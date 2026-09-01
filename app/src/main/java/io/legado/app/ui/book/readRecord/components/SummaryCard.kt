@@ -1,6 +1,5 @@
 package io.legado.app.ui.book.readRecord.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +19,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.legado.app.R
@@ -75,16 +75,23 @@ fun SummaryCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ===== 上半部分：3 列 =====
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                StatItem(
-                    label = stringResource(R.string.rr_total_read_time_label),
-                    value = formatDurationLong(context, totalReadTime),
-                    modifier = Modifier.weight(1f)
-                )
+            // ===== 主指标：累计时长是核心成就，大字独占一行，避免长数值在网格中折行 =====
+            StatItem(
+                label = stringResource(R.string.rr_total_read_time_label),
+                value = formatDuration(context, totalReadTime),
+                valueStyle = MaterialTheme.typography.headlineMedium
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ===== 累计成就：值均为「x天/x本」短格式，4 列均分 =====
+            Row(modifier = Modifier.fillMaxWidth()) {
                 StatItem(
                     label = stringResource(R.string.rr_active_days),
                     value = stringResource(
@@ -103,22 +110,6 @@ fun SummaryCard(
                     ),
                     modifier = Modifier.weight(1f)
                 )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // ===== 分隔线 =====
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // ===== 下半部分：2 列 =====
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
                 StatItem(
                     label = stringResource(R.string.rr_current_streak),
                     value = stringResource(
@@ -141,18 +132,16 @@ fun SummaryCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            // ===== 近期时长：值可能达「xx小时xx分钟」，2 列布局预留宽度防止折行 =====
+            Row(modifier = Modifier.fillMaxWidth()) {
                 StatItem(
                     label = stringResource(R.string.rr_today_read_time),
-                    value = formatDurationShort(context, todayReadTime),
+                    value = formatDuration(context, todayReadTime),
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
                     label = stringResource(R.string.rr_month_read_time),
-                    value = formatDurationShort(context, monthReadTime),
+                    value = formatDuration(context, monthReadTime),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -164,7 +153,8 @@ fun SummaryCard(
 private fun StatItem(
     label: String,
     value: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    valueStyle: TextStyle = MaterialTheme.typography.titleMedium
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
     val secondaryTextColor = readRecordSecondaryTextColor()
@@ -181,7 +171,7 @@ private fun StatItem(
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = value,
-            style = MaterialTheme.typography.titleMedium,
+            style = valueStyle,
             color = primaryColor,
             fontWeight = FontWeight.Bold
         )
@@ -189,10 +179,11 @@ private fun StatItem(
 }
 
 /**
- * 短格式时长：不含天，用于今日、本月等较短时间。
- * 格式：x小时x分钟 / x分钟 / x秒
+ * 时长格式化：x小时x分钟 / x小时 / x分钟 / x秒。
+ * 小时不折算为天，累计阅读时长以总小时数展示（如 104小时30分钟），
+ * 让「总时长」与「今日/本月时长」保持同一度量口径。
  */
-private fun formatDurationShort(context: android.content.Context, mss: Long): String {
+private fun formatDuration(context: android.content.Context, mss: Long): String {
     val totalSeconds = mss / 1000
     val hours = totalSeconds / 3600
     val minutes = (totalSeconds % 3600) / 60
@@ -200,41 +191,12 @@ private fun formatDurationShort(context: android.content.Context, mss: Long): St
     return when {
         hours > 0 -> {
             val hourStr = context.getString(if (hours == 1L) R.string.rr_hour else R.string.rr_hours)
-            val minStr = context.getString(if (minutes == 1L) R.string.rr_minute else R.string.rr_minutes)
-            "$hours$hourStr$minutes$minStr"
-        }
-        minutes > 0 -> {
-            val minStr = context.getString(if (minutes == 1L) R.string.rr_minute else R.string.rr_minutes)
-            "$minutes$minStr"
-        }
-        else -> {
-            val secStr = context.getString(if (seconds == 1L) R.string.rr_second else R.string.rr_seconds)
-            "$seconds$secStr"
-        }
-    }
-}
-
-/**
- * 长格式时长：用于累计阅读时间。
- * 格式：x天x小时x分钟 / x小时x分钟 / x分钟 / x秒
- */
-private fun formatDurationLong(context: android.content.Context, mss: Long): String {
-    val totalSeconds = mss / 1000
-    val days = totalSeconds / 86400
-    val hours = (totalSeconds % 86400) / 3600
-    val minutes = (totalSeconds % 3600) / 60
-    val seconds = totalSeconds % 60
-    return when {
-        days > 0 -> {
-            val dayStr = context.getString(if (days == 1L) R.string.rr_day else R.string.rr_days)
-            val hourStr = context.getString(if (hours == 1L) R.string.rr_hour else R.string.rr_hours)
-            val minStr = context.getString(if (minutes == 1L) R.string.rr_minute else R.string.rr_minutes)
-            "$days$dayStr$hours$hourStr$minutes$minStr"
-        }
-        hours > 0 -> {
-            val hourStr = context.getString(if (hours == 1L) R.string.rr_hour else R.string.rr_hours)
-            val minStr = context.getString(if (minutes == 1L) R.string.rr_minute else R.string.rr_minutes)
-            "$hours$hourStr$minutes$minStr"
+            if (minutes > 0) {
+                val minStr = context.getString(if (minutes == 1L) R.string.rr_minute else R.string.rr_minutes)
+                "$hours$hourStr$minutes$minStr"
+            } else {
+                "$hours$hourStr"
+            }
         }
         minutes > 0 -> {
             val minStr = context.getString(if (minutes == 1L) R.string.rr_minute else R.string.rr_minutes)
