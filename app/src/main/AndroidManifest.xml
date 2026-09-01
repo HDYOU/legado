@@ -182,10 +182,13 @@
                 android:name="com.samsung.android.support.REMOTE_ACTION"
                 android:resource="@xml/spen_remote_actions" />
         </activity>
-        <!-- 书籍详情页 -->
+        <!-- 书籍详情页。
+             standard（默认单实例语义改为允许多实例堆叠）：详情页内部跳转（作者其他作品、
+             底部弹窗查看详情）需要压入新实例，返回时才能回到上一本书的详情页。
+             若改回 singleTop，系统会复用栈顶实例走 onNewIntent 替换当前书，导致返回断头。 -->
         <activity
             android:name=".ui.book.info.BookInfoActivity"
-            android:launchMode="singleTop" />
+            android:launchMode="standard" />
         <!-- 书籍信息编辑 -->
         <activity
             android:name=".ui.book.info.edit.BookInfoEditActivity"
