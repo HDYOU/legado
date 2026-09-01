@@ -177,16 +177,12 @@ data class Book(
      * 处理带格式标记的简介：<usehtml>、<md>、<useweb>
      */
     fun getDisplayIntroPlainText(): String {
-        val displayIntro = getDisplayIntro() ?: return ""
+        val displayIntro = getDisplayIntro()?.trim() ?: return ""
         return when {
-            displayIntro.startsWith("<useweb>") -> {
-                // 去除 <useweb> 前缀，使用 HtmlFormatter 提取纯文本
-                val html = displayIntro.removePrefix("<useweb>")
-                io.legado.app.utils.HtmlFormatter.format(html)
-            }
-            displayIntro.startsWith("<usehtml>") -> {
-                val html = displayIntro.removePrefix("<usehtml>")
-                io.legado.app.utils.HtmlFormatter.format(html)
+            displayIntro.startsWith("<useweb>") || displayIntro.startsWith("<usehtml>") -> {
+                // 移除前缀，提取纯文本（含 style/script 块内容的清理）
+                val html = displayIntro.substringAfter('>')
+                io.legado.app.utils.HtmlFormatter.formatToPlainText(html)
             }
             displayIntro.startsWith("<md>") -> {
                 val md = displayIntro.removePrefix("<md>")

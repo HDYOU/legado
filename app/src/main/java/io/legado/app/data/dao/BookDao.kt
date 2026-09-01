@@ -101,15 +101,11 @@ data class BookShelfDisplay(
      * 处理带格式标记的简介：<usehtml>、<md>、<useweb>
      */
     fun getDisplayIntroPlainText(): String {
-        val displayIntro = getDisplayIntro() ?: return ""
+        val displayIntro = getDisplayIntro()?.trim() ?: return ""
         return when {
-            displayIntro.startsWith("<useweb>") -> {
-                val html = displayIntro.removePrefix("<useweb>")
-                io.legado.app.utils.HtmlFormatter.format(html)
-            }
-            displayIntro.startsWith("<usehtml>") -> {
-                val html = displayIntro.removePrefix("<usehtml>")
-                io.legado.app.utils.HtmlFormatter.format(html)
+            displayIntro.startsWith("<useweb>") || displayIntro.startsWith("<usehtml>") -> {
+                val html = displayIntro.substringAfter('>')
+                io.legado.app.utils.HtmlFormatter.formatToPlainText(html)
             }
             displayIntro.startsWith("<md>") -> {
                 val md = displayIntro.removePrefix("<md>")

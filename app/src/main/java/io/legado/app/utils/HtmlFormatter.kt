@@ -13,6 +13,8 @@ object HtmlFormatter {
     private val commentRegex = "<!--[^>]*-->".toRegex() //注释
     private val notImgHtmlRegex = "</?(?!img)[a-zA-Z]+(?=[ >])[^<>]*>".toRegex()
     private val otherHtmlRegex = "</?[a-zA-Z]+(?=[ >])[^<>]*>".toRegex()
+    private val blockContentRegex = "<(style|script)\\b[^>]*>[\\s\\S]*?</\\1\\s*>".toRegex(RegexOption.IGNORE_CASE)
+    private val unclosedBlockRegex = "<(style|script)\\b[^>]*>[\\s\\S]*$".toRegex(RegexOption.IGNORE_CASE)
     private val formatImagePattern = Pattern.compile(
         "<img[^>]*\\ssrc\\s*=\\s*['\"]([^'\"{>]*\\{(?:[^{}]|\\{[^}>]+\\})+\\})['\"][^>]*>|<img[^>]*\\sdata-(?:src|original|srcset)\\s*=\\s*['\"]([^'\">]+)['\"][^>]*>|<img[^>]*\\ssrc\\s*=\\s*\"([^\">]+)\"[^>]*>|<img[^>]*\\s(?:data-[^=>]*|src)=\\s*['\"]([^'\">]*)['\"][^>]*>",
         Pattern.CASE_INSENSITIVE
@@ -32,6 +34,19 @@ object HtmlFormatter {
             .replace(indent1Regex, "\n　　")
             .replace(indent2Regex, "　　")
             .replace(lastRegex, "")
+    }
+
+    /**
+     * 格式化为纯文本：在 format 基础上先移除 style/script 块的内容
+     * format 只删除标签本身，<style> 内的 CSS 源码会被当作正文保留，
+     * 因此书架简介等纯文本场景必须用此方法
+     */
+    fun formatToPlainText(html: String?): String {
+        html ?: return ""
+        return format(
+            html.replace(blockContentRegex, "")
+                .replace(unclosedBlockRegex, "")
+        )
     }
 
     fun formatKeepImg(html: String?, redirectUrl: URL? = null): String {
