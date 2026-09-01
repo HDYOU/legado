@@ -1,6 +1,7 @@
 package io.legado.app.ui.book.info
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -127,6 +128,7 @@ import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
 import io.noties.markwon.image.glide.GlideImagesPlugin
 import kotlinx.coroutines.Dispatchers.IO
+import java.lang.ref.WeakReference
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -146,6 +148,47 @@ class BookInfoActivity :
     ChangeCoverDialog.CallBack,
     VariableDialog.Callback,
     SearchAdapter.CallBack {
+
+    companion object {
+        /**
+         * 详情页堆叠深度上限：内部跳转（作者其他作品、底部弹窗查看详情）超过该层数时，
+         * 淘汰最底层（最旧）实例再入栈，形成滑动窗口，避免深度浏览时任务栈无限增长
+         */
+        private const val MAX_STACK_DEPTH = 3
+
+        /** 存活实例注册表（弱引用，按创建顺序排列），用于统计当前堆叠深度 */
+        private val liveInstances = ArrayList<WeakReference<BookInfoActivity>>()
+
+        private fun register(instance: BookInfoActivity) {
+            liveInstances.removeAll { it.get() == null || it.get() === instance }
+            liveInstances.add(WeakReference(instance))
+        }
+
+        private fun unregister(instance: BookInfoActivity) {
+            liveInstances.removeAll { it.get() == null || it.get() === instance }
+        }
+
+        /** 当前有效实例（排除已销毁、正在退出、正在重建的），同时顺带清理失效引用 */
+        private fun aliveInstances(): List<BookInfoActivity> {
+            liveInstances.removeAll { it.get() == null || it.get()!!.isDestroyed }
+            return liveInstances.mapNotNull { ref ->
+                ref.get()?.takeUnless { it.isFinishing || it.isChangingConfigurations }
+            }
+        }
+
+        /**
+         * 详情页内部跳转到另一本书的详情页。
+         * 堆叠深度达到 [MAX_STACK_DEPTH] 时先 finish 最底层（最旧）实例再入栈新实例，
+         * 栈内最多保留最近浏览的 [MAX_STACK_DEPTH] 本书。
+         */
+        fun jumpToBookInfo(context: Context, configIntent: Intent.() -> Unit) {
+            val instances = aliveInstances()
+            if (instances.size >= MAX_STACK_DEPTH) {
+                instances.firstOrNull()?.finish()
+            }
+            context.startActivity<BookInfoActivity>(configIntent)
+        }
+    }
 
     private val tocActivityResult = registerForActivityResult(TocActivityResult()) {
         it?.let {
@@ -275,6 +318,7 @@ class BookInfoActivity :
 
     @SuppressLint("PrivateResource")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        register(this)
         binding.titleBar.setBackgroundResource(R.color.transparent)
         binding.refreshLayout?.setColorSchemeColors(accentColor)
         binding.arcView?.setBgColor(backgroundColor)
@@ -1310,6 +1354,7 @@ class BookInfoActivity :
      }
 
     override fun onDestroy() {
+        unregister(this)
         readRecordJob?.cancel()
         destroyWeb()
         // 清理动态添加的 ComposeView，避免 Activity 销毁后 ComposeView 仍被
@@ -1400,13 +1445,13 @@ class BookInfoActivity :
     }
 
     override fun showBookInfo(name: String, author: String, bookUrl: String, origin: String) {
-        val intent = Intent(this, BookInfoActivity::class.java)
-        intent.putExtra("name", name)
-        intent.putExtra("author", author)
-        intent.putExtra("bookUrl", bookUrl)
-        intent.putExtra("origin", origin)
-        intent.putExtra("fromAuthorOtherWorks", true)
-        startActivity(intent)
+        jumpToBookInfo(this) {
+            putExtra("name", name)
+            putExtra("author", author)
+            putExtra("bookUrl", bookUrl)
+            putExtra("origin", origin)
+            putExtra("fromAuthorOtherWorks", true)
+        }
     }
 
     override fun onBookLongClick(book: SearchBook) {
@@ -1440,7 +1485,7 @@ class BookInfoActivity :
                                     viewModel.addAuthorOtherWorkToBookshelf(book)
                                 },
                                 onShowInfo = { book ->
-                                    startActivity<BookInfoActivity> {
+                                    jumpToBookInfo(this@BookInfoActivity) {
                                         putExtra("name", book.name)
                                         putExtra("author", book.author)
                                         putExtra("bookUrl", book.bookUrl)
