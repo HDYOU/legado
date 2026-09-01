@@ -64,7 +64,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import io.legado.app.R
 import io.legado.app.utils.formatReadDuration
-import kotlinx.coroutines.flow.emptyFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -103,8 +102,9 @@ fun BookReadRecordScreen(
 ) {
     val repository = remember { ReadRecordRepository(appDb.readRecordDao) }
 
-    // SQL 聚合：每天的会话数和总时长（不全量加载 Session）
-    val dailyStats = repository.getBookDailySessionStats(bookName, bookAuthor)
+    // 时间线口径：按天分组 + 合并碎片会话（与阅读记录页时间线视图一致），
+    // 避免翻页高频上报产生的同一秒内多条记录直接展示
+    val timelineDays = repository.getBookTimelineDays(bookName, bookAuthor)
         .collectAsStateWithLifecycle(emptyList())
         .value
 
@@ -113,7 +113,7 @@ fun BookReadRecordScreen(
         .collectAsStateWithLifecycle(0L)
         .value
 
-    val totalSessionCount = dailyStats.sumOf { it.sessionCount }
+    val totalSessionCount = timelineDays.sumOf { it.sessions.size }
 
     Scaffold(
         topBar = {
@@ -145,7 +145,7 @@ fun BookReadRecordScreen(
                 .padding(padding),
             color = MaterialTheme.colorScheme.background
         ) {
-            if (dailyStats.isEmpty()) {
+            if (timelineDays.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -197,22 +197,18 @@ fun BookReadRecordScreen(
                     item(key = "summary") {
                         SummaryHeader(
                             totalReadTime = totalReadTime,
-                            dayCount = dailyStats.size,
+                            dayCount = timelineDays.size,
                             sessionCount = totalSessionCount
                         )
                     }
 
                     items(
-                        items = dailyStats,
+                        items = timelineDays,
                         key = { it.date }
-                    ) { stat ->
+                    ) { day ->
                         DaySection(
-                            date = stat.date,
-                            sessionCount = stat.sessionCount,
-                            totalDuration = stat.totalDuration,
-                            bookName = bookName,
-                            bookAuthor = bookAuthor,
-                            repository = repository
+                            date = day.date,
+                            sessions = day.sessions
                         )
                     }
                 }
@@ -284,22 +280,13 @@ private fun StatChip(
 @Composable
 private fun DaySection(
     date: String,
-    sessionCount: Int,
-    totalDuration: Long,
-    bookName: String,
-    bookAuthor: String,
-    repository: ReadRecordRepository
+    sessions: List<ReadRecordSession>
 ) {
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
-
-    // 按需加载：仅在展开时加载该天的会话列表
-    val sessionsFlow = remember(expanded, date) {
-        if (expanded) repository.getBookSessionsByDate(bookName, bookAuthor, date)
-        else emptyFlow()
-    }
-    val sessions = sessionsFlow.collectAsStateWithLifecycle(emptyList()).value
+    val sessionCount = sessions.size
+    val totalDuration = sessions.sumOf { (it.endTime - it.startTime).coerceAtLeast(0L) }
 
     Column(
         modifier = Modifier

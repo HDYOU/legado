@@ -1,6 +1,5 @@
 package io.legado.app.data.repository
 
-import io.legado.app.data.dao.BookDailySessionStat
 import io.legado.app.data.dao.DailyReadStat
 import io.legado.app.data.dao.ReadRecordDao
 import io.legado.app.data.entities.readRecord.ReadRecord
@@ -27,6 +26,9 @@ class ReadRecordRepository(
 ) {
     companion object {
         const val CURRENT_REPAIR_VERSION = 4
+
+        /** 相邻阅读片段的会话合并阈值（毫秒）：间隔 ≤ 20 分钟视为同一次阅读，与时间线视图 mergeContinuousSessions 口径一致 */
+        const val SESSION_MERGE_GAP = 20 * 60 * 1000L
     }
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
@@ -193,42 +195,34 @@ class ReadRecordRepository(
      * 按日期聚合统计单本书的会话：每天的会话数和总时长。
      * SQL GROUP BY 替代全量加载 Session 列表 + 内存 groupBy。
      */
-    fun getBookDailySessionStats(bookName: String, bookAuthor: String): Flow<List<BookDailySessionStat>> {
-        return dao.getDailySessionStats(getCurrentDeviceId(), bookName, bookAuthor)
-    }
-
-    /**
-     * 按需加载某一天的会话列表（展开日期时调用）。
-     * 仅加载单日数据，避免全量加载所有会话到内存。
-     */
-    fun getBookSessionsByDate(bookName: String, bookAuthor: String, date: String): Flow<List<ReadRecordSession>> {
-        return dao.getSessionsByBookAndDateFlow(getCurrentDeviceId(), bookName, bookAuthor, date)
-    }
-
     fun getBookTimelineDays(bookName: String, bookAuthor: String): Flow<List<ReadRecordTimelineDay>> {
+        // 先按天分组再合并，避免跨天 session 被归并到前一天导致日统计偏差（与时间线视图 buildTimelineMap 口径一致）。
+        // 单本书全量加载合并：碎片合并在 SQL 层做不了，且单书数据量可控
         return getBookSessions(bookName, bookAuthor).map { sessions ->
-            val merged = mergeCloseSessions(sessions)
-            merged.groupBy { dateFormat.format(Date(it.startTime)) }
+            sessions
+                .groupBy { dateFormat.format(Date(it.startTime)) }
+                .mapValues { (_, daySessions) ->
+                    mergeCloseSessions(daySessions).sortedByDescending { it.startTime }
+                }
                 .toSortedMap(compareByDescending { it })
                 .map { (date, daySessions) ->
-                    ReadRecordTimelineDay(
-                        date = date,
-                        sessions = daySessions.sortedByDescending { it.startTime }
-                    )
+                    ReadRecordTimelineDay(date = date, sessions = daySessions)
                 }
         }
     }
 
+    /**
+     * 合并同一天内间隔 ≤ [SESSION_MERGE_GAP] 的相邻会话（翻页高频上报产生的碎片）。
+     */
     private fun mergeCloseSessions(sessions: List<ReadRecordSession>): List<ReadRecordSession> {
         if (sessions.isEmpty()) return emptyList()
         val sorted = sessions.sortedBy { it.startTime }
         val merged = mutableListOf<ReadRecordSession>()
         merged.add(sorted.first().copy())
-        val gapLimit = 5 * 60 * 1000L
         for (i in 1 until sorted.size) {
             val current = sorted[i]
             val last = merged.last()
-            if ((current.startTime - last.endTime) <= gapLimit) {
+            if ((current.startTime - last.endTime) <= SESSION_MERGE_GAP) {
                 merged[merged.lastIndex] = last.copy(
                     endTime = max(current.endTime, last.endTime),
                     words = last.words + current.words

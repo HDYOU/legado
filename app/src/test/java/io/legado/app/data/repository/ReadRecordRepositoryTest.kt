@@ -1,12 +1,12 @@
 package io.legado.app.data.repository
 
-import io.legado.app.data.dao.BookDailySessionStat
 import io.legado.app.data.dao.BookReadTime
 import io.legado.app.data.dao.DailyReadStat
 import io.legado.app.data.dao.ReadRecordDao
 import io.legado.app.data.entities.readRecord.ReadRecord
 import io.legado.app.data.entities.readRecord.ReadRecordDetail
 import io.legado.app.data.entities.readRecord.ReadRecordSession
+import io.legado.app.data.entities.readRecord.ReadRecordTimelineDay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -171,6 +171,96 @@ class ReadRecordRepositoryTest {
         assertEquals(600_000L, sessions[0].endTime - sessions[0].startTime)
         assertEquals(600_000L, sessions[1].endTime - sessions[1].startTime)
         assertEquals(end, sessions[1].endTime)
+    }
+
+    @Test
+    fun getBookTimelineDaysMergesSameDayFragments() = runBlocking {
+        val dao = FakeReadRecordDao()
+        val repository = ReadRecordRepository(dao) { CURRENT_DEVICE_ID }
+        // 翻页高频上报产生的首尾相接碎片
+        dao.insertSession(
+            ReadRecordSession(deviceId = CURRENT_DEVICE_ID, bookName = "Fragment Book", bookAuthor = "Author", startTime = 1_000L, endTime = 30_000L, words = 100L)
+        )
+        dao.insertSession(
+            ReadRecordSession(deviceId = CURRENT_DEVICE_ID, bookName = "Fragment Book", bookAuthor = "Author", startTime = 30_000L, endTime = 45_000L, words = 50L)
+        )
+        dao.insertSession(
+            ReadRecordSession(deviceId = CURRENT_DEVICE_ID, bookName = "Fragment Book", bookAuthor = "Author", startTime = 45_000L, endTime = 60_000L, words = 20L)
+        )
+
+        val days = repository.getBookTimelineDays("Fragment Book", "Author").first()
+
+        assertEquals(1, days.size)
+        assertEquals(1, days[0].sessions.size)
+        assertEquals(1_000L, days[0].sessions[0].startTime)
+        assertEquals(60_000L, days[0].sessions[0].endTime)
+        assertEquals(170L, days[0].sessions[0].words)
+    }
+
+    @Test
+    fun getBookTimelineDaysMergesSessionsWithinTwentyMinutes() = runBlocking {
+        val dao = FakeReadRecordDao()
+        val repository = ReadRecordRepository(dao) { CURRENT_DEVICE_ID }
+        val zoneId = ZoneId.systemDefault()
+        val day = LocalDateTime.of(2026, 5, 2, 10, 0).atZone(zoneId).toInstant().toEpochMilli()
+        // 间隔 6 分钟：小于时间线视图的 20 分钟阈值，应合并
+        dao.insertSession(
+            ReadRecordSession(deviceId = CURRENT_DEVICE_ID, bookName = "Gap Book", bookAuthor = "Author", startTime = day, endTime = day + 60_000L, words = 0L)
+        )
+        dao.insertSession(
+            ReadRecordSession(deviceId = CURRENT_DEVICE_ID, bookName = "Gap Book", bookAuthor = "Author", startTime = day + 60_000L + 6 * 60 * 1000L, endTime = day + 60_000L + 6 * 60 * 1000L + 30_000L, words = 0L)
+        )
+
+        val days = repository.getBookTimelineDays("Gap Book", "Author").first()
+
+        assertEquals(1, days.size)
+        assertEquals(1, days[0].sessions.size)
+    }
+
+    @Test
+    fun getBookTimelineDaysKeepsSessionsBeyondTwentyMinutes() = runBlocking {
+        val dao = FakeReadRecordDao()
+        val repository = ReadRecordRepository(dao) { CURRENT_DEVICE_ID }
+        val zoneId = ZoneId.systemDefault()
+        val day = LocalDateTime.of(2026, 5, 2, 10, 0).atZone(zoneId).toInstant().toEpochMilli()
+        // 间隔 25 分钟：超过阈值，保持两条
+        dao.insertSession(
+            ReadRecordSession(deviceId = CURRENT_DEVICE_ID, bookName = "Gap Book", bookAuthor = "Author", startTime = day, endTime = day + 60_000L, words = 0L)
+        )
+        dao.insertSession(
+            ReadRecordSession(deviceId = CURRENT_DEVICE_ID, bookName = "Gap Book", bookAuthor = "Author", startTime = day + 60_000L + 25 * 60 * 1000L, endTime = day + 60_000L + 25 * 60 * 1000L + 30_000L, words = 0L)
+        )
+
+        val days = repository.getBookTimelineDays("Gap Book", "Author").first()
+
+        assertEquals(1, days.size)
+        assertEquals(2, days[0].sessions.size)
+    }
+
+    @Test
+    fun getBookTimelineDaysDoesNotMergeAcrossDays() = runBlocking {
+        val dao = FakeReadRecordDao()
+        val repository = ReadRecordRepository(dao) { CURRENT_DEVICE_ID }
+        val zoneId = ZoneId.systemDefault()
+        val dayOneStart = LocalDateTime.of(2026, 5, 2, 23, 58).atZone(zoneId).toInstant().toEpochMilli()
+        val dayOneEnd = LocalDateTime.of(2026, 5, 2, 23, 59).atZone(zoneId).toInstant().toEpochMilli()
+        val dayTwoStart = LocalDateTime.of(2026, 5, 3, 0, 0).atZone(zoneId).toInstant().toEpochMilli()
+        val dayTwoEnd = LocalDateTime.of(2026, 5, 3, 0, 2).atZone(zoneId).toInstant().toEpochMilli()
+        dao.insertSession(
+            ReadRecordSession(deviceId = CURRENT_DEVICE_ID, bookName = "Midnight Book", bookAuthor = "Author", startTime = dayOneStart, endTime = dayOneEnd, words = 0L)
+        )
+        dao.insertSession(
+            ReadRecordSession(deviceId = CURRENT_DEVICE_ID, bookName = "Midnight Book", bookAuthor = "Author", startTime = dayTwoStart, endTime = dayTwoEnd, words = 0L)
+        )
+
+        val days = repository.getBookTimelineDays("Midnight Book", "Author").first()
+
+        // 各归各天，不合并到前一天（日统计按天归属）
+        assertEquals(2, days.size)
+        assertEquals("2026-05-03", days[0].date)
+        assertEquals(1, days[0].sessions.size)
+        assertEquals("2026-05-02", days[1].date)
+        assertEquals(1, days[1].sessions.size)
     }
 
     @Test
@@ -781,48 +871,6 @@ class ReadRecordRepositoryTest {
             return flowOf(maxOf(recordTime, detailTime))
         }
 
-        override fun getDailySessionStats(
-            deviceId: String,
-            bookName: String,
-            bookAuthor: String
-        ): Flow<List<BookDailySessionStat>> {
-            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd")
-            return flowOf(
-                sessions
-                    .filter {
-                        it.deviceId == deviceId && it.bookName == bookName && it.bookAuthor == bookAuthor
-                    }
-                    .groupBy { sdf.format(java.util.Date(it.startTime)) }
-                    .map { (date, grouped) ->
-                        BookDailySessionStat(
-                            date = date,
-                            sessionCount = grouped.size,
-                            totalDuration = grouped.sumOf { it.endTime - it.startTime }
-                        )
-                    }
-                    .sortedByDescending { it.date }
-            )
-        }
-
-        override fun getSessionsByBookAndDateFlow(
-            deviceId: String,
-            bookName: String,
-            bookAuthor: String,
-            date: String
-        ): Flow<List<ReadRecordSession>> {
-            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd")
-            return flowOf(
-                sessions
-                    .filter {
-                        it.deviceId == deviceId &&
-                            it.bookName == bookName &&
-                            it.bookAuthor == bookAuthor &&
-                            sdf.format(java.util.Date(it.startTime)) == date
-                    }
-                    .sortedByDescending { it.startTime }
-                    .map { it.copy() }
-            )
-        }
     }
 
     private companion object {
