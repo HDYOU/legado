@@ -83,6 +83,11 @@ class BookshelfFragment2() : BaseBookshelfFragment(R.layout.fragment_bookshelf2)
     private var tagSelectedIndex = -1
     private var currentTagList: List<String> = emptyList()
 
+    /** 二级标签栏数据是否已就绪；显隐变化统一推迟到列表提交同帧生效，消除转场残留帧 */
+    private var tagBarLoaded = false
+    /** 适配器最近一次提交列表时所属的分组 */
+    private var lastCommittedGroupId = BookGroup.IdRoot
+
     // 计算最小公倍数
     private fun lcm(a: Int, b: Int): Int {
         return a * b / gcd(a, b)
@@ -94,11 +99,24 @@ class BookshelfFragment2() : BaseBookshelfFragment(R.layout.fragment_bookshelf2)
     }
 
     private fun createBooksAdapter(): BaseBooksAdapter<*> {
-        return if (AppConfig.bookLayout >= 2) {
+        return (if (AppConfig.bookLayout >= 2) {
             BooksAdapterGrid(requireContext(), this)
         } else {
             BooksAdapterList(requireContext(), this)
+        }).also { adapter ->
+            adapter.onListCommitted = { onBookListCommitted(it) }
         }
+    }
+
+    /**
+     * 列表内容提交完成后的同步点：标签栏显隐在此与列表内容同帧切换。
+     * 退出分组时若提前把标签栏 GONE，旧分组内容会以“无标签栏”状态多渲染数帧，
+     * 产生画面残留闪烁；进入分组时同理，避免标签栏先于分组内容出现。
+     */
+    private fun onBookListCommitted(committedGroupId: Long) {
+        lastCommittedGroupId = committedGroupId
+        tagBar?.visibility =
+            if (committedGroupId != BookGroup.IdRoot && tagBarLoaded) View.VISIBLE else View.GONE
     }
 
     override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
@@ -256,7 +274,9 @@ class BookshelfFragment2() : BaseBookshelfFragment(R.layout.fragment_bookshelf2)
 
     private fun initBooksData() {
         if (groupId == BookGroup.IdRoot) {
-            tagBar?.visibility = View.GONE
+            // 退出到主书架：标签栏数据态先复位，显隐推迟到 onBookListCommitted 在列表提交同帧收起，
+            // 避免旧分组内容以“无标签栏”状态残留数帧
+            tagBarLoaded = false
             tagFilter = null
             if (isAdded) {
                 binding.titleBar.title = getString(R.string.bookshelf)
@@ -331,7 +351,8 @@ class BookshelfFragment2() : BaseBookshelfFragment(R.layout.fragment_bookshelf2)
     fun back(): Boolean {
         if (groupId != BookGroup.IdRoot) {
             groupId = BookGroup.IdRoot
-            tagBar?.visibility = View.GONE
+            // 不在此处收起标签栏：过早 GONE 会让旧分组内容以无标签栏状态残留数帧，
+            // 收起时机由 onBookListCommitted 与新列表提交绑定在同一帧
             tagFilter = null
             // 检查View是否存在，避免崩溃
             if (view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
@@ -381,7 +402,8 @@ class BookshelfFragment2() : BaseBookshelfFragment(R.layout.fragment_bookshelf2)
      */
     private fun loadTagBar() {
         if (!AppConfig.showBookshelfTagBar) {
-            tagBar?.visibility = View.GONE
+            // 仅复位数据态，显隐由 onBookListCommitted 在列表提交同帧处理，避免与内容切换脱节
+            tagBarLoaded = false
             tagSelectedIndex = -1
             currentTagList = emptyList()
             tagFilter = null
@@ -400,16 +422,23 @@ class BookshelfFragment2() : BaseBookshelfFragment(R.layout.fragment_bookshelf2)
                 val merged = BookTagManagement.mergeTags(configured, existing)
                 merged.filter { tag -> hidden.none { it.equals(tag, ignoreCase = true) } }
             }
+            // 查询期间已切换分组（如快速进出分组），丢弃过期结果
+            if (currentGroupId != groupId) return@launch
             // 在标签列表前插入空字符串作为“全部”标签
             currentTagList = listOf("") + tags
             tagSelectedIndex = 0
-            tagBar?.visibility = View.VISIBLE
             tagBar?.applyTopBarStyle(force = true)
             tagBar?.submitItems(
                 currentTagList.map { RoundedTagBarView.Item(it.ifBlank { allText }) },
                 0
             )
             tagBar?.setSelectedIndex(0, false)
+            tagBarLoaded = true
+            // 仅当列表内容已切换到当前分组时立即显示；
+            // 否则等待 onBookListCommitted 在内容提交同帧显示，避免标签栏先于内容出现
+            if (lastCommittedGroupId == currentGroupId) {
+                tagBar?.visibility = View.VISIBLE
+            }
             // 标签栏加载完成后，默认选"全部"（tagFilter=null）。
             // 仅在 tagFilter 有非空旧值时才需重启数据流，避免不必要的取消/重启导致列表闪烁。
             if (tagFilter != null) {

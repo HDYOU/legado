@@ -116,13 +116,19 @@ abstract class BaseBooksAdapter<VH : RecyclerView.ViewHolder>(
         }
     }
 
+    /** 新列表在主线程提交完成后的回调（参数为提交时所属分组）。
+     *  外部依赖此时机同步标签栏等 UI 状态，保证与列表内容同帧切换，避免转场残留帧 */
+    var onListCommitted: ((Long) -> Unit)? = null
+
     private val asyncListDiffer by lazy {
         AsyncListDiffer(this, diffItemCallback).apply {
             addListListener { _, _ ->
+                val committedGroupId = currentGroupId
                 currentGroupId?.let {
                     layoutManager?.onRestoreInstanceState(layoutStates[it])
                     layoutStates[it] = null
                 }
+                committedGroupId?.let { onListCommitted?.invoke(it) }
             }
         }
     }
