@@ -17,6 +17,14 @@
 * [Github分支GEd520](https://github.com/GEd520/legados)
 * [Github分支Suml-1](https://github.com/Suml-1/Legado_Max)
 
+**2026/9/01
+- feat(阅读记录): 优化累计阅读成就卡片排版及时长显示
+- style(书架): 二级标签栏改为首页排行榜式胶囊样式
+- fix(目录): 修复目录反转后选中章节不一致的问题
+- feat(书籍详情): 详情页改为 standard 启动模式支持返回上一本书,详情页堆叠超过 3 层时淘汰最底层实例
+- fix(书架): 简介为 useweb/usehtml 时列表显示 CSS 源码的问题
+- fix(书架): 修复文件夹布局退出分组时标签栏残留闪烁
+
 **2026/8/28
 - refactor(书架): 二级标签栏改为透明背景+强调色选中+无圆角样式
 - fix(内存泄漏): 修复 ComposeView 被 AccessibilityInteractionController 持有导致的 Activity 泄漏
