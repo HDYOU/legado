@@ -64,6 +64,12 @@ class TocViewModel(application: Application) : BaseViewModel(application) {
                 val toc = appDb.bookChapterDao.getChapterList(bookUrl)
                 // 先用旧 index 创建迁移器, 记住旧缓存文件名
                 val migrator = BookHelp.createChapterCacheMigrator(this, toc)
+                // 反转后章节序号全部变化, 当前阅读章节的索引同步映射:
+                // 旧索引 i 对应新索引 (章节总数 - 1 - i), 保证选中章节不变
+                val chapterSize = toc.size
+                if (durChapterIndex in 0 until chapterSize) {
+                    durChapterIndex = chapterSize - 1 - durChapterIndex
+                }
                 // 反转并重新编号 (toc.reversed() 共享对象引用, 必须在创建 migrator 之后修改 index)
                 val newToc = toc.reversed()
                 newToc.forEachIndexed { index, bookChapter ->
@@ -72,6 +78,8 @@ class TocViewModel(application: Application) : BaseViewModel(application) {
                 //倒序后章节序号变化会导致缓存文件名变化, 迁移缓存文件
                 migrator.migrate(newToc)
                 appDb.bookChapterDao.insert(*newToc.toTypedArray())
+                appDb.bookDao.update(this)
+                bookData.postValue(this)
             }
         }.onSuccess {
             it?.let(success)

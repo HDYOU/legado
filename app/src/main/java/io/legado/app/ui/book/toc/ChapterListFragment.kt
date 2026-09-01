@@ -194,6 +194,9 @@ class ChapterListFragment : VMBaseFragment<TocViewModel>(R.layout.fragment_chapt
         viewScope.launch {
             withContext(IO) {
                 val currentBook = book
+                // 同步当前章节索引(目录反转等操作会更新 book.durChapterIndex),
+                // 保证列表刷新后高亮仍指向同一章节
+                currentBook?.let { durChapterIndex = it.durChapterIndex }
                 val isPartialLoadingBook = AppConfig.isTocPartialLoad &&
                         currentBook?.isLocal == false &&
                         !currentBook.readSimulating()
