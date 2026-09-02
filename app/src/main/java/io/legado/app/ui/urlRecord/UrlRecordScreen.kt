@@ -56,6 +56,7 @@ import io.legado.app.data.entities.UrlRecord
 import io.legado.app.ui.theme.pageCardContainerColor
 import io.legado.app.ui.theme.pageTopBarBackground
 import io.legado.app.ui.theme.pageTopBarColors
+import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -120,8 +121,7 @@ fun UrlRecordScreen(
         )
     }
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             TopAppBar(
                 modifier = Modifier.pageTopBarBackground(topBarColors),

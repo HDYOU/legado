@@ -21,7 +21,6 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -40,6 +39,7 @@ import io.legado.app.ui.theme.PageDimens
 import io.legado.app.ui.theme.pageTopBarBackground
 import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.AppPageTopBar
+import io.legado.app.ui.widget.components.AppScaffold
 
 /**
  * 下载管理主界面
@@ -60,8 +60,7 @@ fun DownloadManageScreen(
     val completedCount = allTasks.count { it.status == DownloadStatus.SUCCESSFUL }
     val failedCount = allTasks.count { it.status == DownloadStatus.FAILED }
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             // 统一顶栏 + TabRow 连体（theme-styles.md §14.2），阴影落在整块底部
             Column(modifier = Modifier.pageTopBarBackground(topBarColors)) {

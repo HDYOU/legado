@@ -24,7 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -41,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.legado.app.ui.theme.pageCardContainerColor
 import io.legado.app.ui.theme.pageTopBarBackground
 import io.legado.app.ui.theme.pageTopBarColors
+import io.legado.app.ui.widget.components.AppScaffold
 
 /**
  * 模块状态主界面
@@ -57,8 +57,7 @@ fun ModuleStatusScreen(
     val modules by viewModel.modules.collectAsState()
     val topBarColors = pageTopBarColors()
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             TopAppBar(
                 modifier = Modifier.pageTopBarBackground(topBarColors),

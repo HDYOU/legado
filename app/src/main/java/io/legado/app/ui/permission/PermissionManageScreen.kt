@@ -21,6 +21,7 @@ import io.legado.app.ui.theme.pageMutedIconTint
 import io.legado.app.ui.theme.pageSecondaryTextColor
 import io.legado.app.ui.theme.pageTopBarBackground
 import io.legado.app.ui.theme.pageTopBarColors
+import io.legado.app.ui.widget.components.AppScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,8 +30,7 @@ fun PermissionManageScreen(
 ) {
     val topBarColors = pageTopBarColors()
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             TopAppBar(
                 modifier = Modifier.pageTopBarBackground(topBarColors),

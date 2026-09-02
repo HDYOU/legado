@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.OpenWith
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -19,7 +18,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
@@ -28,6 +26,7 @@ import io.legado.app.ui.file.components.PathBreadcrumb
 import io.legado.app.ui.theme.pageTopBarBackground
 import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.AppPageTopBar
+import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.AppSearchBar
 import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
 
@@ -82,8 +81,7 @@ fun FileManageScreen(
         null -> Unit
     }
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             // 顶栏与搜索栏连体渲染，背景由外层容器统一承载（theme-styles.md §14.2）
             Column(modifier = Modifier.pageTopBarBackground(topBarColors)) {
