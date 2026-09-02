@@ -6,6 +6,12 @@ import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 
 /**
+ * 主题配置接口。
+ *
+ * 定义主题存储的完整 API 契约，包括主色/强调色/状态栏色/导航栏色/
+ * 文本色/背景色等颜色配置以及提交方法。
+ * [ThemeStore] 是唯一的内部实现。
+ *
  * @author Aidan Follestad (afollestad), Karim Abou Zeid (kabouzeid)
  */
 internal interface ThemeStoreInterface {

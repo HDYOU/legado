@@ -9,6 +9,11 @@ import androidx.annotation.ColorInt
 import io.legado.app.utils.DrawableUtils
 
 /**
+ * 视图背景工具。
+ *
+ * 提供背景过渡动画（TransitionDrawable）与安全背景设置，
+ * 用于主题切换时的平滑颜色过渡。
+ *
  * @author Karim Abou Zeid (kabouzeid)
  */
 @Suppress("unused")

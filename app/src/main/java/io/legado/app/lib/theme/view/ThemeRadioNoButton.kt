@@ -14,6 +14,13 @@ import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.getCompatColor
 
+/**
+ * 无默认按钮的单选框。
+ *
+ * 继承 AppCompatRadioButton 但不绘制系统自带的 radio button 图标，
+ * 通过自定义 Selector 绘制圆形边框 + 选中填充，
+ * 支持通过 `isBottomBackground` 属性切换底部背景模式（使用 bottomBackground 色 vs primaryText 色）。
+ */
 class ThemeRadioNoButton(context: Context, attrs: AttributeSet) :
     AppCompatRadioButton(context, attrs) {
 

@@ -30,6 +30,12 @@ import io.legado.app.R
 import io.legado.app.utils.ColorUtils
 
 /**
+ * 视图着色工具。
+ *
+ * 为 Button、CheckBox、RadioButton、Switch、ProgressBar、 SEEKBAR 等
+ * 系统控件统一应用主题着色（tint），处理不同状态（正常/按下/选中/禁用）
+ * 下的颜色切换与 ripple 效果。
+ *
  * @author afollestad, plusCubed
  */
 @Suppress("MemberVisibilityCanBePrivate")
