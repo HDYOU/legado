@@ -214,6 +214,16 @@ Conventional Commits 中文适配，husky + commitlint 自动校验。
 
 详细规范与常见问题见 `docs/git-hook/`。
 
+### 帮助文档同步检查（pre-commit 门禁）
+
+改了功能代码但没改对应的帮助文档？这个 hook 会拦下来。
+
+- 映射表：`docs/help-doc-sync/map.json`（代码路径 → 必须同步的 md 文档）
+- 脚本：`scripts/help-doc-sync.mjs`（由 `.husky/pre-commit` 调用）
+- 拦截行为：改了受管代码区域（如 `model/analyzeRule/**`）但没同时改对应的 md，commit 会被阻止并给出提示
+- 逃生口：`SKIP_DOC_SYNC=1 git commit ...`（仅限确认本次改动不涉及文档内容时使用）
+- 扩展映射：编辑 `docs/help-doc-sync/map.json` 即可，无需改脚本
+
 ## 核心规则
 
 1. **收到任务时，先检查是否有匹配的 skill** — 哪怕只有 1% 的可能性也要检查
