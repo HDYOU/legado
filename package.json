@@ -28,7 +28,7 @@
     "release": "standard-version"
   },
   "lint-staged": {
-    "*.{js,ts,jsx,tsx,vue,kt,java}": [
+    "*.{js,ts,jsx,tsx,vue,java}": [
       "prettier --write"
     ],
     "*.md": [
