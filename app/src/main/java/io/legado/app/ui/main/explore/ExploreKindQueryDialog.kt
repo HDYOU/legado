@@ -101,16 +101,22 @@ class ExploreKindQueryDialog() : BaseDialogFragment(R.layout.dialog_explore_kind
      */
     private fun loadData() {
         binding.rotateLoading.visible()
-        Coroutine.async(lifecycleScope, IO) {
+        // 用 viewLifecycleOwner 的作用域：对话框关闭销毁视图时任务立即取消，
+        // 防止加载过程中点外部关闭对话框后，回调访问已销毁的 binding 导致崩溃
+        Coroutine.async(viewLifecycleOwner.lifecycleScope, IO) {
             val bookSource = appDb.bookSourceDao.getBookSource(sourceUrl)
             bookSource?.exploreKinds() ?: emptyList()
         }.onSuccess { kindList ->
+            if (view == null) return@onSuccess
             kinds = kindList
             filteredKinds = kindList
             adapter.setItems(filteredKinds)
             updateEmptyView()
         }.onFinally {
-            binding.rotateLoading.gone()
+            // Coroutine 的 onFinally 在协程被取消时仍会执行，必须先确认视图还活着
+            if (view != null) {
+                binding.rotateLoading.gone()
+            }
         }
     }
 
