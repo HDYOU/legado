@@ -23,17 +23,21 @@ import java.lang.reflect.Method
 
 @SuppressLint("RestrictedApi")
 @Suppress("UsePropertyAccessSyntax")
-fun Menu.applyTint(context: Context, theme: Theme = Theme.Auto): Menu = this.let { menu ->
+fun Menu.applyTint(
+    context: Context,
+    theme: Theme = Theme.Auto,
+    tintColor: Int? = null
+): Menu = this.let { menu ->
     if (menu is MenuBuilder) {
         menu.setOptionalIconsVisible(true)
     }
     val defaultTextColor = context.getCompatColor(R.color.primaryText)
-    val tintColor = MenuExtensions.getMenuColor(context, theme)
+    val tint = tintColor ?: MenuExtensions.getMenuColor(context, theme)
     menu.forEach { item ->
         (item as? MenuItemImpl)?.let { impl ->
             //overflow：展开的item
             impl.icon?.setTintMutate(
-                if (impl.requiresOverflow()) defaultTextColor else tintColor
+                if (impl.requiresOverflow()) defaultTextColor else tint
             )
         }
     }
