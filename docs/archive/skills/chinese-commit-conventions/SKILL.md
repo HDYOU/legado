@@ -11,18 +11,18 @@ description: 中文 commit 与 changelog 配置参考——Conventional Commits 
 
 ### 类型（type）定义
 
-| 类型       | 说明                         | 示例场景                   |
-| ---------- | ---------------------------- | -------------------------- |
-| `feat`     | 新功能                       | 添加用户注册模块           |
-| `fix`      | 修复缺陷                     | 修复登录页白屏问题         |
-| `docs`     | 文档变更                     | 更新 API 接口文档          |
-| `style`    | 代码格式（不影响逻辑）       | 调整缩进、补充分号         |
-| `refactor` | 重构（非新功能、非修复）     | 拆分过长的服务类           |
-| `perf`     | 性能优化                     | 优化首页列表查询速度       |
-| `test`     | 测试相关                     | 补充用户模块单元测试       |
-| `chore`    | 构建/工具/依赖变更           | 升级 webpack 到 v5         |
-| `ci`       | 持续集成配置                 | 修改 GitHub Actions 流程   |
-| `revert`   | 回滚提交                     | 回滚 v2.1.0 的登录重构     |
+| 类型       | 说明                     | 示例场景                 |
+| ---------- | ------------------------ | ------------------------ |
+| `feat`     | 新功能                   | 添加用户注册模块         |
+| `fix`      | 修复缺陷                 | 修复登录页白屏问题       |
+| `docs`     | 文档变更                 | 更新 API 接口文档        |
+| `style`    | 代码格式（不影响逻辑）   | 调整缩进、补充分号       |
+| `refactor` | 重构（非新功能、非修复） | 拆分过长的服务类         |
+| `perf`     | 性能优化                 | 优化首页列表查询速度     |
+| `test`     | 测试相关                 | 补充用户模块单元测试     |
+| `chore`    | 构建/工具/依赖变更       | 升级 webpack 到 v5       |
+| `ci`       | 持续集成配置             | 修改 GitHub Actions 流程 |
+| `revert`   | 回滚提交                 | 回滚 v2.1.0 的登录重构   |
 
 ### 原则
 
@@ -210,19 +210,20 @@ npm install -D conventional-changelog-cli conventional-changelog-conventionalcom
 ```javascript
 module.exports = {
   types: [
-    { type: 'feat', section: '新功能' },
-    { type: 'fix', section: '缺陷修复' },
-    { type: 'perf', section: '性能优化' },
-    { type: 'refactor', section: '代码重构' },
-    { type: 'docs', section: '文档更新' },
-    { type: 'test', section: '测试' },
-    { type: 'chore', section: '构建/工具', hidden: true },
-    { type: 'ci', section: '持续集成', hidden: true },
-    { type: 'style', section: '代码格式', hidden: true }
+    { type: "feat", section: "新功能" },
+    { type: "fix", section: "缺陷修复" },
+    { type: "perf", section: "性能优化" },
+    { type: "refactor", section: "代码重构" },
+    { type: "docs", section: "文档更新" },
+    { type: "test", section: "测试" },
+    { type: "chore", section: "构建/工具", hidden: true },
+    { type: "ci", section: "持续集成", hidden: true },
+    { type: "style", section: "代码格式", hidden: true },
   ],
-  commitUrlFormat: '{{host}}/{{owner}}/{{repository}}/commit/{{hash}}',
-  compareUrlFormat: '{{host}}/{{owner}}/{{repository}}/compare/{{previousTag}}...{{currentTag}}'
-}
+  commitUrlFormat: "{{host}}/{{owner}}/{{repository}}/commit/{{hash}}",
+  compareUrlFormat:
+    "{{host}}/{{owner}}/{{repository}}/compare/{{previousTag}}...{{currentTag}}",
+};
 ```
 
 ## 8. commitlint 中文配置
@@ -237,35 +238,47 @@ npm install -D @commitlint/cli @commitlint/config-conventional
 
 ```javascript
 module.exports = {
-  extends: ['@commitlint/config-conventional'],
+  extends: ["@commitlint/config-conventional"],
   rules: {
-    'type-enum': [2, 'always', [
-      'feat', 'fix', 'docs', 'style', 'refactor',
-      'perf', 'test', 'chore', 'ci', 'revert'
-    ]],
-    'type-case': [2, 'always', 'lower-case'],
-    'type-empty': [2, 'never'],
-    'subject-empty': [2, 'never'],
-    'subject-max-length': [2, 'always', 100],
+    "type-enum": [
+      2,
+      "always",
+      [
+        "feat",
+        "fix",
+        "docs",
+        "style",
+        "refactor",
+        "perf",
+        "test",
+        "chore",
+        "ci",
+        "revert",
+      ],
+    ],
+    "type-case": [2, "always", "lower-case"],
+    "type-empty": [2, "never"],
+    "subject-empty": [2, "never"],
+    "subject-max-length": [2, "always", 100],
     // 允许中文字符，关闭 subject-case 限制
-    'subject-case': [0],
+    "subject-case": [0],
     // 关闭 header-max-length 或放宽（中文占宽较大）
-    'header-max-length': [2, 'always', 120],
-    'body-max-line-length': [1, 'always', 200],
-    'footer-max-line-length': [1, 'always', 200]
+    "header-max-length": [2, "always", 120],
+    "body-max-line-length": [1, "always", 200],
+    "footer-max-line-length": [1, "always", 200],
   },
   prompt: {
     messages: {
-      type: '选择提交类型:',
-      scope: '输入影响范围（可选）:',
-      subject: '填写简短描述:',
+      type: "选择提交类型:",
+      scope: "输入影响范围（可选）:",
+      subject: "填写简短描述:",
       body: '填写详细描述（可选，使用 "|" 换行）:',
-      breaking: '列出不兼容变更（可选）:',
-      footer: '关联的 Issue（可选，例如 #123）:',
-      confirmCommit: '确认提交以上信息？'
-    }
-  }
-}
+      breaking: "列出不兼容变更（可选）:",
+      footer: "关联的 Issue（可选，例如 #123）:",
+      confirmCommit: "确认提交以上信息？",
+    },
+  },
+};
 ```
 
 ## 9. husky + lint-staged 集成
@@ -296,17 +309,9 @@ npx lint-staged
 ```json
 {
   "lint-staged": {
-    "*.{js,ts,jsx,tsx,vue}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{css,scss,less}": [
-      "stylelint --fix",
-      "prettier --write"
-    ],
-    "*.md": [
-      "prettier --write"
-    ]
+    "*.{js,ts,jsx,tsx,vue}": ["eslint --fix", "prettier --write"],
+    "*.{css,scss,less}": ["stylelint --fix", "prettier --write"],
+    "*.md": ["prettier --write"]
   }
 }
 ```
