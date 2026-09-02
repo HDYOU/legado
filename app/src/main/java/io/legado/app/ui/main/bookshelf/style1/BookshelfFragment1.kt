@@ -30,13 +30,13 @@ import io.legado.app.constant.BookType
 import io.legado.app.help.config.AppConfig
 import io.legado.app.lib.theme.accentColor
 import io.legado.app.lib.theme.primaryColor
-import io.legado.app.lib.theme.primaryTextColor
 import io.legado.app.ui.book.group.GroupEditDialog
 import io.legado.app.ui.book.search.SearchActivity
 import io.legado.app.ui.main.bookshelf.BaseBookshelfFragment
 import io.legado.app.ui.main.bookshelf.style1.books.BooksFragment
 import io.legado.app.ui.widget.RoundedTagBarView
 import io.legado.app.utils.isCreated
+import io.legado.app.utils.MenuExtensions
 import io.legado.app.utils.setEdgeEffectColor
 import io.legado.app.utils.observeEvent
 import io.legado.app.utils.postEvent
@@ -209,7 +209,9 @@ class BookshelfFragment1() : BaseBookshelfFragment(R.layout.fragment_bookshelf1)
     }
 
     private fun updateTitleColor() {
-        val textColor = primaryTextColor
+        // 与右上角搜索/三点菜单图标同一取色逻辑（MenuExtensions.getMenuColor），
+        // 保证透明导航栏/顶栏明暗模式下分组名与图标颜色一致
+        val textColor = MenuExtensions.getMenuColor(requireContext(), binding.titleBar.topBarTheme)
         tvGroupName?.setTextColor(textColor)
         ivArrow?.setColorFilter(textColor)
     }
