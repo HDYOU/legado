@@ -2,7 +2,6 @@ package io.legado.app.ui.file
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +25,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
 import io.legado.app.ui.file.components.FileList
 import io.legado.app.ui.file.components.PathBreadcrumb
-import io.legado.app.ui.theme.pageTopBarContainerColor
+import io.legado.app.ui.theme.pageTopBarBackground
+import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.AppPageTopBar
 import io.legado.app.ui.widget.components.AppSearchBar
 import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
@@ -55,7 +55,7 @@ fun FileManageScreen(
     // UI 状态（承载删除确认 Dialog 显隐，state-events.md §4.5）
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val topBarColor = pageTopBarContainerColor()
+    val topBarColors = pageTopBarColors()
 
     LaunchedEffect(initialPath) {
         initialPath?.let { viewModel.openPath(it) }
@@ -85,12 +85,12 @@ fun FileManageScreen(
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
-            // 顶栏与搜索栏连成一体，AppPageTopBar 容器取透明（theme-styles.md §14.2）
-            Column(modifier = Modifier.background(topBarColor)) {
+            // 顶栏与搜索栏连体渲染，背景由外层容器统一承载（theme-styles.md §14.2）
+            Column(modifier = Modifier.pageTopBarBackground(topBarColors)) {
                 AppPageTopBar(
                     title = stringResource(R.string.file_manage),
                     onBackClick = onBackClick,
-                    containerColor = Color.Transparent
+                    showBackground = false
                 ) {
                     // 用其他文件管理器打开当前路径
                     IconButton(onClick = { viewModel.openWithChooser() }) {
