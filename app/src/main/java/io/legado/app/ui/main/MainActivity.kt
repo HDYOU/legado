@@ -40,6 +40,7 @@ import io.legado.app.help.book.BookHelp
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.NavigationBarConfig
 import io.legado.app.help.config.LocalConfig
+import io.legado.app.help.config.ThemeConfig
 import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.storage.Backup
 import io.legado.app.lib.dialogs.alert
@@ -81,8 +82,11 @@ import io.legado.app.utils.startActivity
 import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.DevicePerformanceUtils
 import io.legado.app.utils.dpToPx
+import io.legado.app.utils.externalFiles
+import io.legado.app.utils.FileUtils
 import io.legado.app.utils.getCompatColor
 import io.legado.app.utils.getPrefInt
+import io.legado.app.utils.getPrefString
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
@@ -94,6 +98,7 @@ import androidx.core.view.get
 import androidx.core.graphics.drawable.toDrawable
 import io.legado.app.help.update.AppUpdate
 import io.legado.app.ui.about.UpdateDialog
+import java.io.File
 import io.legado.app.utils.StringUtils
 import io.legado.app.utils.clearClip
 import io.legado.app.utils.getClipText
@@ -133,6 +138,10 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
     private var onUpBooksBadgeView: BadgeView? = null
     private var bottomNavigationConfigSignature: String? = null
     private var bottomNavigationInset = 0
+    /** 背景图签名缓存，配合 [currentBackgroundSignature] 避免每次 onResume 重复解码 */
+    private var backgroundImageSignature: String? = null
+    /** 背景是否至少应用过一次（区分“尚未初始化”与“签名匹配跳过”） */
+    private var backgroundImageApplied = false
 
     private fun bookshelfPosition(): Int = realPositions.indexOf(idBookshelf)
 
@@ -172,6 +181,13 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
      *   共享，不会因双份背景导致像素内存翻倍，仅额外占用一份轻量状态对象。
      */
     override fun upBackgroundImage() {
+        // 签名缓存：主题/背景路径/文件变更/模糊值均未变化时直接跳过，
+        // 避免每次从其它界面返回 onResume 时都在主线程重新解码整张壁纸并高斯模糊。
+        val signature = currentBackgroundSignature()
+        if (backgroundImageApplied && backgroundImageSignature == signature) {
+            return
+        }
+        backgroundImageSignature = signature
         super.upBackgroundImage()
         // 将 decorView 的当前背景同步到 content_container
         // 使用 constantState?.newDrawable()?.mutate() 创建独立副本，
@@ -179,6 +195,36 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
         val decorBg = window.decorView.background
         // 注意：此处会无条件覆盖 content_container 背景，详见上方约束说明
         binding.contentContainer.background = decorBg?.constantState?.newDrawable()?.mutate()
+        backgroundImageApplied = true
+    }
+
+    /**
+     * 计算当前主题背景的签名，取图逻辑与 [ThemeConfig.getBgImage] 保持一致。
+     * 纳入主题模式（日/夜）、背景路径、文件最后修改时间与大小、模糊强度，
+     * 任一变化都会使签名不同而触发重新解码。
+     */
+    private fun currentBackgroundSignature(): String? {
+        val night = AppConfig.isNightTheme
+        val prefKey = if (night) PreferKey.bgImageN else PreferKey.bgImage
+        val rawPath = getPrefString(prefKey).orEmpty()
+        if (rawPath.isBlank()) return "bg:$prefKey:empty"
+        // 与 getBgImage 相同：在线背景需先落到缓存文件，仅文件名的需拼接完整路径
+        val path = if (rawPath.startsWith("http")) {
+            val filePath = FileUtils.getPath(externalFiles, prefKey, ThemeConfig.getUrlToFile(rawPath))
+            if (FileUtils.exist(filePath)) filePath else null
+        } else if (!rawPath.contains(File.separator)) {
+            val filePath = FileUtils.getPath(externalFiles, prefKey, rawPath)
+            if (FileUtils.exist(filePath)) filePath else null
+        } else {
+            rawPath
+        }
+        if (path == null) return "bg:$prefKey:missing:$rawPath"
+        val blurring = getPrefInt(
+            if (night) PreferKey.bgImageNBlurring else PreferKey.bgImageBlurring,
+            0
+        )
+        val file = File(path)
+        return "bg:$prefKey:${file.absolutePath}:${file.lastModified()}:${file.length()}:$blurring"
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -478,13 +524,19 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
 
     /**
      * 释放底栏玻璃视图的采样源，停止实时模糊采样以节省 CPU/GPU 资源。
-     * 在 Activity 不可见或销毁时调用；恢复可见时由 refreshBottomNavigationConfig 重新绑定。
+     * 在 Activity 不可见或销毁时调用。
+     *
+     * 注意：此处不能清空 [bottomNavigationConfigSignature] 配置签名缓存。
+     * 配置本身并未变化，若清空会导致每次从其它界面返回时都触发
+     * [applyNavigationBarPackage] 全量重建（自定义图标、布局、阴影、
+     * Fragment 底部内边距、LiquidGlass 重建等），正是“设置底栏图标后
+     * 回主界面卡顿”的来源。恢复可见时应由 [refreshBottomNavigationConfig]
+     * 在签名一致的分支调用 [restoreBottomNavigationSamplingIfNeeded]，
+     * 仅异步恢复采样源而跳过整包重建。
      */
     private fun releaseBottomNavigationGlassSampling() {
         if (!binding.bottomNavigationGlassView.isReleased()) {
             binding.bottomNavigationGlassView.release()
-            // 重置签名缓存，确保恢复时重新绑定采样源
-            bottomNavigationConfigSignature = null
         }
     }
 
@@ -740,10 +792,40 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
     private fun refreshBottomNavigationConfig(force: Boolean = false) {
         val signature = NavigationBarConfig.currentSignature(this, AppConfig.isNightTheme)
         if (!force && bottomNavigationConfigSignature == signature) {
+            // 配置未变化：仅恢复可能已被 onStop 释放的玻璃采样，跳过整包重建
+            restoreBottomNavigationSamplingIfNeeded()
             return
         }
         bottomNavigationConfigSignature = signature
         applyNavigationBarPackage()
+    }
+
+    /**
+     * 底栏配置未变化时，异步恢复被 onStop 释放的玻璃/磨砂采样源。
+     *
+     * 回到主界面时配置签名一致即可复用既有底栏（自定义图标、布局均未被破坏），
+     * 只需重新 [StableLiquidGlassView.bind] 采样源。使用 post 推迟到布局帧后
+     * 执行，避免在 onResume 同步重建采样造成首帧卡顿。
+     */
+    private fun restoreBottomNavigationSamplingIfNeeded() {
+        binding.run {
+            val glassView = bottomNavigationGlassView
+            if (!glassView.isReleased()) return@run
+            val config = NavigationBarConfig.activeConfig(this@MainActivity, AppConfig.isNightTheme)
+            val needsGlass = config.layoutMode != NavigationBarConfig.LAYOUT_STANDARD &&
+                config.effectMode != NavigationBarConfig.EFFECT_SOLID &&
+                DevicePerformanceUtils.supportsRealtimeGlass
+            if (!needsGlass) return@run
+            glassView.visible()
+            val bgColor = resolveNavigationBarBackground(config)
+            val cornerRadius = if (config.layoutMode == NavigationBarConfig.LAYOUT_FLOATING) 24f.dpToPx() else 0f
+            glassView.post {
+                if (isFinishing || isDestroyed) return@post
+                if (bottomNavigationGlassView.isReleased() && bottomNavigationGlassView.isAttachedToWindow) {
+                    setupBottomLiquidGlass(bottomNavigationGlassView, config, cornerRadius, bgColor)
+                }
+            }
+        }
     }
 
     /**
