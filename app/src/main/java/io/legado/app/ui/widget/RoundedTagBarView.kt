@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.RecyclerView
 import io.legado.app.R
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.TopBarConfig
+import io.legado.app.lib.theme.ThemeStore
 import io.legado.app.lib.theme.accentColor
 import io.legado.app.lib.theme.primaryColor
-import io.legado.app.lib.theme.secondaryTextColor
 import io.legado.app.lib.theme.uiTypeface
 
 /**
@@ -39,7 +39,6 @@ class RoundedTagBarView @JvmOverloads constructor(
     /** 选中项背景：强调色 alpha 值，与首页排行榜多分类 Tab 的 12% 一致 */
     private companion object {
         const val SELECTED_BG_ALPHA = 31 // 约 12%
-        const val NORMAL_STROKE_ALPHA = 51 // 约 20%
     }
 
     private val layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
@@ -85,8 +84,8 @@ class RoundedTagBarView @JvmOverloads constructor(
 
     /**
      * 应用二级标签栏样式：栏背景始终透明，单个标签渲染为胶囊(Chip)。
-     * 选中项用主题强调色半透明填充 + 强调色文字，未选中项用同色半透明描边 + 次要色文字，
-     * 与首页排行榜多分类 Tab 的展示效果保持一致。
+     * 选中项用主题强调色半透明填充 + 强调色文字，未选中项无描边 + 次要色文字，
+     * 未选中文字颜色逻辑与首页排行榜多分类 Tab（pageSecondaryTextColor）一致。
      *
      * @param force 是否强制刷新，用于首次初始化或样式变化时
      */
@@ -99,11 +98,25 @@ class RoundedTagBarView @JvmOverloads constructor(
         val horizontalPadding = resources.getDimensionPixelSize(R.dimen.bookshelf_tag_bar_padding_horizontal)
         val verticalPadding = resources.getDimensionPixelSize(R.dimen.bookshelf_tag_bar_padding_vertical)
         setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
-        // 胶囊(Chip)样式：选中项用强调色半透明填充，未选中项用描边；与首页排行榜多分类 Tab 一致
+        // 胶囊(Chip)样式：选中项用强调色半透明填充，未选中项无描边；文字颜色逻辑与首页排行榜多分类 Tab 一致
         adapter.selectedBackgroundColor = ColorUtils.setAlphaComponent(context.accentColor, SELECTED_BG_ALPHA)
         adapter.selectedTextColor = context.accentColor
-        adapter.normalTextColor = context.secondaryTextColor
+        adapter.normalTextColor = resolveUnselectedTextColor(context)
         adapter.notifyDataSetChanged()
+    }
+
+    /**
+     * 未选中文字颜色，与首页排行榜 Tab 的 pageSecondaryTextColor 逻辑一致：
+     * 深色背景（相对亮度 < 0.18）时将次要文字色向主文字色提亮 32%，否则直接使用次要文字色。
+     */
+    private fun resolveUnselectedTextColor(context: Context): Int {
+        val background = ThemeStore.backgroundColor(context)
+        val secondary = ThemeStore.textColorSecondary(context)
+        return if (ColorUtils.calculateLuminance(background) < 0.18) {
+            ColorUtils.blendARGB(secondary, ThemeStore.textColorPrimary(context), 0.32f)
+        } else {
+            secondary
+        }
     }
 
     fun setDisplayMode(mode: DisplayMode) {
@@ -209,7 +222,7 @@ class RoundedTagBarView @JvmOverloads constructor(
 
         var selectedBackgroundColor: Int = context.primaryColor
         var selectedTextColor: Int = context.accentColor
-        var normalTextColor: Int = context.secondaryTextColor
+        var normalTextColor: Int = ThemeStore.textColorSecondary(context)
 
         override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): TagViewHolder {
             val textView = LayoutInflater.from(parent.context)
@@ -240,7 +253,7 @@ class RoundedTagBarView @JvmOverloads constructor(
             holder.textView.typeface = holder.textView.context.uiTypeface()
             holder.textView.alpha = item.alpha
             holder.textView.isSelected = selected
-            // 胶囊(Chip)背景：选中填充强调色半透明，未选中描边强调色半透明
+            // 胶囊(Chip)背景：选中填充强调色半透明，未选中无轮廓
             holder.textView.background = buildItemBackground(selected)
             holder.textView.setOnClickListener {
                 val bindingPosition = holder.bindingAdapterPosition
@@ -261,21 +274,18 @@ class RoundedTagBarView @JvmOverloads constructor(
         override fun getItemCount(): Int = items.size
     }
 
-    /** 构建单个标签的胶囊背景：选中用强调色半透明填充，未选中用同色半透明描边 */
+    /** 构建单个标签的胶囊背景：选中用强调色半透明填充，未选中无轮廓 */
     private fun buildItemBackground(selected: Boolean): GradientDrawable {
         val cornerRadius = resources.getDimensionPixelSize(R.dimen.bookshelf_tag_item_corner_radius).toFloat()
-        val strokeWidth =
-            resources.getDimensionPixelSize(R.dimen.bookshelf_tag_item_stroke_width)
         return GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             setCornerRadius(cornerRadius)
             if (selected) {
                 setColor(adapter.selectedBackgroundColor)
-                setStroke(0, Color.TRANSPARENT)
             } else {
                 setColor(Color.TRANSPARENT)
-                setStroke(strokeWidth, ColorUtils.setAlphaComponent(context.secondaryTextColor, NORMAL_STROKE_ALPHA))
             }
+            setStroke(0, Color.TRANSPARENT)
         }
     }
 
