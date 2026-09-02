@@ -601,7 +601,7 @@ fun MenuItemRow(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "ID: ${item.id}",
+                text = "ID: ${item.name}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
