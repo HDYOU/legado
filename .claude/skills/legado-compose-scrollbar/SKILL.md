@@ -1,5 +1,5 @@
 ---
-name: compose-scrollbar
+name: legado-compose-scrollbar
 description: Jetpack Compose 可拖拽垂直滚动条的正确实现方式，包含所有已知坑点和修复方案
 ---
 
@@ -14,6 +14,7 @@ Compose 没有内置的可拖拽滚动条。自定义实现踩过大量坑，此
 已有的可复用组件：`app/src/main/java/io/legado/app/ui/widget/components/VerticalScrollbar.kt`
 
 提供两个重载：
+
 - `VerticalScrollbar(state: LazyListState, ...)` — LazyColumn 用
 - `VerticalScrollbar(state: ScrollState, ...)` — Column + verticalScroll 用
 
@@ -103,6 +104,7 @@ Box(modifier = Modifier.weight(1f)) {
 ## 调试滚动条问题
 
 如果滚动条不出现或行为异常，检查清单：
+
 - [ ] 外层 Box 是否始终渲染（没有被 if/return 包裹）
 - [ ] onSizeChanged 是否在外层 Box 上
 - [ ] thumb 定位是否用了 offset 而非 weight

@@ -1,3 +1,8 @@
+---
+name: legado-ui-architecture
+description: Legado Max 项目 Compose UI 架构规范——目录结构、命名契约、状态管理、导航、无障碍与迁移 Checklist。Code Review 时人工对照。
+---
+
 # Legado Max — Compose UI 架构规范
 
 > **生效范围**：`io.legado.app.ui` 包及以下所有代码  
@@ -58,15 +63,15 @@ ui/
 
 ## 2. 文件命名规范
 
-| 类型 | 命名模式 | 示例 |
-|------|----------|------|
-| Screen（页面级 Composable） | `*Screen.kt` | `BookDetailScreen.kt` |
-| ViewModel | `*ViewModel.kt` | `BookDetailViewModel.kt` |
-| Repository / DataSource | `*Repository.kt` / `*DataSource.kt` | `BookRepository.kt` |
-| Feature 私有组件 | `*Card.kt` / `*Dialog.kt` / `*Menu.kt` 语义命名 | `ThemeCard.kt` 而非 `ThemeComponents.kt` |
-| 通用组件 | `App*.kt` / `*List.kt` / `*Scaffold.kt` | `AppListItem.kt` |
-| State 定义 | `*State.kt` / `*UiState.kt` | `ThemeManageUiState.kt` |
-| 工具函数扩展 | `*Utils.kt` / `*Extensions.kt` | `ColorParsers.kt` |
+| 类型                        | 命名模式                                        | 示例                                     |
+| --------------------------- | ----------------------------------------------- | ---------------------------------------- |
+| Screen（页面级 Composable） | `*Screen.kt`                                    | `BookDetailScreen.kt`                    |
+| ViewModel                   | `*ViewModel.kt`                                 | `BookDetailViewModel.kt`                 |
+| Repository / DataSource     | `*Repository.kt` / `*DataSource.kt`             | `BookRepository.kt`                      |
+| Feature 私有组件            | `*Card.kt` / `*Dialog.kt` / `*Menu.kt` 语义命名 | `ThemeCard.kt` 而非 `ThemeComponents.kt` |
+| 通用组件                    | `App*.kt` / `*List.kt` / `*Scaffold.kt`         | `AppListItem.kt`                         |
+| State 定义                  | `*State.kt` / `*UiState.kt`                     | `ThemeManageUiState.kt`                  |
+| 工具函数扩展                | `*Utils.kt` / `*Extensions.kt`                  | `ColorParsers.kt`                        |
 
 ### 硬规则
 
@@ -140,11 +145,13 @@ fun AppListItem(
 ### 5.2 降级条件
 
 当以下任一情况成立时，允许不使用 Hilt：
+
 - 模块尚未接入 Hilt 插件（如独立编译的子模块）
 - 构建环境 KSP/KAPT 冲突无法解决
 - 老代码迁移过渡期，尚未完成 DI 改造
 
 降级时**必须**：
+
 - 文件头加注释：`// DI 降级原因：xxx，待 yyy 后迁回 Hilt`
 - 手动构造的对象通过 Factory 模式管理，禁止散落 `object` 单例
 
@@ -177,12 +184,12 @@ sealed interface UiError {
 
 ### 6.2 错误展示策略
 
-| 错误类型 | 展示方式 | 说明 |
-|---------|---------|------|
-| 网络异常 / 列表加载失败 | 全屏 `AppErrorState` | 占据内容区域，带重试按钮 |
-| 单项操作失败（复制、导入） | `Snackbar` | 不打断用户当前操作 |
-| 需要用户确认的错误 | `AlertDialog` | 如：导入冲突、数据覆盖 |
-| 非阻塞性提示 | `Snackbar` | 如：已复制、已删除 |
+| 错误类型                   | 展示方式             | 说明                     |
+| -------------------------- | -------------------- | ------------------------ |
+| 网络异常 / 列表加载失败    | 全屏 `AppErrorState` | 占据内容区域，带重试按钮 |
+| 单项操作失败（复制、导入） | `Snackbar`           | 不打断用户当前操作       |
+| 需要用户确认的错误         | `AlertDialog`        | 如：导入冲突、数据覆盖   |
+| 非阻塞性提示               | `Snackbar`           | 如：已复制、已删除       |
 
 ### 6.3 硬规则
 
@@ -517,9 +524,9 @@ fun ThemeManageScreen(
 
 ## 15. 执行记录
 
-| 日期 | 版本 | 变更内容 | 执行人 |
-|------|------|----------|--------|
-| 2026-08-12 | v1.0 | 初稿：目录结构、API 契约、Checklist 发布 | — |
-| 2026-08-12 | v1.2 | 目录结构放宽（允许 Feature 内 components/）、字符串命名放宽（允许缩写/分层前缀）；违规 B 同步改为「跨 Feature 引用私有组件」 | — |
-| 2026-08-12 | v1.1 | 新增：DI 规范、错误处理、字符串资源、性能规范、Preview 规范；Checklist 补充 5 项 | — |
-| | | | |
+| 日期       | 版本 | 变更内容                                                                                                                     | 执行人 |
+| ---------- | ---- | ---------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 2026-08-12 | v1.0 | 初稿：目录结构、API 契约、Checklist 发布                                                                                     | —      |
+| 2026-08-12 | v1.2 | 目录结构放宽（允许 Feature 内 components/）、字符串命名放宽（允许缩写/分层前缀）；违规 B 同步改为「跨 Feature 引用私有组件」 | —      |
+| 2026-08-12 | v1.1 | 新增：DI 规范、错误处理、字符串资源、性能规范、Preview 规范；Checklist 补充 5 项                                             | —      |
+|            |      |                                                                                                                              |        |

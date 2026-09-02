@@ -1,5 +1,5 @@
 ---
-name: git-local-discipline
+name: legado-git-local-discipline
 description: 在进行任何文件修改后必须立即使用的纪律技能——每次修改必须 git add + git commit，绝不裸改文件不提交；在用户明确许可前只做本地 commit 绝不 git push；commit message 必须使用 conventional commits 中文格式。当 Agent 修改、创建、删除代码文件后，或者完成一组逻辑相关的编辑后，必须调用此技能执行提交。哪怕只改了一行代码也要提交。
 ---
 
@@ -209,4 +209,5 @@ docs: 更新 CLAUDE.md 中的构建命令说明
 如果刚提交完发现遗漏了一个文件，使用 `git commit --amend` 补充，而不是创建一个新 commit。但如果已经 push 过（虽然本技能不允许主动 push），则只能新建 commit。
 
 ### 用户正在 review 中的分支
+
 如果当前分支上有用户正在 review 的改动，新提交会让 review 变复杂。此时应该询问用户是否继续在此分支上提交，还是创建新分支。
