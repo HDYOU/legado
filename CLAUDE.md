@@ -92,6 +92,7 @@ The project has three library modules in `modules/`:
 ### Source Layout
 
 `app/src/main/java/io/legado/app/`:
+
 - `ui/` — Activities/Fragments grouped by feature (book/, rss/, source/, config/, debuglog/, image/)
 - `model/` — domain logic (WebBook for HTTP fetching, analyzeRule for rule engine, ParagraphBubbleRenderer, BookCover)
 - `data/` — Room DB, DAOs, repositories
@@ -134,7 +135,9 @@ Compose 规范拆分为 8 个文件，位于 `docs/project-rules/compose/`：
 - 日志使用统一的 tag 格式：`AppTag.xxx`
 
 ## Comments
+
 > 注释优先表达**为什么这么做、特殊约束、业务背景**，代码本身负责表达“是什么、怎么做”。
+
 - **类注释**
   - 核心/复杂类（单例、引擎、解析器、管理器等）必须补充完整 KDoc。
   - 普通 `Activity` / `Adapter` / `ViewModel` 无需完整 KDoc，仅简短说明核心用途即可。
@@ -157,6 +160,7 @@ Compose 规范拆分为 8 个文件，位于 `docs/project-rules/compose/`：
 ## Testing Strategy
 
 这个视情况讨论，因为有时开发环境不允许。
+
 - 单元测试：`app/src/test/`
 - 集成测试：`app/src/androidTest/`
 - 测试覆盖率要求：核心模块 ≥ 80%
@@ -171,6 +175,7 @@ All dependency versions are in `gradle/libs.versions.toml`. In `build.gradle.kts
 ## Build Variants
 
 Three product flavors in dimension "app":
+
 - `appLegacy` — same package name as original Legado (`io.legado.app`)
 - `appMax` — coexistence package (`io.legado.app.yuedu`), the primary development target
 - `appS` — another coexistence package (`io.legado.app.yuedu.a`)
@@ -183,6 +188,7 @@ Release builds: minifyEnabled + shrinkResources + ProGuard (`app/proguard-rules.
 ## CI/CD
 
 GitHub Actions in `.github/workflows/`:
+
 - `test.yml` — builds all 3 release flavors on push to main; auto-creates GitHub/Gitee releases with changelog from `updateLog.md`
 - `web.yml` — builds the Vue frontend on changes to `modules/web/` and commits the output to `app/src/main/assets/web/vue/`
 - `cronet.yml` — updates Cronet native libraries
@@ -195,6 +201,18 @@ GitHub Actions in `.github/workflows/`:
 - Room schema exports to `$projectDir/schemas` for migration verification.
 - Disabled build features: aidl, renderscript, resvalues, shaders. buildConfig is explicitly enabled (Cronet version fields); do not assume BuildConfig is absent.
 - Architecture documentation in `Structure/` directory (Chinese) covers app startup flow, database schema, reading flow, event bus, and module dependencies.
+
+## Git Commit 规范
+
+Conventional Commits 中文适配，husky + commitlint 自动校验。
+
+格式：`<type>(<scope>): <subject>`，type 用英文（feat/fix/docs/refactor/perf/test/chore/ci/revert/style），scope 和 subject 用中文，subject 为动宾短语不超 100 字符。
+
+交互式提交：`npm run commit`。不合规提交会被自动拦截。
+
+**新人首次使用需在项目根目录运行 `npm install`**，否则 git hook 不会生效。
+
+详细规范与常见问题见 `docs/git-hook/`。
 
 ## 核心规则
 
@@ -221,6 +239,7 @@ GitHub Actions in `.github/workflows/`:
 当任务明确匹配某个 skill 的应用场景时，应调用该 skill 检查。
 
 ## AI 探索项目的方式
+
 1. 先看本文件了解模块结构
 2. 定位目标模块，读项目模块的 build.gradle 确认依赖
 3. 找该模块的对外接口（api/ 目录或 interface），而不是直接钻进实现
