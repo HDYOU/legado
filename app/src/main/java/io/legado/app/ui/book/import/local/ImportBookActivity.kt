@@ -81,11 +81,12 @@ class ImportBookActivity : BaseImportBookActivity<ImportBookViewModel>(),
         return super.onCompatCreateOptionsMenu(menu)
     }
 
-    override fun onMenuOpened(featureId: Int, menu: Menu): Boolean {
-        menu.findItem(R.id.menu_sort_name)?.isChecked = viewModel.sort == 0
-        menu.findItem(R.id.menu_sort_size)?.isChecked = viewModel.sort == 1
-        menu.findItem(R.id.menu_sort_time)?.isChecked = viewModel.sort == 2
-        return super.onMenuOpened(featureId, menu)
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val sortSubMenu = menu.findItem(R.id.menu_sort)?.subMenu
+        sortSubMenu?.findItem(R.id.menu_sort_name)?.isChecked = viewModel.sort == 0
+        sortSubMenu?.findItem(R.id.menu_sort_size)?.isChecked = viewModel.sort == 1
+        sortSubMenu?.findItem(R.id.menu_sort_time)?.isChecked = viewModel.sort == 2
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onCompatOptionsItemSelected(item: MenuItem): Boolean {
