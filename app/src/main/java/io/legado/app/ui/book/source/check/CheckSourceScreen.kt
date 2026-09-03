@@ -57,6 +57,7 @@ import io.legado.app.ui.theme.pageMutedIconTint
 import io.legado.app.ui.theme.pageSecondaryTextColor
 import io.legado.app.ui.theme.pageSurfaceVariantColor
 import io.legado.app.ui.theme.pageTopBarContainerColor
+import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.utils.sendToClip
 
 /**
@@ -82,8 +83,7 @@ fun CheckSourceScreen(
     var detailResult by remember { mutableStateOf<CheckResult?>(null) }
     var showSourcePicker by remember { mutableStateOf(false) }
     
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             CheckSourceTopBar(
                 uiState = uiState,
@@ -98,6 +98,7 @@ fun CheckSourceScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .navigationBarsPadding()
         ) {
             when (val state = uiState) {
                 is CheckSourceUIState.Idle -> {

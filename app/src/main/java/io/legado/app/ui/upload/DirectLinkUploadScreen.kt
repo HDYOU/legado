@@ -49,6 +49,7 @@ import io.legado.app.data.entities.DirectLinkUploadRule
 import io.legado.app.data.entities.UploadHistory
 import io.legado.app.data.entities.UploadHistoryWithRule
 import io.legado.app.ui.upload.DirectLinkUploadViewModel.*
+import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
 import java.text.SimpleDateFormat
 import java.util.*
@@ -95,8 +96,7 @@ fun DirectLinkUploadScreen(
     val tabs = listOf("规则管理", "上传历史")
 
     // 主界面布局
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         // 顶部应用栏
         topBar = {
             TopAppBar(
@@ -170,7 +170,7 @@ fun DirectLinkUploadScreen(
         }
     ) { paddingValues ->
         // 主内容区域
-        Column(modifier = Modifier.padding(paddingValues)) {
+        Column(modifier = Modifier.padding(paddingValues).navigationBarsPadding()) {
             // 标签页布局
             TabRow(
                 selectedTabIndex = selectedTab,

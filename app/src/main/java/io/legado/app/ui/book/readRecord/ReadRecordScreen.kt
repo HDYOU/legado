@@ -41,6 +41,7 @@ import io.legado.app.help.glide.ImageLoader
 import io.legado.app.ui.book.readRecord.components.HeatmapCalendarBottomSheet
 import io.legado.app.ui.book.readRecord.components.HeatmapMode
 import io.legado.app.ui.book.readRecord.components.SummaryCard
+import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.swipe.SwipeActionContainer
 import io.legado.app.ui.widget.components.swipe.rememberSwipeDeleteAction
 import io.legado.app.utils.formatReadDuration
@@ -196,8 +197,7 @@ fun ReadRecordScreen(
         )
     }
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             if (state.isSelectionMode) {
                 TopAppBar(
@@ -347,6 +347,7 @@ fun ReadRecordScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .navigationBarsPadding()
         ) {
             AnimatedVisibility(visible = showSearch) {
                 OutlinedTextField(

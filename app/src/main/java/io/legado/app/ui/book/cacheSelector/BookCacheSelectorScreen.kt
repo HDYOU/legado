@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,7 +28,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,6 +51,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.legado.app.R
 import io.legado.app.ui.book.cacheSelector.components.BookCacheItemCard
 import io.legado.app.ui.theme.pageCardContainerColor
+import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.utils.ConvertUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,8 +79,7 @@ fun BookCacheSelectorScreen(
     }
     val visibleAllSelected = viewModel.isAllSelected(visibleBookItems)
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -134,6 +134,8 @@ fun BookCacheSelectorScreen(
         },
         bottomBar = {
             Surface(
+                // 背景延伸到导航条后面保持铺满，栏内按钮避开导航条以免被压住
+                modifier = Modifier.navigationBarsPadding(),
                 color = pageCardContainerColor(),
                 shadowElevation = 8.dp
             ) {

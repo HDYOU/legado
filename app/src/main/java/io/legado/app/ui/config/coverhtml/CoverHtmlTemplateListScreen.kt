@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import io.legado.app.R
 import io.legado.app.help.config.CoverHtmlTemplateConfig
 import io.legado.app.constant.EventBus
+import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.image.CoverImageView
 import io.legado.app.utils.postEvent
 import io.legado.app.utils.toastOnUi
@@ -54,8 +55,7 @@ fun CoverHtmlTemplateListScreen(
         selectedId = CoverHtmlTemplateConfig.getSelectedTemplate().id
     }
     
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -90,7 +90,8 @@ fun CoverHtmlTemplateListScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
+                    .padding(paddingValues)
+                    .navigationBarsPadding(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -113,7 +114,8 @@ fun CoverHtmlTemplateListScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
+                    .padding(paddingValues)
+                    .navigationBarsPadding(),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(templateList, key = { it.id }) { template ->
