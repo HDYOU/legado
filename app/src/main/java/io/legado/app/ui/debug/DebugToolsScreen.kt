@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.legado.app.R
+import io.legado.app.ui.widget.components.AppScaffold
 
 data class DebugTool(
     val titleRes: Int,
@@ -81,8 +82,7 @@ fun DebugToolsScreen(
         )
     )
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -116,7 +116,8 @@ fun DebugToolsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .navigationBarsPadding(),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
             items(tools) { tool ->
