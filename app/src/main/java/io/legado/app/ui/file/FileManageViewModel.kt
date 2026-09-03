@@ -25,11 +25,11 @@ data class FileManageUiState(
 
 /**
  * 文件管理一次性 UI 事件
- * 平台操作（FileProvider 打开文件、Toast）由 Activity 执行，ViewModel 只抛事件（state-events.md §4.1）
+ * 平台操作（FileProvider 打开文件、写剪贴板、Toast）由 Activity 执行，ViewModel 只抛事件（state-events.md §4.1）
  */
 sealed interface FileManageEvent {
     data class OpenFile(val file: File) : FileManageEvent
-    data class OpenWithChooser(val dir: File?) : FileManageEvent
+    data class CopyPath(val path: String) : FileManageEvent
     data class Toast(val message: String?) : FileManageEvent
 }
 
@@ -75,8 +75,11 @@ class FileManageViewModel(
     /** 当前未过滤的文件列表（用于搜索过滤） */
     private var currentFiles = listOf<File>()
 
-    /** 当前目录的上级目录（用于显示 ".." 项） */
-    val lastDir: File? get() = _subDocs.value.lastOrNull() ?: rootDoc
+    /**
+     * 当前所在目录
+     * 非根目录时它同时是列表首项（显示为 ".."），点击该项即返回上级
+     */
+    val currentDir: File? get() = _subDocs.value.lastOrNull() ?: rootDoc
 
     init {
         // 初始化时加载根目录
@@ -109,18 +112,18 @@ class FileManageViewModel(
 
     /**
      * 根据搜索关键词过滤文件列表
-     * 过滤规则：保留 ".." 项和名称包含关键词的文件
+     * 过滤规则：保留返回上级项和名称包含关键词的文件（忽略大小写）
      */
     private fun filterFiles() {
         val query = _searchQuery.value
-        if (query.isNotEmpty()) {
-            currentFiles.filter {
-                it.name == ".." || it.name.contains(query)
-            }.let {
-                _files.value = it
-            }
-        } else {
+        if (query.isEmpty()) {
             _files.value = currentFiles
+            return
+        }
+        // 返回上级项不是名为 ".." 的文件，而是当前目录本身（见 currentDir），只能按对象比较保留
+        val parentEntry = currentDir
+        _files.value = currentFiles.filter {
+            it == parentEntry || it.name.contains(query, ignoreCase = true)
         }
     }
 
@@ -186,11 +189,11 @@ class FileManageViewModel(
      * 返回上级目录
      * 点击 ".." 项时调用
      */
-    fun gotoLastDir() {
+    fun gotoParentDir() {
         val currentSubDocs = _subDocs.value.toMutableList()
         currentSubDocs.removeLastOrNull()
         _subDocs.value = currentSubDocs
-        upFiles(lastDir)
+        upFiles(currentDir)
     }
 
     /**
@@ -245,11 +248,13 @@ class FileManageViewModel(
     }
 
     /**
-     * 用系统选择器打开当前目录，让用户选择用哪个应用/文件管理器打开
-     * 平台操作（FileProvider + Chooser）由 Activity 执行（§4.1）
+     * 复制当前目录的绝对路径
+     * 剪贴板写入属于平台操作，由 Activity 执行（§4.1）
      */
-    fun openWithChooser() {
-        _events.trySend(FileManageEvent.OpenWithChooser(lastDir))
+    fun copyCurrentPath() {
+        // 外部存储不可用时 rootDoc 为 null，此时无路径可复制，静默忽略
+        val path = currentDir?.absolutePath ?: return
+        _events.trySend(FileManageEvent.CopyPath(path))
     }
 
     /**
@@ -262,7 +267,7 @@ class FileManageViewModel(
         viewModelScope.launch {
             try {
                 file.delete()
-                upFiles(lastDir)
+                upFiles(currentDir)
             } catch (e: Exception) {
                 _toasts.trySend(FileManageEvent.Toast(e.localizedMessage))
             }

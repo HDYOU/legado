@@ -31,7 +31,7 @@ import java.io.File
 @Composable
 fun FileList(
     files: List<File>,
-    lastDir: File?,
+    currentDir: File?,
     onFileClick: (File) -> Unit,
     onFileLongClick: (File) -> Unit,
     modifier: Modifier = Modifier
@@ -42,7 +42,7 @@ fun FileList(
         items(files, key = { it.absolutePath }) { file ->
             FileItem(
                 file = file,
-                isParentDir = file == lastDir,
+                isParentDir = file == currentDir,
                 onClick = { onFileClick(file) },
                 onLongClick = { onFileLongClick(file) }
             )

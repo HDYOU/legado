@@ -2,6 +2,7 @@
 
 package io.legado.app.ui.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.graphics.Outline
@@ -30,9 +31,11 @@ import io.legado.app.BuildConfig
 import io.legado.app.R
 import io.legado.app.base.VMBaseActivity
 import io.legado.app.constant.AppConst.appInfo
+import io.legado.app.constant.ClipboardImportMode
 import io.legado.app.constant.EventBus
 import io.legado.app.constant.PreferKey
 import io.legado.app.databinding.ActivityMainBinding
+import io.legado.app.databinding.DialogClipboardImportBinding
 import io.legado.app.databinding.DialogEditTextBinding
 import io.legado.app.help.AppWebDav
 import io.legado.app.help.LifecycleHelp
@@ -70,7 +73,6 @@ import io.legado.app.ui.widget.text.BadgeView
 import io.legado.app.utils.isCreated
 import io.legado.app.utils.navigationBarHeight
 import io.legado.app.utils.observeEvent
-import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.setEdgeEffectColor
 import io.legado.app.utils.setOnApplyWindowInsetsListenerCompat
 import io.legado.app.utils.showDialogFragment
@@ -79,7 +81,6 @@ import io.legado.app.utils.printOnDebug
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 import io.legado.app.utils.invisible
 import io.legado.app.utils.visible
-import io.legado.app.utils.startActivity
 import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.DevicePerformanceUtils
 import io.legado.app.utils.dpToPx
@@ -89,13 +90,11 @@ import io.legado.app.utils.getCompatColor
 import io.legado.app.utils.getPrefInt
 import io.legado.app.utils.getPrefString
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import splitties.views.bottomPadding
 import kotlin.coroutines.resume
-import androidx.core.view.get
 import androidx.core.graphics.drawable.toDrawable
 import io.legado.app.help.update.AppUpdate
 import io.legado.app.ui.about.UpdateDialog
@@ -287,7 +286,6 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
             binding.viewPagerMain.postDelayed(1000) {
                 viewModel.ruleSubsUp()
             }
-            readShibboleth(1500)
             //自动更新书籍
             val isAutoRefreshedBook = savedInstanceState?.getBoolean("isAutoRefreshedBook") ?: false
             if (AppConfig.autoRefreshBook && !isAutoRefreshedBook) {
@@ -504,10 +502,22 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
         }
     }
 
+    /**
+     * App 已在前台时，外部应用通过 intent 跳入本界面（singleTask）只回调此处，
+     * 不经过 onStart，需显式标记为"从外部进入"，确保外部分享的口令能被识别。
+     */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        LifecycleHelp.markEnteredFromExternal()
+    }
+
     override fun onResume() {
         super.onResume()
-        // 口令识别：不限制 activitySize，确保从子 Activity 返回时也能识别
-        readShibboleth(500)
+        // 口令识别只在从 App 外部进入主界面时进行（冷启动、后台切回、外部应用跳入），
+        // 应用内子界面返回不再读取剪贴板，避免每次回到主界面都弹窗打扰。
+        if (LifecycleHelp.consumeEnteredFromExternal()) {
+            readShibboleth()
+        }
         // 用户从设置页返回时，RECREATE 事件可能未送达后台的 Activity，
         // 或 recreate() 可能被 upSort() 异常阻断。
         // 在 onResume 中直接刷新背景图片，确保主题背景变更立即生效。
@@ -1275,48 +1285,86 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
     }
 
     /**
-     * 读取导入口令
-     * 受设置项 askClipboardImport 控制：
-     * - 开启：每次读取剪贴板前都弹窗询问是否允许访问剪贴板，用户允许后才读取并解析 #L: 口令
-     * - 关闭：彻底不读取剪贴板（禁用自动导入口令功能）
+     * 读取剪贴板中的导入口令。
+     *
+     * 触发时机由 [onResume] 收敛为「从 App 外部进入主界面」，应用内子界面返回不再打扰用户。
+     *
+     * 采用先探测后询问：先在本地判断剪贴板是否真含 `#L:` 口令，确认有才继续，
+     * 否则静默返回。绝大多数情况下剪贴板内容与导入无关，这样可避免无谓弹窗。
+     * 前台读取剪贴板无需权限，探测过程也不联网、不落库。
+     *
+     * 探测到口令后的行为由设置项 [PreferKey.clipboardImportMode] 决定：
+     * - ASK：弹窗询问，可勾选「记住我的选择」把决定固化为 ALWAYS / NEVER
+     * - ALWAYS：直接导入并 Toast 提示
+     * - NEVER：不读取剪贴板
      */
-    fun readShibboleth(delay: Long) {
-        binding.viewPagerMain.postDelayed(delay) {
-            if (!getPrefBoolean(PreferKey.askClipboardImport, true)) {
-                return@postDelayed
+    private fun readShibboleth() {
+        binding.viewPagerMain.postDelayed(500) {
+            val mode = AppConfig.clipboardImportMode
+            if (mode == ClipboardImportMode.NEVER) return@postDelayed
+            val text = try {
+                this@MainActivity.getClipText()
+            } catch (e: Exception) {
+                e.printOnDebug()
+                null
             }
-            alert(R.string.ask_clipboard_import, R.string.ask_clipboard_import_summary) {
-                okButton { proceedReadShibboleth() }
-                cancelButton()
+            if (text.isNullOrBlank() || "#L:" !in text) return@postDelayed
+            if (mode == ClipboardImportMode.ALWAYS) {
+                // 自动导入是用户「记住此选择」后的静默行为，导入对话框会毫无预兆地弹出，
+                // 用 Toast 说明来源，避免用户困惑于这个框从哪来
+                toastOnUi(R.string.clipboard_import_auto_toast)
+                importShibboleth(text)
+            } else {
+                showClipboardImportConfirm(text)
             }
         }
     }
 
     /**
-     * 在用户授权访问剪贴板后，读取并解析剪贴板中的 #L: 导入口令
+     * 询问是否导入剪贴板中探测到的口令。
+     *
+     * 勾选「记住我的选择」后把本次决定写入 [PreferKey.clipboardImportMode] 长期生效；
+     * 未勾选则只对本次生效。
      */
-    private fun proceedReadShibboleth() {
-        try {
-            val text = this@MainActivity.getClipText()
-            if (text.isNullOrBlank()) return
-            if ("#L:" in text) {
-                this@MainActivity.clearClip() //清理一下防重复
-                val (url, type, customWord) = StringUtils.unShibboleth(text)
-                when (type) {
-                    StringUtils.BOOK_SOURCE ->
-                        showDialogFragment(ImportBookSourceDialog(url))
-                    StringUtils.RSS_SOURCE ->
-                        showDialogFragment(ImportRssSourceDialog(url))
-                    StringUtils.DICT_RULE ->
-                        showDialogFragment(ImportDictRuleDialog(url))
-                    StringUtils.REPLACE_RULE ->
-                        showDialogFragment(ImportReplaceRuleDialog(url))
-                    StringUtils.TOC_RULE ->
-                        showDialogFragment(ImportTxtTocRuleDialog(url))
-                    StringUtils.TTS_RULE ->
-                        showDialogFragment(ImportHttpTtsDialog(url))
-                    else -> showDialogFragment(ImportHttpTtsDialog(url))
+    private fun showClipboardImportConfirm(text: String) {
+        val dialogBinding = DialogClipboardImportBinding.inflate(layoutInflater)
+        alert(R.string.clipboard_import_confirm, R.string.clipboard_import_confirm_summary) {
+            customView { dialogBinding.root }
+            okButton {
+                if (dialogBinding.cbRemember.isChecked) {
+                    AppConfig.clipboardImportMode = ClipboardImportMode.ALWAYS
                 }
+                importShibboleth(text)
+            }
+            cancelButton {
+                if (dialogBinding.cbRemember.isChecked) {
+                    AppConfig.clipboardImportMode = ClipboardImportMode.NEVER
+                }
+            }
+        }
+    }
+
+    /**
+     * 解析剪贴板中的 #L: 导入口令并弹出对应的导入对话框
+     */
+    private fun importShibboleth(text: String) {
+        try {
+            this@MainActivity.clearClip() //清理一下防重复
+            val (url, type, customWord) = StringUtils.unShibboleth(text)
+            when (type) {
+                StringUtils.BOOK_SOURCE ->
+                    showDialogFragment(ImportBookSourceDialog(url))
+                StringUtils.RSS_SOURCE ->
+                    showDialogFragment(ImportRssSourceDialog(url))
+                StringUtils.DICT_RULE ->
+                    showDialogFragment(ImportDictRuleDialog(url))
+                StringUtils.REPLACE_RULE ->
+                    showDialogFragment(ImportReplaceRuleDialog(url))
+                StringUtils.TOC_RULE ->
+                    showDialogFragment(ImportTxtTocRuleDialog(url))
+                StringUtils.TTS_RULE ->
+                    showDialogFragment(ImportHttpTtsDialog(url))
+                else -> showDialogFragment(ImportHttpTtsDialog(url))
             }
         } catch (e: Exception) {
             e.printOnDebug()

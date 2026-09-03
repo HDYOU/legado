@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.OpenWith
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -92,11 +92,10 @@ fun FileManageScreen(
                     onBackClick = onBackClick,
                     showBackground = false
                 ) {
-                    // 用其他文件管理器打开当前路径
-                    IconButton(onClick = { viewModel.openWithChooser() }) {
+                    IconButton(onClick = { viewModel.copyCurrentPath() }) {
                         Icon(
-                            imageVector = Icons.Default.OpenWith,
-                            contentDescription = stringResource(R.string.open_with)
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = stringResource(R.string.copy_current_path)
                         )
                     }
                 }
@@ -129,16 +128,16 @@ fun FileManageScreen(
             } else {
                 FileList(
                     files = files,
-                    lastDir = viewModel.lastDir,
+                    currentDir = viewModel.currentDir,
                     onFileClick = { file ->
                         when {
-                            file == viewModel.lastDir -> viewModel.gotoLastDir()  // 点击 ".." 返回上级
+                            file == viewModel.currentDir -> viewModel.gotoParentDir()  // 点击 ".." 返回上级
                             file.isDirectory -> viewModel.enterDir(file)         // 进入文件夹
                             else -> viewModel.openFile(file)                     // 打开文件
                         }
                     },
                     onFileLongClick = { file ->
-                        if (file != viewModel.lastDir) {
+                        if (file != viewModel.currentDir) {
                             viewModel.requestDelete(file)
                         }
                     }

@@ -4,12 +4,14 @@ import android.content.SharedPreferences
 import android.os.Build
 import io.legado.app.BuildConfig
 import io.legado.app.constant.AppConst
+import io.legado.app.constant.ClipboardImportMode
 import io.legado.app.constant.MangaReadMode
 import io.legado.app.constant.PreferKey
 import io.legado.app.data.appDb
 import io.legado.app.model.debug.DebugCategory
 import io.legado.app.utils.GSON
 import io.legado.app.utils.canvasrecorder.CanvasRecorderFactory
+import io.legado.app.utils.defaultSharedPreferences
 import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.getPrefInt
@@ -91,6 +93,30 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         set(value) {
             appCtx.putPrefString(PreferKey.debugLogOnlyCategories, DebugLogOnlyConfig.serializeCategories(value))
         }
+    // ==================== 剪贴板导入口令 ====================
+
+    /**
+     * 剪贴板导入口令的处理模式，取值见 [ClipboardImportMode]。
+     */
+    var clipboardImportMode: String
+        get() = appCtx.getPrefString(PreferKey.clipboardImportMode) ?: ClipboardImportMode.ASK
+        set(value) = appCtx.putPrefString(PreferKey.clipboardImportMode, value)
+
+    /**
+     * 将废弃的布尔开关 askClipboardImport 一次性迁移为三态 [clipboardImportMode]。
+     *
+     * 该布尔项只存在过一个提交、未正式发布，但装过对应构建的用户可能已改动过它，
+     * 故做一次迁移：关闭（false）等价于"从不读取剪贴板"，其余统一落到"每次询问"。
+     * 迁移后移除旧 key，使得再次调用时因 key 不存在而直接返回。
+     */
+    fun migrateClipboardImportMode() {
+        if (!appCtx.defaultSharedPreferences.contains(PreferKey.askClipboardImport)) return
+        if (!appCtx.getPrefBoolean(PreferKey.askClipboardImport, true)) {
+            appCtx.putPrefString(PreferKey.clipboardImportMode, ClipboardImportMode.NEVER)
+        }
+        appCtx.removePref(PreferKey.askClipboardImport)
+    }
+
     var editFontScale = appCtx.getPrefInt(PreferKey.editFontScale, 16)
     var editNonPrintable = appCtx.getPrefInt(PreferKey.editNonPrintable, 0)
     var editAutoWrap = appCtx.getPrefBoolean(PreferKey.editAutoWrap, true)

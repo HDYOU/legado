@@ -31,7 +31,7 @@ Backup.backup()
 
 ```kotlin
 private fun getBackupPaths(): ArrayList<String> {
-    return File(backupPath)                           // ← 326: EARLY RETURN! 
+    return File(backupPath)                           // ← 326: EARLY RETURN!
         .listFiles()
         ?.mapTo(arrayListOf()) { it.absolutePath }
         ?: arrayListOf()
@@ -52,6 +52,7 @@ private fun getBackupPaths(): ArrayList<String> {
 **结论：第 326 行的 `return` 使函数提前退出，第 330-340 行为死代码。**
 
 该函数的实际行为：
+
 - 仅返回 `backupPath/` 目录下的**直接子项**（包括文件和子目录）
 - `getBackgroundImageFiles()` 永远不会被调用
 - 所有 JSON 数据文件、bgImage/ 子目录、bgImageNight/ 子目录等均作为路径条目返回
@@ -115,20 +116,20 @@ fun stageBackgroundImageFiles(rootPath: String) {
 
 ### 5. 图片删除操作 — 不删除磁盘文件
 
-| 操作 | 位置 | 行为 |
-|------|------|------|
-| 删除主题背景 | `ThemeConfigFragment.selectBgAction()` | 仅调用 `removePref(bgKey)`，**不删除磁盘文件** |
-| 删除主题配置 | `ThemeConfig.delConfig()` | 从 `configList` 移除，**不删除关联的图片文件** |
-| 删除启动界面图片 | `WelcomeConfigFragment` | 仅调用 `removePref(key)`，**不删除磁盘文件** |
-| 删除阅读配置 | `ReadBookConfig.deleteDur()` | 从 `configList` 移除，**不删除关联的 bg 文件** |
+| 操作             | 位置                                   | 行为                                           |
+| ---------------- | -------------------------------------- | ---------------------------------------------- |
+| 删除主题背景     | `ThemeConfigFragment.selectBgAction()` | 仅调用 `removePref(bgKey)`，**不删除磁盘文件** |
+| 删除主题配置     | `ThemeConfig.delConfig()`              | 从 `configList` 移除，**不删除关联的图片文件** |
+| 删除启动界面图片 | `WelcomeConfigFragment`                | 仅调用 `removePref(key)`，**不删除磁盘文件**   |
+| 删除阅读配置     | `ReadBookConfig.deleteDur()`           | 从 `configList` 移除，**不删除关联的 bg 文件** |
 
 ### 6. 图片清理机制 — 覆盖面不足
 
-| 清理函数 | 触发时机 | 覆盖目录 | 缺陷 |
-|----------|----------|----------|------|
-| `ThemeConfig.clearBg()` | 每个会话**首次**调用 `applyConfig()` 时 | `bgImage/`, `bgImageN/` | 仅运行一次，删除主题配置文件后残留图片无法清理 |
-| `ReadBookConfig.clearBgAndCache()` | 应用启动时 (`App.kt:114`) | `bg/` | 仅启动时运行，会话期间删除的配置残留图片无法清理 |
-| 启动界面图片清理 | **无** | `covers/` | 完全不存在清理机制 |
+| 清理函数                           | 触发时机                                | 覆盖目录                | 缺陷                                             |
+| ---------------------------------- | --------------------------------------- | ----------------------- | ------------------------------------------------ |
+| `ThemeConfig.clearBg()`            | 每个会话**首次**调用 `applyConfig()` 时 | `bgImage/`, `bgImageN/` | 仅运行一次，删除主题配置文件后残留图片无法清理   |
+| `ReadBookConfig.clearBgAndCache()` | 应用启动时 (`App.kt:114`)               | `bg/`                   | 仅启动时运行，会话期间删除的配置残留图片无法清理 |
+| 启动界面图片清理                   | **无**                                  | `covers/`               | 完全不存在清理机制                               |
 
 ## 根因分析
 
@@ -191,12 +192,12 @@ private fun getBackupPaths(): ArrayList<String> {
 
 ### 方案三：增强图片删除时的磁盘清理
 
-| 函数 | 修改内容 |
-|------|----------|
-| `ThemeConfigFragment.selectBgAction()` 删除操作 | 增加 `File(bgFilePath).delete()` |
-| `ThemeConfig.delConfig()` | 调用清理检查删除关联的背景图片文件 |
-| `WelcomeConfigFragment` 删除操作 | 增加 `File(imagePath).delete()` |
-| `ThemeConfig.clearBg()` | 移除 `needClearImg` 一次性限制，改为每次应用主题时都执行清理 |
+| 函数                                            | 修改内容                                                     |
+| ----------------------------------------------- | ------------------------------------------------------------ |
+| `ThemeConfigFragment.selectBgAction()` 删除操作 | 增加 `File(bgFilePath).delete()`                             |
+| `ThemeConfig.delConfig()`                       | 调用清理检查删除关联的背景图片文件                           |
+| `WelcomeConfigFragment` 删除操作                | 增加 `File(imagePath).delete()`                              |
+| `ThemeConfig.clearBg()`                         | 移除 `needClearImg` 一次性限制，改为每次应用主题时都执行清理 |
 
 ### 方案四：在 `stageBackgroundImageFiles()` 中清空子目录
 
@@ -204,13 +205,13 @@ private fun getBackupPaths(): ArrayList<String> {
 
 ## 涉及的关键文件
 
-| 文件 | 角色 |
-|------|------|
-| `app/.../help/storage/Backup.kt:325-341` | `getBackupPaths()` — 死代码缺陷 |
-| `app/.../help/storage/Backup.kt:262-278` | `stageBackgroundImageFiles()` — 图片暂存 |
-| `app/.../help/storage/Backup.kt:166-219` | `getBackgroundImageFiles()` — 图片引用收集 |
-| `app/.../utils/compress/ZipUtils.kt:171-203` | `zipFile()` — 目录递归打包 |
-| `app/.../help/config/ThemeConfig.kt:535-566` | `clearBg()` — 一次性清理限制 |
-| `app/.../help/config/ReadBookConfig.kt:178-195` | `clearBgAndCache()` — 启动时清理 |
-| `app/.../ui/config/ThemeConfigFragment.kt:276-279` | 主题背景删除 — 不删文件 |
-| `app/.../ui/config/WelcomeConfigFragment.kt:130-131,163-164` | 启动图片删除 — 不删文件 |
+| 文件                                                         | 角色                                       |
+| ------------------------------------------------------------ | ------------------------------------------ |
+| `app/.../help/storage/Backup.kt:325-341`                     | `getBackupPaths()` — 死代码缺陷            |
+| `app/.../help/storage/Backup.kt:262-278`                     | `stageBackgroundImageFiles()` — 图片暂存   |
+| `app/.../help/storage/Backup.kt:166-219`                     | `getBackgroundImageFiles()` — 图片引用收集 |
+| `app/.../utils/compress/ZipUtils.kt:171-203`                 | `zipFile()` — 目录递归打包                 |
+| `app/.../help/config/ThemeConfig.kt:535-566`                 | `clearBg()` — 一次性清理限制               |
+| `app/.../help/config/ReadBookConfig.kt:178-195`              | `clearBgAndCache()` — 启动时清理           |
+| `app/.../ui/config/ThemeConfigFragment.kt:276-279`           | 主题背景删除 — 不删文件                    |
+| `app/.../ui/config/WelcomeConfigFragment.kt:130-131,163-164` | 启动图片删除 — 不删文件                    |

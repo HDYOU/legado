@@ -765,8 +765,12 @@
     <string name="debug_log_floating_ball_summary">启用后在应用任意页面显示调试日志悬浮球</string>
     <string name="copy_crash_log_title">复制崩溃日志</string>
     <string name="copy_crash_log_summary">崩溃后重新进入应用时自动复制日志到剪贴板</string>
-    <string name="ask_clipboard_import">导入时询问剪贴板</string>
-    <string name="ask_clipboard_import_summary">开启后，每次从剪贴板读取导入口令前都会询问是否允许。可在「其他设置」中开启或关闭。</string>
+    <string name="clipboard_import_mode">剪贴板导入口令</string>
+    <string name="clipboard_import_mode_summary">从其他应用进入主界面时，若剪贴板中存在导入口令的处理方式。</string>
+    <string name="clipboard_import_confirm">检测到导入口令</string>
+    <string name="clipboard_import_confirm_summary">剪贴板中存在导入口令，是否立即导入？</string>
+    <string name="clipboard_import_remember">记住我的选择</string>
+    <string name="clipboard_import_auto_toast">已自动读取剪贴板中的导入口令</string>
     <string name="md_link_inner_browser">使用内置浏览器打开</string>
     <string name="md_link_inner_browser_summary">Markdown文件中的链接默认使用内置浏览器打开</string>
     <string name="verbose_update_log">详细更新日志</string>
@@ -1410,6 +1414,7 @@
     <string name="refuse">拒绝</string>
     <string name="file_manage">文件管理</string>
     <string name="file_manage_summary">管理私有文件夹的文件</string>
+    <string name="copy_current_path">复制当前路径</string>
     <string name="create_folder">创建文件夹</string>
     <string name="allow_drop_down_refresh">允许下拉刷新</string>
     <string name="only_update_read">仅更新已读完</string>

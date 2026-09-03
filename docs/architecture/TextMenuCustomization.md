@@ -6,16 +6,16 @@
 
 ## 菜单项列表
 
-| 菜单项 | ID | 说明 |
-|--------|-----|------|
-| 替换 | R.id.menu_replace | 替换文本内容 |
-| 复制 | R.id.menu_copy | 复制到剪贴板 |
-| 书签 | R.id.menu_bookmark | 添加书签 |
-| 朗读 | R.id.menu_aloud | 朗读选中文本 |
-| 字典 | R.id.menu_dict | 查字典 |
-| 搜索内容 | R.id.menu_search_content | 在本地内容中搜索 |
-| 浏览器 | R.id.menu_browser | 用浏览器打开或搜索 |
-| 分享 | R.id.menu_share_str | 分享文本 |
+| 菜单项   | ID                       | 说明               |
+| -------- | ------------------------ | ------------------ |
+| 替换     | R.id.menu_replace        | 替换文本内容       |
+| 复制     | R.id.menu_copy           | 复制到剪贴板       |
+| 书签     | R.id.menu_bookmark       | 添加书签           |
+| 朗读     | R.id.menu_aloud          | 朗读选中文本       |
+| 字典     | R.id.menu_dict           | 查字典             |
+| 搜索内容 | R.id.menu_search_content | 在本地内容中搜索   |
+| 浏览器   | R.id.menu_browser        | 用浏览器打开或搜索 |
+| 分享     | R.id.menu_share_str      | 分享文本           |
 
 ## 使用方法
 
@@ -24,9 +24,9 @@
 ```kotlin
 // 在设置界面中添加菜单项配置列表
 class TextMenuSettingsFragment : Fragment() {
-    
+
     private lateinit var binding: FragmentTextMenuSettingsBinding
-    
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -35,16 +35,16 @@ class TextMenuSettingsFragment : Fragment() {
         binding = FragmentTextMenuSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
-    
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         // 获取所有菜单项
         val menuItems = TextMenuConfig.getAllMenuItems()
-        
+
         // 获取当前隐藏的菜单项
         val hiddenIds = TextMenuConfig.getHiddenMenuItemIds(requireContext())
-        
+
         // 创建菜单项列表适配器
         val adapter = MenuItemsAdapter(menuItems, hiddenIds) { itemId ->
             // 切换菜单项显示状态
@@ -52,7 +52,7 @@ class TextMenuSettingsFragment : Fragment() {
             // 更新UI
             updateMenuItemStatus(itemId, isVisible)
         }
-        
+
         binding.recyclerView.adapter = adapter
     }
 }

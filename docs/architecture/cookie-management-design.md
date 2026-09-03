@@ -33,14 +33,14 @@
 
 ### 关键组件
 
-| 组件 | 文件 | 职责 |
-|------|------|------|
-| CookieStore | `help/http/CookieStore.kt` | 持久化存储（Room DB）+ 内存缓存 |
-| CookieManager | `help/http/CookieManager.kt` | HTTP 层协调：解析 Set-Cookie、注入 Cookie |
-| HttpHelper cookieJar | `help/http/HttpHelper.kt` | OkHttp CookieJar 实现（仅内存暂存） |
-| Cronet 拦截器 | `lib/cronet/` | Cronet 引擎的 Cookie 注入/保存 |
-| AnalyzeUrl | `model/analyzeRule/AnalyzeUrl.kt` | 请求构建器，添加哨兵 Header |
-| BaseSource | `data/entities/BaseSource.kt` | 书源/订阅源的 JS Cookie 接口 |
+| 组件                 | 文件                              | 职责                                      |
+| -------------------- | --------------------------------- | ----------------------------------------- |
+| CookieStore          | `help/http/CookieStore.kt`        | 持久化存储（Room DB）+ 内存缓存           |
+| CookieManager        | `help/http/CookieManager.kt`      | HTTP 层协调：解析 Set-Cookie、注入 Cookie |
+| HttpHelper cookieJar | `help/http/HttpHelper.kt`         | OkHttp CookieJar 实现（仅内存暂存）       |
+| Cronet 拦截器        | `lib/cronet/`                     | Cronet 引擎的 Cookie 注入/保存            |
+| AnalyzeUrl           | `model/analyzeRule/AnalyzeUrl.kt` | 请求构建器，添加哨兵 Header               |
+| BaseSource           | `data/entities/BaseSource.kt`     | 书源/订阅源的 JS Cookie 接口              |
 
 ---
 
@@ -68,6 +68,7 @@ while (cookie.length > 4096) {
 ```
 
 **问题**：
+
 - 随机删除可能导致关键 Cookie（如 session token）被移除
 - 4096 限制来源于 HTTP 规范的保守估计，但现代服务器和客户端普遍支持更大的 Cookie
 - 没有日志记录哪些 Cookie 被淘汰了，排障困难
@@ -80,6 +81,7 @@ while (cookie.length > 4096) {
 - **CookieStore → WebView**：`applyToWebView()` 在页面加载前同步
 
 **问题**：
+
 - JS 动态设置的 Cookie（不触发页面导航）不会被捕获
 - `onPageStarted` 和 `onPageFinished` 之间 WebView 设置的 Cookie 可能丢失
 - 多个 WebView 实例（BackstageWebView、BottomWebViewDialog、WebViewActivity）各自独立同步，可能存在竞态
@@ -89,6 +91,7 @@ while (cookie.length > 4096) {
 会话 Cookie（没有 `Expires`/`Max-Age` 的 Set-Cookie）存储在内存 `CacheManager` 中，key 为 `<domain>_session_cookie`。
 
 **问题**：
+
 - 应用重启后丢失，但用户可能期望会话 Cookie 在进程存活期间一直有效
 - `CookieManager.saveResponse()` 的持久/会话判断逻辑：没有 `Expires` 且没有 `Max-Age` 的 Cookie 被认为是会话 Cookie。但 RFC 6265 规定 `Max-Age=0` 应该立即过期，当前代码可能误判
 - `removeCookie()` 清除会话和持久 Cookie，但 `removeCookie(url, key)` 只清除指定 key 的会话 Cookie，行为不对称
@@ -98,6 +101,7 @@ while (cookie.length > 4096) {
 使用 `"CookieJar"` 作为哨兵 Header 来 opt-in Cookie 处理。
 
 **问题**：
+
 - 如果某个书源恰好设置了一个名为 `CookieJar` 的 Header，会意外触发或干扰 Cookie 处理
 - Cronet 和 OkHttp 两条路径都需要独立检查这个 Header，容易遗漏
 - `ObsoleteUrlFactory` 也有独立的检查逻辑，维护三处容易不一致
@@ -120,6 +124,7 @@ val url = NetworkUtils.getSubDomain(url)
 ```
 
 **问题**：
+
 - `a.example.com` 和 `b.example.com` 的 Cookie 存在不同记录中，但 `example.com` 和 `www.example.com` 可能共享（取决于 `getSubDomain` 实现）
 - 不支持 path 限制的 Cookie（RFC 6265 要求 path 匹配）
 - 同一域名下不同书源的 Cookie 会互相污染
@@ -232,6 +237,7 @@ enum class CookieMode {
 **方案**：将哨兵 Header 检查收拢到一个位置。
 
 当前有三处独立检查：
+
 1. `HttpHelper` network interceptor
 2. `CronetInterceptor`
 3. `ObsoleteUrlFactory`
@@ -252,14 +258,14 @@ enum class CookieMode {
 
 ## 四、优先级排序
 
-| 优先级 | 改动 | 风险 | 收益 |
-|--------|------|------|------|
-| P0 | 清理死代码（saveCookie、getCookie） | 低 | 消除维护困惑 |
-| P0 | Cookie 长度管理改进（日志 + LRU） | 低 | 排障能力提升，避免关键 Cookie 被误删 |
-| P1 | WebView Cookie 同一入口 | 中 | 消除分散逻辑，减少遗漏和竞态 |
-| P1 | Cronet Cookie 路径统一 | 中 | 消除不一致行为 |
-| P2 | Cookie 域名隔离 | 高 | 解决多源 Cookie 互污染 |
-| P2 | 哨兵 Header 统一 | 中 | 降低维护成本 |
+| 优先级 | 改动                                | 风险 | 收益                                 |
+| ------ | ----------------------------------- | ---- | ------------------------------------ |
+| P0     | 清理死代码（saveCookie、getCookie） | 低   | 消除维护困惑                         |
+| P0     | Cookie 长度管理改进（日志 + LRU）   | 低   | 排障能力提升，避免关键 Cookie 被误删 |
+| P1     | WebView Cookie 同一入口             | 中   | 消除分散逻辑，减少遗漏和竞态         |
+| P1     | Cronet Cookie 路径统一              | 中   | 消除不一致行为                       |
+| P2     | Cookie 域名隔离                     | 高   | 解决多源 Cookie 互污染               |
+| P2     | 哨兵 Header 统一                    | 中   | 降低维护成本                         |
 
 ---
 

@@ -766,8 +766,12 @@
     <string name="debug_log_floating_ball_summary">Show debug log floating ball on any page within the app</string>
     <string name="copy_crash_log_title">Copy Crash Log</string>
     <string name="copy_crash_log_summary">Auto copy crash log to clipboard on next app launch</string>
-    <string name="ask_clipboard_import">Ask before reading clipboard</string>
-    <string name="ask_clipboard_import_summary">When enabled, ask for permission each time before reading clipboard for import. You can enable or disable it in Other Settings.</string>
+    <string name="clipboard_import_mode">Clipboard Import</string>
+    <string name="clipboard_import_mode_summary">How to handle an import code found in the clipboard when entering the app from outside.</string>
+    <string name="clipboard_import_confirm">Import Code Detected</string>
+    <string name="clipboard_import_confirm_summary">An import code was found in the clipboard. Import it now?</string>
+    <string name="clipboard_import_remember">Remember my choice</string>
+    <string name="clipboard_import_auto_toast">Import code auto-read from clipboard</string>
     <string name="md_link_inner_browser">Open in Inner Browser</string>
     <string name="md_link_inner_browser_summary">Open MD file links in inner browser by default</string>
     <string name="verbose_update_log">Verbose Update Log</string>
@@ -1397,7 +1401,7 @@
     <string name="refuse">Refuse</string>
     <string name="file_manage">File management</string>
     <string name="file_manage_summary">Managing files in the application\'s private folder</string>
-    <string name="open_with">Open with</string>
+    <string name="copy_current_path">Copy current path</string>
     <string name="create_folder">Create Folder</string>
     <string name="allow_drop_down_refresh">Allow drop-down refresh</string>
     <string name="only_update_read">Only Update Read Books</string>

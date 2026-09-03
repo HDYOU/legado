@@ -158,4 +158,10 @@
         <item>方框</item>
     </string-array>
 
+    <string-array name="clipboard_import_mode_entries">
+        <item>每次询问</item>
+        <item>始终自动导入</item>
+        <item>从不读取</item>
+    </string-array>
+
 </resources>

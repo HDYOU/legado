@@ -118,12 +118,14 @@
             android:title="@string/copy_crash_log_title"
             app:iconSpaceReserved="false" />
 
-        <!-- 导入时询问剪贴板访问：默认开启，每次从剪贴板读取导入口令前都询问是否允许 -->
-        <io.legado.app.lib.prefs.SwitchPreference
-            android:defaultValue="true"
-            android:key="askClipboardImport"
-            android:summary="@string/ask_clipboard_import_summary"
-            android:title="@string/ask_clipboard_import"
+        <!-- 剪贴板导入口令：从其他应用进入主界面且剪贴板存在 #L: 口令时的处理方式 -->
+        <io.legado.app.lib.prefs.NameListPreference
+            android:defaultValue="ask"
+            android:key="clipboardImportMode"
+            android:summary="@string/clipboard_import_mode_summary"
+            android:title="@string/clipboard_import_mode"
+            app:entries="@array/clipboard_import_mode_entries"
+            app:entryValues="@array/clipboard_import_mode_values"
             app:iconSpaceReserved="false" />
 
         <!-- MD链接用内置浏览器打开：默认关闭 -->
