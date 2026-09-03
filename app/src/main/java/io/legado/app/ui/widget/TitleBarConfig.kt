@@ -1,5 +1,6 @@
 package io.legado.app.ui.widget
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapShader
@@ -12,6 +13,7 @@ import android.graphics.Path
 import android.graphics.PixelFormat
 import android.graphics.RectF
 import android.graphics.Shader
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.Drawable
@@ -21,9 +23,12 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import com.google.android.material.tabs.TabLayout
 import io.legado.app.R
+import io.legado.app.constant.Theme
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.TopBarConfig
+import io.legado.app.lib.theme.backgroundColor
 import io.legado.app.lib.theme.elevation
+import io.legado.app.lib.theme.getPrimaryTextColor
 import io.legado.app.lib.theme.primaryColor
 import io.legado.app.lib.theme.primaryTextColor
 import io.legado.app.lib.theme.transparentNavBar
@@ -100,26 +105,75 @@ private fun TitleBar.applyTopBarConfig(config: TopBarConfig.Config) {
         backgroundAlpha < 100 -> 0.1f
         else -> context.elevation
     }
-    applyTopBarContentColor()
-    applyTopBarChildConfig(config)
+    val contentColor = topBarContentColor()
+    applyTopBarContentColor(contentColor)
+    applyTopBarChildConfig(config, contentColor)
 }
 
 /** 应用顶栏内容颜色（文字、图标着色） */
-private fun TitleBar.applyTopBarContentColor() {
-    val color = topBarContentColor()
-    setTextColor(color)
-    setColorFilter(color)
-    toolbar.menu.applyTint(context, topBarTheme)
+private fun TitleBar.applyTopBarContentColor(contentColor: Int = topBarContentColor()) {
+    setTextColor(contentColor)
+    setColorFilter(contentColor)
+    toolbar.menu.applyTint(context, topBarTheme, contentColor)
 }
 
+/**
+ * 顶栏内容颜色。
+ * Auto 模式下按顶栏实际背景（TopBarConfig 纯色/半透明背景与页面背景合成）的亮度决定深浅，
+ * 避免主题主色与顶栏背景色调不一致时文字看不清（与二级标签栏的取色思路一致）；
+ * 背景含壁纸等无法判定亮度的图层时回退到 getMenuColor 的默认逻辑。
+ */
 private fun TitleBar.topBarContentColor(): Int {
+    if (topBarTheme != Theme.Auto) {
+        return MenuExtensions.getMenuColor(context, topBarTheme)
+    }
+    background.resolveSolidColor()
+        ?.compositeOverPageBackground(context)
+        ?.let { bgColor ->
+            // 背景越亮文字越深：亮背景(>0.5)用深色文字，暗背景用浅色文字。
+            // 与 MenuExtensions.getMenuColor 透明导航栏分支的取色约定保持一致。
+            return context.getPrimaryTextColor(
+                ColorUtils.calculateLuminance(bgColor) > 0.5
+            )
+        }
     return MenuExtensions.getMenuColor(context, topBarTheme)
+}
+
+/** 解析背景中的纯色：含壁纸等非纯色图层时返回 null（无法判定亮度） */
+private fun Drawable?.resolveSolidColor(): Int? {
+    if (this == null) return null
+    return when (this) {
+        is ColorDrawable -> color
+        is GradientDrawable -> color?.defaultColor?.takeIf { it != Color.TRANSPARENT }
+        is LayerDrawable -> {
+            var resolved: Int? = null
+            for (i in 0 until numberOfLayers) {
+                resolved = getDrawable(i).resolveSolidColor() ?: return null
+            }
+            resolved
+        }
+        else -> null
+    }
+}
+
+/** 半透明背景色与页面背景合成，得到实际显示的底色 */
+private fun Int.compositeOverPageBackground(context: Context): Int {
+    return if (Color.alpha(this) == 255) {
+        this
+    } else {
+        ColorUtils.compositeColors(this, context.backgroundColor)
+    }
 }
 
 /** 应用顶栏子 View 配置（TabLayout、SearchView），使用当前 TopBarConfig */
 fun View.applyTopBarChildConfig() {
     val config = TopBarConfig.currentConfig(context, AppConfig.isNightTheme)
-    applyTopBarChildConfig(config)
+    val contentColor = if (context.transparentNavBar) {
+        MenuExtensions.getMenuColor(context)
+    } else {
+        context.primaryTextColor
+    }
+    applyTopBarChildConfig(config, contentColor)
 }
 
 /** 生成常规样式的圆角背景 Drawable */
@@ -139,9 +193,12 @@ private fun regularBackground(color: Int, radius: Float, alphaPercent: Int): Dra
     }
 }
 
-private fun TitleBar.applyTopBarChildConfig(config: TopBarConfig.Config) {
-    findViewById<TabLayout?>(R.id.tab_layout)?.applyTopBarChildConfig(config)
-    findViewById<View?>(R.id.search_view)?.applyTopBarChildConfig(config)
+private fun TitleBar.applyTopBarChildConfig(
+    config: TopBarConfig.Config,
+    contentColor: Int = topBarContentColor()
+) {
+    findViewById<TabLayout?>(R.id.tab_layout)?.applyTopBarChildConfig(config, contentColor)
+    findViewById<View?>(R.id.search_view)?.applyTopBarChildConfig(config, contentColor)
 }
 
 private fun TitleBar.applyTransparentTopBarChildConfig() {
@@ -157,15 +214,14 @@ private fun TitleBar.applyTransparentTopBarChildConfig() {
             )
         )
     }
-    findViewById<View?>(R.id.search_view)?.applyTopBarChildConfig(config)
+    findViewById<View?>(R.id.search_view)?.applyTopBarChildConfig(config, contentColor)
 }
 
-private fun View.applyTopBarChildConfig(config: TopBarConfig.Config) {
+private fun View.applyTopBarChildConfig(config: TopBarConfig.Config, contentColor: Int) {
     if (this !is TabLayout && id != R.id.search_view) return
     val tagBarColor = config.tagBarColor
         ?: ContextCompat.getColor(context, R.color.background_menu)
     val selectedColor = config.tagSelectedColor ?: context.primaryColor
-    val contentColor = if (context.transparentNavBar) MenuExtensions.getMenuColor(context) else context.primaryTextColor
     if (this is TabLayout && id == R.id.tab_layout) {
         val tagBarAlpha = if (context.transparentNavBar) 0 else config.tagBarAlpha
         setBackgroundColor(TopBarConfig.withOpacity(tagBarColor, tagBarAlpha))

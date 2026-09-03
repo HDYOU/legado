@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.legado.app.R
+import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.utils.EncoderUtils
 import io.legado.app.utils.MD5Utils
 import io.legado.app.utils.encodeURI
@@ -55,8 +56,7 @@ fun EncodeToolsScreen(
     var result by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -85,7 +85,8 @@ fun EncodeToolsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Card(

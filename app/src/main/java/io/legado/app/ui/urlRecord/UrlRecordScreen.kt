@@ -54,7 +54,10 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import io.legado.app.data.entities.UrlRecord
 import io.legado.app.ui.theme.pageCardContainerColor
-import io.legado.app.ui.theme.pageTopBarContainerColor
+import io.legado.app.ui.theme.pageTopBarBackground
+import io.legado.app.ui.theme.pageTopBarColors
+import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -83,7 +86,7 @@ fun UrlRecordScreen(
     
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val containerColor = pageCardContainerColor()
-    val topBarColor = pageTopBarContainerColor()
+    val topBarColors = pageTopBarColors()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -119,16 +122,16 @@ fun UrlRecordScreen(
         )
     }
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.pageTopBarBackground(topBarColors),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = topBarColor,
-                    scrolledContainerColor = topBarColor,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSecondary,
-                    titleContentColor = MaterialTheme.colorScheme.onSecondary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onSecondary
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent,
+                    navigationIconContentColor = topBarColors.contentColor,
+                    titleContentColor = topBarColors.contentColor,
+                    actionIconContentColor = topBarColors.contentColor
                 ),
                 title = {
                     Column {
@@ -633,7 +636,7 @@ private fun ActiveFilterChips(viewModel: UrlRecordViewModel) {
                 }
                 TextButton(
                     onClick = { viewModel.clearAllFilters() },
-                    contentPadding = PaddingValues(horizontal = 8.dp)
+                    contentPadding = PaddingValues(start = 8.dp, top = 0.dp, end = 8.dp, bottom = navigationBarBottomInset)
                 ) {
                     Text("清除全部", style = MaterialTheme.typography.labelSmall)
                 }
@@ -652,7 +655,7 @@ private fun GroupedRecordList(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 8.dp)
+        contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset)
     ) {
         groupedRecords.forEach { (dateGroup, records) ->
             item(key = "header_$dateGroup") {

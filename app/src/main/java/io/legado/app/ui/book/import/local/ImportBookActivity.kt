@@ -81,11 +81,13 @@ class ImportBookActivity : BaseImportBookActivity<ImportBookViewModel>(),
         return super.onCompatCreateOptionsMenu(menu)
     }
 
-    override fun onMenuOpened(featureId: Int, menu: Menu): Boolean {
-        menu.findItem(R.id.menu_sort_name)?.isChecked = viewModel.sort == 0
-        menu.findItem(R.id.menu_sort_size)?.isChecked = viewModel.sort == 1
-        menu.findItem(R.id.menu_sort_time)?.isChecked = viewModel.sort == 2
-        return super.onMenuOpened(featureId, menu)
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val sortSubMenu = menu.findItem(R.id.menu_sort)?.subMenu
+        sortSubMenu?.setGroupCheckable(R.id.menu_group_sort, true, true)
+        sortSubMenu?.findItem(R.id.menu_sort_name)?.isChecked = viewModel.sort == 0
+        sortSubMenu?.findItem(R.id.menu_sort_size)?.isChecked = viewModel.sort == 1
+        sortSubMenu?.findItem(R.id.menu_sort_time)?.isChecked = viewModel.sort == 2
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onCompatOptionsItemSelected(item: MenuItem): Boolean {
@@ -93,9 +95,9 @@ class ImportBookActivity : BaseImportBookActivity<ImportBookViewModel>(),
             R.id.menu_select_folder -> selectFolder.launch()
             R.id.menu_scan_folder -> scanFolder()
             R.id.menu_import_file_name -> alertImportFileName()
-            R.id.menu_sort_name -> upSort(0)
-            R.id.menu_sort_size -> upSort(1)
-            R.id.menu_sort_time -> upSort(2)
+            R.id.menu_sort_name -> upSort(item, 0)
+            R.id.menu_sort_size -> upSort(item, 1)
+            R.id.menu_sort_time -> upSort(item, 2)
         }
         return super.onCompatOptionsItemSelected(item)
     }
@@ -220,9 +222,10 @@ class ImportBookActivity : BaseImportBookActivity<ImportBookViewModel>(),
             .request()
     }
 
-    private fun upSort(sort: Int) {
+    private fun upSort(item: MenuItem, sort: Int) {
         viewModel.sort = sort
         putPrefInt(PreferKey.localBookImportSort, sort)
+        item.isChecked = true
         if (scanDocJob?.isActive != true) {
             viewModel.dataCallback?.upAdapter()
         }

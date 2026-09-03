@@ -1,5 +1,5 @@
 ---
-name: chinese-git-workflow
+name: legado-chinese-git-workflow
 description: 国内 Git 平台配置参考——Gitee、Coding.net、极狐 GitLab、CNB 的 SSH/HTTPS/凭据/CI 接入差异与镜像同步配置。仅在用户显式 /chinese-git-workflow 时调用，不要根据上下文自动触发。
 ---
 
@@ -15,14 +15,14 @@ description: 国内 Git 平台配置参考——Gitee、Coding.net、极狐 GitL
 
 ### 平台对比
 
-| 特性 | Gitee | Coding.net | 极狐 GitLab | CNB | GitHub |
-|------|-------|------------|-------------|-----|--------|
-| 国内访问 | 快 | 快 | 快 | 快 | 不稳定 |
-| 免费私有仓库 | 有 | 有 | 有 | 有 | 有 |
-| CI/CD | Gitee Go | Coding CI | 内置 GitLab CI | 内置（.cnb.yml） | GitHub Actions |
-| 代码审查 | PR | MR | MR | MR | PR |
-| 制品库 | 有限 | 完整 | 完整 | 完整 | Packages |
-| 适合场景 | 开源/小团队 | 中大型团队 | 企业私有化 | 云原生 / Docker 流水线 | 国际项目 |
+| 特性         | Gitee       | Coding.net | 极狐 GitLab    | CNB                    | GitHub         |
+| ------------ | ----------- | ---------- | -------------- | ---------------------- | -------------- |
+| 国内访问     | 快          | 快         | 快             | 快                     | 不稳定         |
+| 免费私有仓库 | 有          | 有         | 有             | 有                     | 有             |
+| CI/CD        | Gitee Go    | Coding CI  | 内置 GitLab CI | 内置（.cnb.yml）       | GitHub Actions |
+| 代码审查     | PR          | MR         | MR             | MR                     | PR             |
+| 制品库       | 有限        | 完整       | 完整           | 完整                   | Packages       |
+| 适合场景     | 开源/小团队 | 中大型团队 | 企业私有化     | 云原生 / Docker 流水线 | 国际项目       |
 
 ### Gitee 特有配置
 
@@ -88,6 +88,7 @@ feat/x  ●─●   ●─●    fix/y ●─●
 ```
 
 **规则：**
+
 - 主干（main）始终保持可发布状态
 - 功能分支生命周期不超过 2 天
 - 每天至少合并一次到主干
@@ -121,6 +122,7 @@ feat/x       ●─●    ●─────●               功能分支
 ```
 
 **分支说明：**
+
 - `main` — 生产环境代码，只接受 release 和 hotfix 的合并
 - `develop` — 开发主线，功能分支从这里拉出，合回这里
 - `release/*` — 发布分支，从 develop 拉出，只修 bug 不加功能
@@ -140,6 +142,7 @@ feat/x       ●●      ●●       功能分支
 ```
 
 **规则：**
+
 - `main` 分支受保护，只能通过 PR/MR 合并
 - `dev` 分支对应测试环境，自动部署
 - 功能分支从 `dev` 拉出，合回 `dev`
@@ -191,19 +194,19 @@ dev/zhangsan/feat-login      # 个人开发分支
 
 ### 类型清单
 
-| 类型 | 说明 | emoji（可选） |
-|------|------|--------------|
-| feat | 新增功能 | ✨ |
-| fix | 修复 Bug | 🐛 |
-| docs | 文档更新 | 📝 |
-| style | 代码格式（不影响逻辑） | 💄 |
-| refactor | 重构（不是新功能也不是修 Bug） | ♻️ |
-| perf | 性能优化 | ⚡ |
-| test | 测试相关 | ✅ |
-| build | 构建系统或外部依赖 | 📦 |
-| ci | CI/CD 配置 | 👷 |
-| chore | 其他杂项 | 🔧 |
-| revert | 回滚 | ⏪ |
+| 类型     | 说明                           | emoji（可选） |
+| -------- | ------------------------------ | ------------- |
+| feat     | 新增功能                       | ✨            |
+| fix      | 修复 Bug                       | 🐛            |
+| docs     | 文档更新                       | 📝            |
+| style    | 代码格式（不影响逻辑）         | 💄            |
+| refactor | 重构（不是新功能也不是修 Bug） | ♻️            |
+| perf     | 性能优化                       | ⚡            |
+| test     | 测试相关                       | ✅            |
+| build    | 构建系统或外部依赖             | 📦            |
+| ci       | CI/CD 配置                     | 👷            |
+| chore    | 其他杂项                       | 🔧            |
+| revert   | 回滚                           | ⏪            |
 
 ### 好的 commit message
 
@@ -251,7 +254,7 @@ fix：修复了一个bug，因为user login的时候会crash
 ```yaml
 # .gitee/pipelines/pipeline.yml
 name: 构建与测试
-displayName: '构建与测试流水线'
+displayName: "构建与测试流水线"
 
 triggers:
   push:
@@ -267,7 +270,7 @@ stages:
         steps:
           - step: npmbuild@1
             name: install_and_test
-            displayName: '安装依赖并执行测试'
+            displayName: "安装依赖并执行测试"
             inputs:
               nodeVersion: 20
               commands:
@@ -380,7 +383,7 @@ variables:
     - main
   environment:
     name: production
-  when: manual  # 生产环境手动触发
+  when: manual # 生产环境手动触发
 ```
 
 ### CNB（Cloud Native Build）
@@ -404,6 +407,7 @@ main:
 ```
 
 **特点：**
+
 - 每个流水线独立指定 Docker 镜像，天然云原生
 - 支持 `push` / `pull_request` 触发
 - 同一事件可并行多条流水线
@@ -411,14 +415,14 @@ main:
 
 ### GitHub Actions 国内替代方案对照
 
-| GitHub Actions 功能 | Gitee Go | Coding CI | 极狐 GitLab CI | CNB |
-|---------------------|----------|-----------|----------------|-----|
-| 触发条件 | triggers | Jenkinsfile triggers | only/rules | push / pull_request |
-| 缓存依赖 | cache step | stash/unstash | cache | 见官方文档 |
-| 制品存储 | artifacts | 制品库 | artifacts | 见官方文档 |
-| 环境变量 | env | environment | variables | env |
-| 密钥管理 | 环境变量配置 | 凭据管理 | CI/CD Variables | Access Token |
-| 手动触发 | 手动运行 | 手动触发 | when: manual | 页面手动运行 |
+| GitHub Actions 功能 | Gitee Go     | Coding CI            | 极狐 GitLab CI  | CNB                 |
+| ------------------- | ------------ | -------------------- | --------------- | ------------------- |
+| 触发条件            | triggers     | Jenkinsfile triggers | only/rules      | push / pull_request |
+| 缓存依赖            | cache step   | stash/unstash        | cache           | 见官方文档          |
+| 制品存储            | artifacts    | 制品库               | artifacts       | 见官方文档          |
+| 环境变量            | env          | environment          | variables       | env                 |
+| 密钥管理            | 环境变量配置 | 凭据管理             | CI/CD Variables | Access Token        |
+| 手动触发            | 手动运行     | 手动触发             | when: manual    | 页面手动运行        |
 
 ## PR/MR 描述模板
 

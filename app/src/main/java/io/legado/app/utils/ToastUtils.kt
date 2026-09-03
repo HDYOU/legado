@@ -29,6 +29,14 @@ private var toast: Toast? = null
 
 private var toastLegacy: Toast? = null
 
+private val toastHandler by lazy { buildMainHandler() }
+
+/** 兜底清理延迟：Toast.LENGTH_SHORT 实际展示约 2s，留余量后清空静态引用。 */
+private const val SHORT_TOAST_CLEAN_DELAY = 3_000L
+
+/** 兜底清理延迟：Toast.LENGTH_LONG 实际展示约 3.5s，留余量后清空静态引用。 */
+private const val LONG_TOAST_CLEAN_DELAY = 5_000L
+
 /**
  * 在 Toast 显示结束（view 被移除）时回调，用于释放静态引用，避免 Toast 被静态持有导致泄漏。
  * [onDismiss] 中需自行判断当前引用是否仍指向被 dismiss 的实例，防止误清新创建的 Toast。
@@ -44,33 +52,65 @@ private fun Toast?.releaseWhenDismissed(onDismiss: (Toast?) -> Unit) {
     })
 }
 
-fun Context.toastOnUi(message: Int, duration: Int = Toast.LENGTH_SHORT) {
-    toastOnUi(getString(message), duration)
-}
-
+/**
+ * 创建并展示自定义样式的 Toast，旧的实例先 cancel，再让静态引用指向新实例。
+ *
+ * 关键约束：view 必须用 [applicationContext] 的 LayoutInflater 创建，严禁使用
+ * Activity/Fragment 的 inflater。否则 view.mContext 会直接引用调用方界面，而 Toast 又
+ * 被静态字段持有——只要界面在 Toast 消失前销毁，整条 Activity 链就会被拖住（LeakCanary
+ * 曾捕获：static toast -> Toast.mNextView -> View.mContext -> 已销毁的 ThemeManageActivity，
+ * 一次就挂住 22.6MB）。
+ *
+ * 静态引用的清理分两路兜底：
+ * 1. view 正常展示结束被移除时（detach）回调清空；
+ * 2. 若 Toast 在 attach 之前就被 cancel（如快速连发），view 永远不会 detach、回调不会
+ *    触发，静态字段会一直挂着旧 Toast。因此再按显示时长延时兜底清空一次，避免长期持有。
+ */
 @SuppressLint("InflateParams")
 @Suppress("DEPRECATION")
-fun Context.toastOnUi(message: CharSequence?, duration: Int = Toast.LENGTH_SHORT) {
+private fun Context.showCustomToast(
+    message: CharSequence?,
+    duration: Int,
+    afterShow: () -> Unit
+) {
     runOnUI {
         kotlin.runCatching {
             toast?.cancel()
-            toast = Toast(this.applicationContext)
+            val newToast = Toast(applicationContext)
             val isLight = ColorUtils.isColorLight(bottomBackground)
-            ViewToastBinding.inflate(layoutInflater).run {
-                toast?.view = root
+            ViewToastBinding.inflate(applicationContext.layoutInflater).run {
+                newToast.view = root
                 cvToast.setCardBackgroundColor(bottomBackground)
                 tvText.setTextColor(getPrimaryTextColor(isLight))
                 tvText.text = message
             }
-            toast?.duration = duration
-            toast?.releaseWhenDismissed { dismissed ->
+            newToast.duration = duration
+            newToast.releaseWhenDismissed { dismissed ->
                 if (toast === dismissed) toast = null
             }
-            toast?.show()
-            
-            // 记录Toast到调试日志
-            recordToast(message, duration)
+            toast = newToast
+            newToast.show()
+            val cleanDelay = if (duration == Toast.LENGTH_LONG) {
+                LONG_TOAST_CLEAN_DELAY
+            } else {
+                SHORT_TOAST_CLEAN_DELAY
+            }
+            toastHandler.postDelayed({
+                if (toast === newToast) toast = null
+            }, cleanDelay)
+            afterShow()
         }
+    }
+}
+
+fun Context.toastOnUi(message: Int, duration: Int = Toast.LENGTH_SHORT) {
+    toastOnUi(getString(message), duration)
+}
+
+fun Context.toastOnUi(message: CharSequence?, duration: Int = Toast.LENGTH_SHORT) {
+    showCustomToast(message, duration) {
+        // 记录Toast到调试日志
+        recordToast(message, duration)
     }
 }
 
@@ -163,25 +203,8 @@ private fun recordToast(message: CharSequence?, duration: Int, context: ToastCon
 }
 
 fun Context.toastOnUi(message: CharSequence?, context: ToastContext, duration: Int = Toast.LENGTH_SHORT) {
-    runOnUI {
-        kotlin.runCatching {
-            toast?.cancel()
-            toast = Toast(this.applicationContext)
-            val isLight = ColorUtils.isColorLight(bottomBackground)
-            ViewToastBinding.inflate(layoutInflater).run {
-                toast?.view = root
-                cvToast.setCardBackgroundColor(bottomBackground)
-                tvText.setTextColor(getPrimaryTextColor(isLight))
-                tvText.text = message
-            }
-            toast?.duration = duration
-            toast?.releaseWhenDismissed { dismissed ->
-                if (toast === dismissed) toast = null
-            }
-            toast?.show()
-            
-            recordToast(message, duration, context)
-        }
+    showCustomToast(message, duration) {
+        recordToast(message, duration, context)
     }
 }
 

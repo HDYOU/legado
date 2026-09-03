@@ -13,6 +13,13 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.IntDef
 import androidx.core.content.ContextCompat
 
+/**
+ * 主题选择器构建器工厂。
+ *
+ * 提供形状、颜色、资源三种选择器的构建入口，
+ * 用于为 UI 组件生成带状态切换（正常/按下/选中/禁用等）的
+ * Android StateListDrawable / ColorStateList。
+ */
 @Suppress("unused")
 object Selector {
     fun shapeBuild(): ShapeSelector {

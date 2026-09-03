@@ -1,5 +1,5 @@
 ---
-name: localization-sync
+name: legado-localization-sync
 description: Synchronize user-visible string resources across four required languages in the Legado project (English, Simplified Chinese, Traditional Chinese Taiwan, Traditional Chinese Hong Kong). Use when adding or modifying UI text or discovering missing translations.
 ---
 
@@ -22,10 +22,10 @@ description: Synchronize user-visible string resources across four required lang
 
 详见 `references/resource-paths.md`。核心文件如下：
 
-| 语言 | strings.xml | arrays.xml |
-|------|------------|------------|
-| 英语 (基准) | `app/src/main/res/values/strings.xml` | `app/src/main/res/values/arrays.xml` |
-| 简体中文 | `app/src/main/res/values-zh/strings.xml` | `app/src/main/res/values-zh/arrays.xml` |
+| 语言            | strings.xml                                  | arrays.xml                                  |
+| --------------- | -------------------------------------------- | ------------------------------------------- |
+| 英语 (基准)     | `app/src/main/res/values/strings.xml`        | `app/src/main/res/values/arrays.xml`        |
+| 简体中文        | `app/src/main/res/values-zh/strings.xml`     | `app/src/main/res/values-zh/arrays.xml`     |
 | 繁体中文 (台湾) | `app/src/main/res/values-zh-rTW/strings.xml` | `app/src/main/res/values-zh-rTW/arrays.xml` |
 | 繁体中文 (香港) | `app/src/main/res/values-zh-rHK/strings.xml` | `app/src/main/res/values-zh-rHK/arrays.xml` |
 
@@ -42,6 +42,7 @@ description: Synchronize user-visible string resources across four required lang
 ### 第二步：以英文为基准
 
 始终以 `values/strings.xml`（英文）为权威基准。对于新增字符串：
+
 - 如果用户提供了英文原文，直接使用
 - 如果用户仅提供中文，先推导出准确的英文对应文本
 - 确保 key 命名符合项目现有规范（使用 `snake_case` 或项目已有的命名风格）
@@ -56,6 +57,7 @@ description: Synchronize user-visible string resources across four required lang
 4. **繁体中文香港** (`values-zh-rHK/`) — 翻译为香港繁体中文
 
 关键规则：
+
 - 四种语言的资源 **key 必须完全一致**
 - 对于修改场景，使用 `Edit` 工具精确定位并替换
 - 对于新增场景，在对应文件的适当位置（按分组注释或字母顺序）插入新条目
@@ -66,11 +68,13 @@ description: Synchronize user-visible string resources across four required lang
 台湾繁体中文与香港繁体中文之间需要区分用词差异。常见对照表详见 `references/tw-hk-differences.md`。
 
 核心差异类别：
+
 - **计算机术语**：如「軟體」vs「軟件」、「記憶體」vs「記憶體」（香港也常用英文原词）
 - **日常用词**：如「透過」vs「通過」、「資料」vs「數據」、「儲存」vs「存儲」
 - **字符差异**：如「為」vs「爲」、「讀」vs「閲」、「線」vs「綫」
 
 当无法确定正确的区域用词时，应参考：
+
 1. `references/tw-hk-differences.md` 中的对照表
 2. 已有翻译文件中类似字符串的用词惯例
 3. 如仍不确定，在翻译后标注供审核

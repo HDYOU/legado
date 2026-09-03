@@ -1,0 +1,80 @@
+{
+  "$comment": "代码 → 帮助文档映射表。用于 pre-commit 门禁：当某块功能代码被修改时，必须同步修改对应的帮助文档（位于 app/src/main/assets/web/help/md/）。支持 glob 通配符（* 匹配任意字符，** 匹配任意多级目录）。",
+
+  "version": 1,
+
+  "rules": [
+    {
+      "source": "app/src/main/java/io/legado/app/model/analyzeRule/**",
+      "docs": ["ruleHelp.md", "xpathHelp.md", "regexHelp.md", "jsHelp.md", "jsVariableHelp.md", "书源字段规则类型.md", "订阅源字段规则类型.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/webBook/**",
+      "docs": ["网络请求机制.md", "legado_network_api.md", "网络请求机制问题分析.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/ReadBook.kt",
+      "docs": ["正文下一页懒加载与缓存机制.md", "readMenuHelp.md", "目录不完全加载机制.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/CacheBook.kt",
+      "docs": ["缓存与导出备份机制.md", "bookCacheHelp.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/ImageProvider.kt",
+      "docs": ["图片加载机制.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/blockrule/**",
+      "docs": ["ruleHelp.md", "替换规则流程与机制.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/rss/**",
+      "docs": ["订阅源机制详解.md", "订阅源字段规则类型.md", "SourceMRssHelp.md", "rssRuleHelp.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/localBook/**",
+      "docs": ["目录不完全加载机制.md", "txtTocRuleHelp.md", "缓存与导出备份机制.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/debug/**",
+      "docs": ["debugHelp.md", "调试日志系统改进规划.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/help/source/**",
+      "docs": ["ruleHelp.md", "SourceMBookHelp.md", "SourceMRssHelp.md", "rssRuleHelp.md", "书源字段规则类型.md", "订阅源字段规则类型.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/help/rhino/**",
+      "docs": ["jsHelp.md", "jsVariableHelp.md", "jsPackagesHelp.md", "预注入JS机制详解.md", "Rhino缺陷.md", "打印源对象的JS对象.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/help/config/**",
+      "docs": ["coverConfigHelp.md", "bubbleHelp.md", "highlightRules.md", "replaceRuleHelp.md", "dictRuleHelp.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/help/book/**",
+      "docs": ["readMenuHelp.md", "bookCacheHelp.md", "缓存与导出备份机制.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/web/**",
+      "docs": ["网络请求机制.md", "网络请求机制问题分析.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/remote/**",
+      "docs": ["webDavHelp.md", "webDavBookHelp.md", "缓存与导出备份机制.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/SharedJsScope.kt",
+      "docs": ["jsVariableHelp.md", "预注入JS机制详解.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/ParagraphBubbleRenderer.kt",
+      "docs": ["bubbleHelp.md"]
+    },
+    {
+      "source": "app/src/main/java/io/legado/app/model/BookCover.kt",
+      "docs": ["coverConfigHelp.md"]
+    }
+  ]
+}

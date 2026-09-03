@@ -18,23 +18,29 @@
 
         <menu>
 
-            <item
-                android:id="@+id/menu_sort_name"
-                android:checkable="true"
-                android:title="@string/sort_by_name"
-                app:showAsAction="never" />
+            <group
+                android:id="@+id/menu_group_sort"
+                android:checkableBehavior="single">
 
-            <item
-                android:id="@+id/menu_sort_size"
-                android:checkable="true"
-                android:title="@string/sort_by_size"
-                app:showAsAction="never" />
+                <item
+                    android:id="@+id/menu_sort_name"
+                    android:checkable="true"
+                    android:title="@string/sort_by_name"
+                    app:showAsAction="never" />
 
-            <item
-                android:id="@+id/menu_sort_time"
-                android:checkable="true"
-                android:title="@string/sort_by_time"
-                app:showAsAction="never" />
+                <item
+                    android:id="@+id/menu_sort_size"
+                    android:checkable="true"
+                    android:title="@string/sort_by_size"
+                    app:showAsAction="never" />
+
+                <item
+                    android:id="@+id/menu_sort_time"
+                    android:checkable="true"
+                    android:title="@string/sort_by_time"
+                    app:showAsAction="never" />
+
+            </group>
 
         </menu>
 

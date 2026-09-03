@@ -1,5 +1,5 @@
 ---
-name: chinese-documentation
+name: legado-chinese-documentation
 description: 中文文档排版参考——中英文空格、全半角标点、术语保留、链接格式、中文文案排版指北约定。仅在用户显式 /chinese-documentation 时调用，不要根据上下文自动触发。
 ---
 
@@ -179,7 +179,7 @@ See the documentation (README.md) for details.
 
 ### 接口文档模板
 
-```markdown
+````markdown
 ## 创建订单 / Create Order
 
 ### 基本信息
@@ -191,56 +191,56 @@ See the documentation (README.md) for details.
 
 ### 请求参数 (Request Parameters)
 
-| 参数名 (Field) | 类型 (Type) | 必填 (Required) | 说明 (Description) |
-|----------------|-------------|-----------------|-------------------|
-| product_id | string | 是 | 商品 ID (Product ID) |
-| quantity | integer | 是 | 购买数量 (Quantity)，最小值为 1 |
-| address_id | string | 是 | 收货地址 ID (Shipping address ID) |
-| coupon_code | string | 否 | 优惠券码 (Coupon code) |
+| 参数名 (Field) | 类型 (Type) | 必填 (Required) | 说明 (Description)                |
+| -------------- | ----------- | --------------- | --------------------------------- |
+| product_id     | string      | 是              | 商品 ID (Product ID)              |
+| quantity       | integer     | 是              | 购买数量 (Quantity)，最小值为 1   |
+| address_id     | string      | 是              | 收货地址 ID (Shipping address ID) |
+| coupon_code    | string      | 否              | 优惠券码 (Coupon code)            |
 
 ### 请求示例 (Request Example)
 
 \```json
 {
-  "product_id": "prod_abc123",
-  "quantity": 2,
-  "address_id": "addr_xyz789",
-  "coupon_code": "SUMMER2024"
+"product_id": "prod_abc123",
+"quantity": 2,
+"address_id": "addr_xyz789",
+"coupon_code": "SUMMER2024"
 }
 \```
 
 ### 响应参数 (Response Parameters)
 
-| 参数名 (Field) | 类型 (Type) | 说明 (Description) |
-|----------------|-------------|-------------------|
-| order_id | string | 订单 ID (Order ID) |
-| status | string | 订单状态 (Order status): pending / paid / shipped |
-| total_amount | integer | 订单总金额，单位：分 (Total amount in cents) |
-| created_at | string | 创建时间 (Created at)，ISO 8601 格式 |
+| 参数名 (Field) | 类型 (Type) | 说明 (Description)                                |
+| -------------- | ----------- | ------------------------------------------------- |
+| order_id       | string      | 订单 ID (Order ID)                                |
+| status         | string      | 订单状态 (Order status): pending / paid / shipped |
+| total_amount   | integer     | 订单总金额，单位：分 (Total amount in cents)      |
+| created_at     | string      | 创建时间 (Created at)，ISO 8601 格式              |
 
 ### 响应示例 (Response Example)
 
 \```json
 {
-  "code": 0,
-  "message": "success",
-  "data": {
-    "order_id": "ord_20240315001",
-    "status": "pending",
-    "total_amount": 9900,
-    "created_at": "2024-03-15T10:30:00+08:00"
-  }
+"code": 0,
+"message": "success",
+"data": {
+"order_id": "ord_20240315001",
+"status": "pending",
+"total_amount": 9900,
+"created_at": "2024-03-15T10:30:00+08:00"
+}
 }
 \```
 
 ### 错误码 (Error Codes)
 
-| 错误码 (Code) | 说明 (Description) | 处理建议 (Suggestion) |
-|---------------|--------------------|--------------------|
-| 40001 | 商品不存在 (Product not found) | 检查 product_id 是否正确 |
-| 40002 | 库存不足 (Insufficient stock) | 减少购买数量或稍后重试 |
-| 40003 | 优惠券已过期 (Coupon expired) | 移除 coupon_code 或更换优惠券 |
-```
+| 错误码 (Code) | 说明 (Description)             | 处理建议 (Suggestion)         |
+| ------------- | ------------------------------ | ----------------------------- |
+| 40001         | 商品不存在 (Product not found) | 检查 product_id 是否正确      |
+| 40002         | 库存不足 (Insufficient stock)  | 减少购买数量或稍后重试        |
+| 40003         | 优惠券已过期 (Coupon expired)  | 移除 coupon_code 或更换优惠券 |
+````
 
 ### 金额表示约定
 
@@ -256,11 +256,11 @@ total_amount: 99.00  // 是元还是分？浮点数会有精度问题
 
 国内开源项目常用的 README 结构：
 
-```markdown
+````markdown
 # 项目名称
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)]()
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](<>)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](<>)
 
 简短一句话介绍项目是什么、解决什么问题。
 
@@ -310,16 +310,21 @@ const result = await client.doSomething();
 ### 本地开发
 
 \```bash
+
 # 克隆项目
+
 git clone https://gitee.com/your-org/your-project.git
 
 # 安装依赖
+
 npm install
 
 # 启动开发服务器
+
 npm run dev
 
 # 运行测试
+
 npm test
 \```
 
@@ -331,7 +336,7 @@ npm test
 ## 许可证
 
 [MIT](./LICENSE)
-```
+````
 
 ## 常见问题与避坑指南
 
@@ -348,6 +353,7 @@ npm test
 ```
 
 **要点：**
+
 - 避免被动语态（"被用来" → "用于"）
 - 避免冗余代词（"你想要" → 直接说）
 - 避免直译英文句式
@@ -366,6 +372,7 @@ npm test
 ```
 
 **要点：**
+
 - 长句拆成短句
 - 把定语从句改成并列句
 - 一句话只说一件事

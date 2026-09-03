@@ -40,6 +40,10 @@ abstract class BaseFragment(@LayoutRes layoutID: Int) : Fragment(layoutID) {
             }
         }
         onFragmentCreated(view, savedInstanceState)
+        // 首次创建也要应用一次顶栏配置：TOP_BAR_CHANGED 只在配置/主题变更时发送，
+        // 不应用的话 TitleBar 子视图（TabLayout/SearchView）会停留在 XML 主题默认色，
+        // 顶栏背景较浅时出现白色文字看不清的问题
+        view.findViewById<TitleBar>(R.id.title_bar)?.applyTopBarConfig()
     }
 
     abstract fun onFragmentCreated(view: View, savedInstanceState: Bundle?)

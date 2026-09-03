@@ -7,7 +7,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -20,11 +19,13 @@ import androidx.compose.ui.unit.sp
 import io.legado.app.R
 import io.legado.app.ui.theme.pageTopBarBackground
 import io.legado.app.ui.theme.pageTopBarColors
+import io.legado.app.ui.widget.components.AppScaffold
 
 /**
  * 配置管理通用 Scaffold。
  *
  * 封装了统一的 TopAppBar（含返回按钮、标题、多选/普通模式 actions）和可选的底部多选操作栏。
+ * 底层复用 [AppScaffold]，与页面级界面共用同一套 Scaffold 配置，避免两处配置漂移。
  *
  * @param title 标题文本
  * @param isMultiSelectMode 是否处于多选模式
@@ -48,10 +49,8 @@ fun ConfigManageScaffold(
 ) {
     val topBarColors = pageTopBarColors()
 
-    Scaffold(
+    AppScaffold(
         modifier = modifier,
-        containerColor = Color.Transparent,
-        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 modifier = Modifier.pageTopBarBackground(topBarColors),

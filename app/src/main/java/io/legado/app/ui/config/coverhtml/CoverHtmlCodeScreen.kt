@@ -37,6 +37,7 @@ import io.legado.app.model.BookCover
 import io.legado.app.ui.widget.code.CodeView
 import io.legado.app.ui.widget.code.addHtmlPattern
 import io.legado.app.ui.widget.code.addJsPattern
+import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
 import io.legado.app.ui.widget.image.CoverImageView
 import io.legado.app.utils.postEvent
@@ -211,8 +212,7 @@ fun CoverHtmlCodeScreen(
     //endregion
     
     //region UI布局
-    Scaffold(
-        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+    AppScaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -246,6 +246,7 @@ fun CoverHtmlCodeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .navigationBarsPadding()
         ) {
             // 可滚动内容区域
             Column(

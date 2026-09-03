@@ -21,14 +21,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,6 +38,8 @@ import io.legado.app.ui.book.storage.components.ClearConfirmDialog
 import io.legado.app.ui.theme.PageDimens
 import io.legado.app.ui.theme.pageCardContainerColor
 import io.legado.app.ui.widget.components.AppPageTopBar
+import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 
 // UI层
 // 4. StorageManageScreen.kt
@@ -98,8 +98,7 @@ fun StorageManageScreen(
         null -> Unit
     }
     
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             // 统一顶栏（theme-styles.md §14.2）
             AppPageTopBar(
@@ -174,7 +173,12 @@ fun StorageManageScreen(
             is StorageUiState.Idle -> {
                 LazyColumn(
                     modifier = Modifier.padding(paddingValues),
-                    contentPadding = PaddingValues(PageDimens.screenPadding),
+                    contentPadding = PaddingValues(
+                        top = PageDimens.screenPadding,
+                        bottom = PageDimens.screenPadding + navigationBarBottomInset,
+                        start = PageDimens.screenPadding,
+                        end = PageDimens.screenPadding
+                    ),
                     verticalArrangement = Arrangement.spacedBy(PageDimens.cardSpacing)
                 ) {
                     item {
