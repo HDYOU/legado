@@ -118,7 +118,7 @@ Compose 规范拆分为 8 个文件，位于 `docs/project-rules/compose/`：
 
 ## 项目级规范（必读）
 
-项目级强制规范库位于 `docs/project-rules/`，索引与领域覆盖矩阵见 [`docs/project-rules/README.md`](docs/project-rules/README.md)。写代码前先按"什么时候必须读"对照索引，规范与实现冲突时以源码为准并回头修规范。
+项目级强制规范库位于 `docs/project-rules/`，索引与领域覆盖矩阵见 [`docs/project-rules/README.md`](docs/project-rules/README.md)。写代码前先按"什么时候必须读"对照索引；改动代码后主动回看相关规范是否需要同步更新（规范跟着代码走，pre-commit 的 help-doc-sync 钩子会拦截"改了受管代码却没改对应文档"的提交）；规范与实现冲突时以源码为准并回头修规范。
 
 - **协程**：本项目使用自研链式协程包装（`BaseViewModel.execute` → `help/coroutine/Coroutine`）。使用协程前必读 [`docs/project-rules/coroutine-rules.md`](docs/project-rules/coroutine-rules.md)，其中包含 `execute` 链的时序坑、Scope 规则、Flow 位置与反面示例。
 - **数据层（Repository）**：[`docs/project-rules/repository-rules.md`](docs/project-rules/repository-rules.md)，新增数据访问逻辑必须遵循。
