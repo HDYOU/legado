@@ -70,6 +70,7 @@ import io.legado.app.ui.widget.text.BadgeView
 import io.legado.app.utils.isCreated
 import io.legado.app.utils.navigationBarHeight
 import io.legado.app.utils.observeEvent
+import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.setEdgeEffectColor
 import io.legado.app.utils.setOnApplyWindowInsetsListenerCompat
 import io.legado.app.utils.showDialogFragment
@@ -1275,34 +1276,50 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
 
     /**
      * 读取导入口令
+     * 受设置项 askClipboardImport 控制：
+     * - 开启：每次读取剪贴板前都弹窗询问是否允许访问剪贴板，用户允许后才读取并解析 #L: 口令
+     * - 关闭：彻底不读取剪贴板（禁用自动导入口令功能）
      */
     fun readShibboleth(delay: Long) {
         binding.viewPagerMain.postDelayed(delay) {
-            try {
-                val text = this@MainActivity.getClipText()
-                if (text.isNullOrBlank()) return@postDelayed
-                if ("#L:" in text) {
-                    this@MainActivity.clearClip() //清理一下防重复
-                    val (url, type, customWord) = StringUtils.unShibboleth(text)
-                    when (type) {
-                        StringUtils.BOOK_SOURCE ->
-                            showDialogFragment(ImportBookSourceDialog(url))
-                        StringUtils.RSS_SOURCE ->
-                            showDialogFragment(ImportRssSourceDialog(url))
-                        StringUtils.DICT_RULE ->
-                            showDialogFragment(ImportDictRuleDialog(url))
-                        StringUtils.REPLACE_RULE ->
-                            showDialogFragment(ImportReplaceRuleDialog(url))
-                        StringUtils.TOC_RULE ->
-                            showDialogFragment(ImportTxtTocRuleDialog(url))
-                        StringUtils.TTS_RULE ->
-                            showDialogFragment(ImportHttpTtsDialog(url))
-                        else -> showDialogFragment(ImportHttpTtsDialog(url))
-                    }
-                }
-            } catch (e: Exception) {
-                e.printOnDebug()
+            if (!getPrefBoolean(PreferKey.askClipboardImport, true)) {
+                return@postDelayed
             }
+            alert(R.string.ask_clipboard_import, R.string.ask_clipboard_import_summary) {
+                okButton { proceedReadShibboleth() }
+                cancelButton()
+            }
+        }
+    }
+
+    /**
+     * 在用户授权访问剪贴板后，读取并解析剪贴板中的 #L: 导入口令
+     */
+    private fun proceedReadShibboleth() {
+        try {
+            val text = this@MainActivity.getClipText()
+            if (text.isNullOrBlank()) return
+            if ("#L:" in text) {
+                this@MainActivity.clearClip() //清理一下防重复
+                val (url, type, customWord) = StringUtils.unShibboleth(text)
+                when (type) {
+                    StringUtils.BOOK_SOURCE ->
+                        showDialogFragment(ImportBookSourceDialog(url))
+                    StringUtils.RSS_SOURCE ->
+                        showDialogFragment(ImportRssSourceDialog(url))
+                    StringUtils.DICT_RULE ->
+                        showDialogFragment(ImportDictRuleDialog(url))
+                    StringUtils.REPLACE_RULE ->
+                        showDialogFragment(ImportReplaceRuleDialog(url))
+                    StringUtils.TOC_RULE ->
+                        showDialogFragment(ImportTxtTocRuleDialog(url))
+                    StringUtils.TTS_RULE ->
+                        showDialogFragment(ImportHttpTtsDialog(url))
+                    else -> showDialogFragment(ImportHttpTtsDialog(url))
+                }
+            }
+        } catch (e: Exception) {
+            e.printOnDebug()
         }
     }
 

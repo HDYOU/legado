@@ -765,6 +765,8 @@
     <string name="debug_log_floating_ball_summary">启用后在应用任意页面显示调试日志悬浮球</string>
     <string name="copy_crash_log_title">复制崩溃日志</string>
     <string name="copy_crash_log_summary">崩溃后重新进入应用时自动复制日志到剪贴板</string>
+    <string name="ask_clipboard_import">导入时询问剪贴板</string>
+    <string name="ask_clipboard_import_summary">开启后，每次从剪贴板读取导入口令前都会询问是否允许。可在「其他设置」中开启或关闭。</string>
     <string name="md_link_inner_browser">使用内置浏览器打开</string>
     <string name="md_link_inner_browser_summary">Markdown文件中的链接默认使用内置浏览器打开</string>
     <string name="verbose_update_log">详细更新日志</string>

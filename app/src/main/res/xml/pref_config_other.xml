@@ -118,6 +118,14 @@
             android:title="@string/copy_crash_log_title"
             app:iconSpaceReserved="false" />
 
+        <!-- 导入时询问剪贴板访问：默认开启，每次从剪贴板读取导入口令前都询问是否允许 -->
+        <io.legado.app.lib.prefs.SwitchPreference
+            android:defaultValue="true"
+            android:key="askClipboardImport"
+            android:summary="@string/ask_clipboard_import_summary"
+            android:title="@string/ask_clipboard_import"
+            app:iconSpaceReserved="false" />
+
         <!-- MD链接用内置浏览器打开：默认关闭 -->
         <io.legado.app.lib.prefs.SwitchPreference
             android:defaultValue="false"
