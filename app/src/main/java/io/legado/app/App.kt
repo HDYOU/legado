@@ -84,6 +84,7 @@ class App : Application() {
         oldConfig = Configuration(resources.configuration)
         applyDayNightInit(this)
         LauncherIconHelp.fixLauncherIconPref()
+        AppConfig.migrateClipboardImportMode()
         registerActivityLifecycleCallbacks(LifecycleHelp)
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(AppConfig)
         Coroutine.async {

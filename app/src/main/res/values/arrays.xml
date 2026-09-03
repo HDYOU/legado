@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+	<string-array name="clipboard_import_mode_entries">
+		<item>每次询问</item>
+		<item>始终自动导入</item>
+		<item>从不读取</item>
+	</string-array>
+
+	<string-array name="clipboard_import_mode_values">
+		<item>ask</item>
+		<item>always</item>
+		<item>never</item>
+	</string-array>
+
 	<string-array name="server_type">
 		<item>WEBDAV</item>
 	</string-array>

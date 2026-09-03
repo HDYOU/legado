@@ -1320,8 +1320,12 @@
     <string name="contributors_summary_sigma">gedoor、Luoyacheng、Horis、Xwite、GEd520、youfengknight 等，詳情請在 GitHub 中查看</string>
     <string name="copy_crash_log_summary">發生崩潰時複製崩潰日誌</string>
     <string name="copy_crash_log_title">複製崩潰日誌</string>
-    <string name="ask_clipboard_import">匯入時詢問剪貼簿</string>
-    <string name="ask_clipboard_import_summary">啟用後，每次從剪貼簿讀取匯入口令前都會詢問是否允許。可在「其他設定」中開啟或關閉。</string>
+    <string name="clipboard_import_mode">剪貼簿匯入口令</string>
+    <string name="clipboard_import_mode_summary">從其他應用進入主介面時，若剪貼簿中存在匯入口令的處理方式。</string>
+    <string name="clipboard_import_confirm">偵測到匯入口令</string>
+    <string name="clipboard_import_confirm_summary">剪貼簿中存在匯入口令，是否立即匯入？</string>
+    <string name="clipboard_import_remember">記住我的選擇</string>
+    <string name="clipboard_import_auto_toast">已自動讀取剪貼簿中的匯入口令</string>
     <string name="cover_html_code">封面 HTML 程式碼</string>
     <string name="cover_html_code_summary">自訂封面 HTML 程式碼</string>
     <string name="cover_html_enable">啟用封面 HTML</string>

@@ -21,8 +21,46 @@ object LifecycleHelp : Application.ActivityLifecycleCallbacks {
     private var appFinishedListener: (() -> Unit)? = null
     private var currentActivityRef: WeakReference<Activity>? = null
 
+    /**
+     * 处于 started 状态的 Activity 数量。
+     *
+     * 应用内 Activity 互相切换时，新 Activity 的 onStart 早于上一个 Activity 的 onStop，
+     * 计数不会归零；只有当整个 App 退到后台时才会归零。
+     * 因此「计数由 0 变 1」即可判定为 App 从外部进入前台。
+     */
+    private var startedActivityCount = 0
+
+    /**
+     * 最近一次进入前台是否来自 App 外部（冷启动、后台切回、外部应用跳入）。
+     * 由 [consumeEnteredFromExternal] 消费式读取，保证一次进入只被消费一次。
+     */
+    private var enteredFromExternal = false
+
     fun activitySize(): Int {
         return activities.size
+    }
+
+    /**
+     * 标记本次进入前台来自 App 外部。
+     *
+     * singleTask 的 Activity 在 App 已处于前台时收到外部 intent 只回调 onNewIntent，
+     * 不走 onStart，[startedActivityCount] 不会变化，需要由调用方显式标记。
+     */
+    @Synchronized
+    fun markEnteredFromExternal() {
+        enteredFromExternal = true
+    }
+
+    /**
+     * 消费「最近一次进入前台是否来自 App 外部」的标记，读取后清空。
+     *
+     * @return true 表示本次进入是从 App 外部（冷启动、后台切回、外部应用跳入）而来
+     */
+    @Synchronized
+    fun consumeEnteredFromExternal(): Boolean {
+        val value = enteredFromExternal
+        enteredFromExternal = false
+        return value
     }
 
     fun getCurrentActivity(): Activity? {
@@ -76,8 +114,13 @@ object LifecycleHelp : Application.ActivityLifecycleCallbacks {
         currentActivityRef = WeakReference(activity)
     }
 
+    @Synchronized
     override fun onActivityStarted(activity: Activity) {
         LogUtils.d(TAG, "${activity::class.simpleName} onStart")
+        if (startedActivityCount == 0) {
+            enteredFromExternal = true
+        }
+        startedActivityCount++
     }
 
     override fun onActivityDestroyed(activity: Activity) {
@@ -97,8 +140,10 @@ object LifecycleHelp : Application.ActivityLifecycleCallbacks {
         LogUtils.d(TAG, "${activity::class.simpleName} onSaveInstanceState")
     }
 
+    @Synchronized
     override fun onActivityStopped(activity: Activity) {
         LogUtils.d(TAG, "${activity::class.simpleName} onStop")
+        startedActivityCount = (startedActivityCount - 1).coerceAtLeast(0)
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
