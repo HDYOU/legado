@@ -68,7 +68,7 @@ setText() → mEditorTextWatcher.onTextChanged()
 - `app/src/main/java/io/legado/app/ui/book/source/edit/BookSourceEditAdapter.kt` — `bind()` 中设置 flag
 - `app/src/main/java/io/legado/app/ui/rss/source/edit/RssSourceEditAdapter.kt` — 同上
 
-**预期收益**：消除 bind 后 500ms 的 13 次全文正则匹配 + span 操作 + 13 次 requestLayout。每次高亮约 2~5ms（取决于文本长度），总计省 26~65ms。
+**预期收益**：消除 bind 后 500ms 的 13 次全文正则匹配 + span 操作 + 13 次 requestLayout。每次高亮约 2~~5ms（取决于文本长度），总计省 26~~65ms。
 
 ---
 
@@ -156,7 +156,7 @@ binding.recyclerView.recycledViewPool.setMaxRecycledViews(1, 10)
 - `app/src/main/java/io/legado/app/ui/book/source/edit/BookSourceEditActivity.kt` — `initView()`（line 431 附近）
 - `app/src/main/java/io/legado/app/ui/rss/source/edit/RssSourceEditActivity.kt` — `initView()`（line 345 附近）
 
-**预期收益**：省掉 RecyclerView 自身 measure；Tab 来回切换时避免反复 inflate XML + addSyntaxPattern（每次约 1~2ms × 13 = 13~26ms）。
+**预期收益**：省掉 RecyclerView 自身 measure；Tab 来回切换时避免反复 inflate XML + addSyntaxPattern（每次约 1~~2ms × 13 = 13~~26ms）。
 
 ---
 

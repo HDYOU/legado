@@ -10,10 +10,10 @@
 
 「页面无法点击和滑动，仅返回按钮可响应」在 Android 输入管线中有且仅有两类成因：
 
-| 成因 | 判定特征 | 与本现象吻合度 |
-|---|---|---|
-| **A. 透明/残留窗口层吞噬触摸** | 触摸被某不可见窗口消费，系统 BACK 仍可关闭该窗口 | ✅ 高度吻合 |
-| **B. 主线程永久阻塞（ANR）** | 所有输入（含 BACK）全部无响应 | ❌ 不吻合（BACK 可响应） |
+| 成因                           | 判定特征                                         | 与本现象吻合度           |
+| ------------------------------ | ------------------------------------------------ | ------------------------ |
+| **A. 透明/残留窗口层吞噬触摸** | 触摸被某不可见窗口消费，系统 BACK 仍可关闭该窗口 | ✅ 高度吻合              |
+| **B. 主线程永久阻塞（ANR）**   | 所有输入（含 BACK）全部无响应                    | ❌ 不吻合（BACK 可响应） |
 
 因此将排查焦点收敛到：**什么代码路径会导致旧窗口（DecorView）未正确摘除、新窗口未获得输入焦点**。围绕该问题，对用户提出的五类假设逐一取证。
 
@@ -207,12 +207,14 @@ override fun recreate() {
 ## 7. 验证方式与后续建议
 
 ### 验证方式
+
 1. 真机/模拟器覆盖：日夜主题互切、同模式主题互切、跟随系统模式（系统翻转日夜）；
 2. 重点机型：MIUI/HyperOS、EMUI、ColorOS、Android 8~14（还原「部分机型」场景）；
 3. 观察点：应用主题后页面应只闪烁一次即完成主题切换，点击/滑动立即恢复；
 4. 回归：编辑当前主题保存后重建、多选导出/置顶/删除、导入主题等功能。
 
 ### 后续建议（本次未改动，避免扩大共享函数影响面）
+
 1. **背景模糊降级优化**：`ThemeConfig.getBgImage` 中 `Toolkit.blur` 可改为「小尺寸模糊后放大」，显著降低后台模糊耗时与内存（当前已不阻塞主线程，仅影响背景呈现延迟）；
 2. **其余主线程轻量重活**：`clearBg()`（文件遍历删除，进程内一次）与 `BookCover.upDefaultCover()`（600×900 解码）为瞬时项，可按需下沉协程；
 3. **其他 Activity 的双重建**：`ConfigActivity`/`MainActivity` 观察 RECREATE 事件的同时仍会被 AppCompat 重建，存在同类竞态风险，可复用 5.1/5.4 模式治理；
@@ -254,10 +256,10 @@ override fun recreate() {
 
 ## 9. 双层根因总结与修复对照
 
-| 层 | 根因 | 修复 |
-|---|---|---|
-| 第一层 | 重建风暴：AppCompat 夜间模式自动重建 + RECREATE 事件同步派发 + 通道显式重建 + 配置变化二次级联 → 竞态双重建（部分 ROM 窗口过渡中断） | 清单 `configChanges="uiMode"` + `recreate()` 合并守卫 + 主题模式缓存同步 |
-| 第二层 | 主线程同步全屏解码 + `Toolkit.blur` 高斯模糊（背景图主题触发，机型/主题相关） | `upBackgroundImage()` 移出主线程（`Dispatchers.Default` + 主线程回设 + 生命周期守卫） |
+| 层     | 根因                                                                                                                                 | 修复                                                                                  |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| 第一层 | 重建风暴：AppCompat 夜间模式自动重建 + RECREATE 事件同步派发 + 通道显式重建 + 配置变化二次级联 → 竞态双重建（部分 ROM 窗口过渡中断） | 清单 `configChanges="uiMode"` + `recreate()` 合并守卫 + 主题模式缓存同步              |
+| 第二层 | 主线程同步全屏解码 + `Toolkit.blur` 高斯模糊（背景图主题触发，机型/主题相关）                                                        | `upBackgroundImage()` 移出主线程（`Dispatchers.Default` + 主线程回设 + 生命周期守卫） |
 
 两轮修复相互独立、均需保留：第一层消除重建竞态与异常重建次数；第二层消除应用主题时的主线程长阻塞。修复后：应用主题 → 页面**立即**重建为正确主题、背景图异步呈现、交互即时恢复。
 
@@ -293,14 +295,14 @@ override fun recreate() {
 
 ### 11.1 用户实测数据（关键判据）
 
-| 项 | 结果 | 推论 |
-|---|---|---|
-| 机型 / 系统 | Redmi Note 12 Turbo / Android 15（HyperOS） | OEM ROM，窗口过渡行为与 AOSP 有差异 |
-| 已装修复 | 前三轮全部修复 | 重建竞态、背景模糊、ConfigActivity 均已修复，卡死仍在 |
-| 卡死性质 | **永久持续** | 排除主线程长阻塞（会随计算结束而恢复）；指向窗口/输入通道级损坏 |
-| 返回键 | 系统返回 + **左上角返回箭头均可用** | 同一 Compose 窗口内返回箭头可点击 → **窗口输入通道存活、Compose 命中测试局部正常** |
-| 粘贴按钮（右上角，同一 TopAppBar） | **不可用** | 与返回箭头同层，却失效 → 命中测试区域异常或被局部遮挡 |
-| 内容区 | 不可点击/滑动 | 同上 |
+| 项                                 | 结果                                        | 推论                                                                               |
+| ---------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| 机型 / 系统                        | Redmi Note 12 Turbo / Android 15（HyperOS） | OEM ROM，窗口过渡行为与 AOSP 有差异                                                |
+| 已装修复                           | 前三轮全部修复                              | 重建竞态、背景模糊、ConfigActivity 均已修复，卡死仍在                              |
+| 卡死性质                           | **永久持续**                                | 排除主线程长阻塞（会随计算结束而恢复）；指向窗口/输入通道级损坏                    |
+| 返回键                             | 系统返回 + **左上角返回箭头均可用**         | 同一 Compose 窗口内返回箭头可点击 → **窗口输入通道存活、Compose 命中测试局部正常** |
+| 粘贴按钮（右上角，同一 TopAppBar） | **不可用**                                  | 与返回箭头同层，却失效 → 命中测试区域异常或被局部遮挡                              |
+| 内容区                             | 不可点击/滑动                               | 同上                                                                               |
 
 **结论**：主线程未死锁（否则返回箭头也不可能响应）；问题在**窗口层**——单次应用主题使主题页、MainActivity、ConfigActivity 在同一主线程内**并发重建 3 个窗口**，在 HyperOS/Android 15 上损坏了窗口/输入状态，导致前台页面**局部输入失效**（左上可点、其余区域命中异常）。
 
@@ -315,6 +317,7 @@ override fun recreate() {
 ### 11.3 决定性验证：看门狗堆栈文件
 
 新构建内置卡死看门狗（第 10.2 节）。请复现卡死后检查：
+
 - `filesDir/theme_freeze_stack.txt` 与 logcat（Tag `ThemeFreeze`）；
 - **若文件存在** → 主线程确实被阻塞，把堆栈内容发来即可精确定位；
 - **若文件不存在** → 确认主线程空闲、问题在窗口层 → 本轮「延后重建」即为对症修复方向。
@@ -377,17 +380,17 @@ override fun recreate() {
 
 ## 附：修改文件清单
 
-| 文件 | 修改 |
-|---|---|
-| `app/src/main/AndroidManifest.xml` | ThemeManageActivity 增加 `android:configChanges="uiMode"` |
-| `app/src/main/java/io/legado/app/help/config/AppConfig.kt` | `isNightTheme` setter 同步刷新 `themeMode`/`isEInkMode` 缓存 |
-| `app/src/main/java/io/legado/app/base/BaseComposeActivity.kt` | 新增 `recreate()` 合并守卫 |
-| `app/src/main/java/io/legado/app/ui/config/theme/manage/ThemeManageActivity.kt` | 新增 `onConfigurationChanged` → `recreate()` |
-| `app/src/main/java/io/legado/app/base/BaseActivity.kt` | `upBackgroundImage()` 解码+模糊移出主线程（`Dispatchers.Default` + 主线程回设 + 生命周期守卫） |
-| `app/src/main/AndroidManifest.xml` | ConfigActivity 增加 `android:configChanges="uiMode"`（消除其日夜切换双重建） |
-| `app/src/main/java/io/legado/app/base/BaseComposeActivity.kt` | 新增卡死看门狗：主线程阻塞超 4s 时 dump 主线程堆栈至 logcat 与 `filesDir/theme_freeze_stack.txt` |
-| `app/src/main/java/io/legado/app/ui/config/ConfigActivity.kt` | RECREATE 重建延后到 onResume（后台不立即重建，避免并发窗口重建） |
-| `app/src/main/java/io/legado/app/ui/main/MainActivity.kt` | 同上（保留 onResume 背景刷新回退） |
-| `app/src/main/java/io/legado/app/App.kt` | `onConfigurationChanged` 断开反馈环：不再重复 `setDefaultNightMode`，只刷新主题+通知重建 |
-| `app/src/main/java/io/legado/app/help/config/ThemeConfig.kt` | 新增 `notifyRecreate()` 防抖广播（500→1500ms）；`applyDayNight` 改用它 |
-| `app/src/main/java/io/legado/app/ui/config/theme/legacy/ThemeConfigFragment.kt` | `recreateActivities()` 改用 `ThemeConfig.notifyRecreate()`（消除主题链路直接广播点） |
+| 文件                                                                            | 修改                                                                                             |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `app/src/main/AndroidManifest.xml`                                              | ThemeManageActivity 增加 `android:configChanges="uiMode"`                                        |
+| `app/src/main/java/io/legado/app/help/config/AppConfig.kt`                      | `isNightTheme` setter 同步刷新 `themeMode`/`isEInkMode` 缓存                                     |
+| `app/src/main/java/io/legado/app/base/BaseComposeActivity.kt`                   | 新增 `recreate()` 合并守卫                                                                       |
+| `app/src/main/java/io/legado/app/ui/config/theme/manage/ThemeManageActivity.kt` | 新增 `onConfigurationChanged` → `recreate()`                                                     |
+| `app/src/main/java/io/legado/app/base/BaseActivity.kt`                          | `upBackgroundImage()` 解码+模糊移出主线程（`Dispatchers.Default` + 主线程回设 + 生命周期守卫）   |
+| `app/src/main/AndroidManifest.xml`                                              | ConfigActivity 增加 `android:configChanges="uiMode"`（消除其日夜切换双重建）                     |
+| `app/src/main/java/io/legado/app/base/BaseComposeActivity.kt`                   | 新增卡死看门狗：主线程阻塞超 4s 时 dump 主线程堆栈至 logcat 与 `filesDir/theme_freeze_stack.txt` |
+| `app/src/main/java/io/legado/app/ui/config/ConfigActivity.kt`                   | RECREATE 重建延后到 onResume（后台不立即重建，避免并发窗口重建）                                 |
+| `app/src/main/java/io/legado/app/ui/main/MainActivity.kt`                       | 同上（保留 onResume 背景刷新回退）                                                               |
+| `app/src/main/java/io/legado/app/App.kt`                                        | `onConfigurationChanged` 断开反馈环：不再重复 `setDefaultNightMode`，只刷新主题+通知重建         |
+| `app/src/main/java/io/legado/app/help/config/ThemeConfig.kt`                    | 新增 `notifyRecreate()` 防抖广播（500→1500ms）；`applyDayNight` 改用它                           |
+| `app/src/main/java/io/legado/app/ui/config/theme/legacy/ThemeConfigFragment.kt` | `recreateActivities()` 改用 `ThemeConfig.notifyRecreate()`（消除主题链路直接广播点）             |

@@ -10,19 +10,19 @@
 
 `test.yml` 的 `build` 任务使用 matrix strategy，一次构建 4 个变体：
 
-| 变体 | Gradle 任务 | 说明 |
-|------|------------|------|
-| release | `assembleAppMaxRelease` | 测试版 |
-| releaseS | `assembleAppSRelease` | 共存版 |
-| releaseLegacy | `assembleAppLegacyRelease` | 兼容版 |
-| debug | `assembleAppMaxDebug` | Debug 调试包 |
+| 变体          | Gradle 任务                | 说明         |
+| ------------- | -------------------------- | ------------ |
+| release       | `assembleAppMaxRelease`    | 测试版       |
+| releaseS      | `assembleAppSRelease`      | 共存版       |
+| releaseLegacy | `assembleAppLegacyRelease` | 兼容版       |
+| debug         | `assembleAppMaxDebug`      | Debug 调试包 |
 
 `release.yml` 的 `build` 任务使用 matrix，一次构建 3 个产品：
 
-| 产品 | 说明 |
-|------|------|
-| appS | 共存版 |
-| appMax | 测试版 |
+| 产品      | 说明   |
+| --------- | ------ |
+| appS      | 共存版 |
+| appMax    | 测试版 |
 | appLegacy | 兼容版 |
 
 ### 1.2 问题：默认全部并行
@@ -42,7 +42,7 @@ GitHub Actions 的 matrix strategy 默认不设 `max-parallel`，所有组合全
 strategy:
   matrix: ...
   fail-fast: false
-  max-parallel: 2   # ← 新增
+  max-parallel: 2 # ← 新增
 ```
 
 ### 1.4 为什么是 2 而不是 4
@@ -86,13 +86,13 @@ Debug 包默认不开启（`minifyEnabled = false`）。
 
 ### 2.2 R8 的能力
 
-| 能力 | 说明 |
-|------|------|
-| 代码压缩 | 剔除从未调用的类/方法/字段 |
-| 代码优化 | 字节码重写，减少分配和虚方法调用 |
-| 引用重定向 | 短链化包名，减小字符串常量池 |
-| 资源压缩 | 剔除从未引用的资源（图标、字符串等） |
-| 字节码重写 | interface 调用 → 直接调用 |
+| 能力       | 说明                                 |
+| ---------- | ------------------------------------ |
+| 代码压缩   | 剔除从未调用的类/方法/字段           |
+| 代码优化   | 字节码重写，减少分配和虚方法调用     |
+| 引用重定向 | 短链化包名，减小字符串常量池         |
+| 资源压缩   | 剔除从未引用的资源（图标、字符串等） |
+| 字节码重写 | interface 调用 → 直接调用            |
 
 Release 包经 R8 后，APK 体积通常减少 30%~50%。
 

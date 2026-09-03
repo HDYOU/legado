@@ -125,6 +125,17 @@ Compose 规范拆分为 8 个文件，位于 `docs/project-rules/compose/`：
 - **API 兼容**：[`docs/project-rules/api-compat-rules.md`](docs/project-rules/api-compat-rules.md)。调用高于 minSdk 23 的 API、引入新依赖、发版前必读（SDK 分支写法、desugaring 边界、16KB 对齐等 targetSdk 37 红线）。
 - **事件总线**：[`docs/project-rules/live-event-bus-rules.md`](docs/project-rules/live-event-bus-rules.md)。新增跨组件事件、在 LiveEventBus 与 Compose `Channel<Event>` 之间选型时必读。
 
+### 计划/方案文档的收尾
+
+`docs/` 根目录只放当前有效的文档。任务收尾（实现 + 验证 + code-review + 提交）时，同一批处理本次产生的方案文档，不留悬空计划：
+
+- **一次性方案 / 计划 / 根因分析**（文件名含「方案」「计划」「分析」「评估」）：实现落地后 `git mv` 到 `docs/archive/`，沿用原文件名，不加日期前缀。
+- **结论已沉淀进代码和规范**的：直接删除，避免同一事实两处维护、日后文档与代码不同步。
+- **长期有效的约定 / checklist**：下沉到 `docs/project-rules/`，并在 `docs/project-rules/README.md` 索引登记。
+- **长期有效的架构说明**：保留在 `docs/`，但需在文件开头写明适用范围与是否仍然有效。
+
+判断依据：下次有人问"这块怎么做的"时还会不会来读这份文档——会，就保留或下沉成规范；不会，就归档或删除。
+
 ## Coding Conventions
 
 - Kotlin 代码风格遵循 Google Android Style Guide

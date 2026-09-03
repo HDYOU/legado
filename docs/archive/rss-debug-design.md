@@ -3,6 +3,7 @@
 ## 一、设计目标
 
 让订阅源调试具备与书源调试同等的能力，能够清晰展示：
+
 1. 规则执行的完整路径和嵌套关系
 2. 每一步的输入输出数据
 3. JS 执行环境状态
@@ -317,14 +318,14 @@ fun NetworkRequestPanel(
 
 ### 6.2 差异处理
 
-| 功能 | 书源 | 订阅源 |
-|------|------|--------|
-| 搜索规则 | ruleSearch | - |
-| 发现规则 | ruleExplore | sortUrl |
-| 目录规则 | ruleToc | - |
-| 正文规则 | ruleContent | ruleContent |
-| 列表规则 | - | ruleArticles |
-| 下一页 | ruleNextUrl | ruleNextPage |
+| 功能     | 书源        | 订阅源       |
+| -------- | ----------- | ------------ |
+| 搜索规则 | ruleSearch  | -            |
+| 发现规则 | ruleExplore | sortUrl      |
+| 目录规则 | ruleToc     | -            |
+| 正文规则 | ruleContent | ruleContent  |
+| 列表规则 | -           | ruleArticles |
+| 下一页   | ruleNextUrl | ruleNextPage |
 
 ## 七、性能考虑
 
@@ -338,6 +339,7 @@ fun NetworkRequestPanel(
 ### 场景 1: 列表规则调试
 
 用户调试列表规则 `@css:.article-list li`，期望看到：
+
 1. CSS 选择器匹配了多少元素
 2. 每个元素的具体内容
 3. 匹配失败时的原因（选择器错误/页面结构变化）
@@ -345,6 +347,7 @@ fun NetworkRequestPanel(
 ### 场景 2: JS 规则调试
 
 用户调试 JS 规则 `{{result.replace(/广告/g, '')}}`，期望看到：
+
 1. JS 执行前的 result 值
 2. JS 执行后的返回值
 3. JS 执行环境中的所有变量
@@ -353,6 +356,7 @@ fun NetworkRequestPanel(
 ### 场景 3: 网络问题排查
 
 用户遇到网络请求失败，期望看到：
+
 1. 完整的请求 URL 和参数
 2. 请求头和 Cookie
 3. 响应状态码和响应头

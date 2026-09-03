@@ -8,12 +8,12 @@
 
 ## 涉及文件总览
 
-| 界面 | Screen | ViewModel | Activity |
-|------|--------|-----------|----------|
-| 下载管理 | `ui/download/DownloadManageScreen.kt` | `ui/download/DownloadManageViewModel.kt` | `ui/download/DownloadManageActivity.kt` |
-| 文件管理 | `ui/file/FileManageScreen.kt` | `ui/file/FileManageViewModel.kt` | `ui/file/FileManageActivity.kt` |
-| 存储管理 | `ui/book/storage/StorageManageScreen.kt` + `ui/book/storage/components/` | `ui/book/storage/StorageManageViewModel.kt` | `ui/book/storage/StorageManageActivity.kt` |
-| 书源回收站 | `ui/source/recycle/SourceRecycleBinScreen.kt` | `ui/source/recycle/SourceRecycleBinViewModel.kt` | `ui/source/recycle/SourceRecycleBinActivity.kt` |
+| 界面       | Screen                                                                   | ViewModel                                        | Activity                                        |
+| ---------- | ------------------------------------------------------------------------ | ------------------------------------------------ | ----------------------------------------------- |
+| 下载管理   | `ui/download/DownloadManageScreen.kt`                                    | `ui/download/DownloadManageViewModel.kt`         | `ui/download/DownloadManageActivity.kt`         |
+| 文件管理   | `ui/file/FileManageScreen.kt`                                            | `ui/file/FileManageViewModel.kt`                 | `ui/file/FileManageActivity.kt`                 |
+| 存储管理   | `ui/book/storage/StorageManageScreen.kt` + `ui/book/storage/components/` | `ui/book/storage/StorageManageViewModel.kt`      | `ui/book/storage/StorageManageActivity.kt`      |
+| 书源回收站 | `ui/source/recycle/SourceRecycleBinScreen.kt`                            | `ui/source/recycle/SourceRecycleBinViewModel.kt` | `ui/source/recycle/SourceRecycleBinActivity.kt` |
 
 ---
 
@@ -24,6 +24,7 @@
 现状：4 个 Screen 全部使用裸 `collectAsState()`（文件管理还在 collect LiveData）。
 
 修法：
+
 - 统一替换为 `collectAsStateWithLifecycle()`（`androidx.lifecycle.compose`，`lifecycle-runtime-compose` 依赖项目已有，`HomepageScreen`/`CheckSourceScreen` 为合规模板）。
 - 文件管理的 `filesLiveData` 顺带把 ViewModel 的 LiveData 改为 `StateFlow`，一并收敛。
 
@@ -32,6 +33,7 @@
 现状：4 个界面的确认弹窗显隐全部用 `var showXxxDialog by remember { mutableStateOf(...) }` 本地持有；回收站一个 Screen 里有 13 个本地 `mutableStateOf`（规范上限 3 个）。
 
 修法（每页统一）：
+
 1. 在各自 `UiState` 中新增 `val dialog: XxxDialogState? = null` 字段，Dialog 状态用 `sealed interface` 建模，例如：
 
    ```kotlin
@@ -42,6 +44,7 @@
        data object ClearAll : RecycleBinDialogState
    }
    ```
+
 2. Screen 用 `when (state.dialog)` 条件渲染，确认后调 ViewModel 并清状态。
 3. 按 §4.5 显式注册 `OnBackPressedCallback`：有 Dialog 时返回键关 Dialog，无 Dialog 时走正常返回。
 4. 菜单展开态（`DropdownMenu expanded`）属于纯瞬态，允许保留本地 `remember`，但数量超 3 个时随其余状态一起抽 State Holder。
@@ -51,6 +54,7 @@
 现状：下载管理整屏硬编码（标题、统计行、空态、菜单、`getStatusText()`）；存储管理标题/按钮/清理中文案硬编码；文件管理返回按钮描述与删除确认文案硬编码；回收站已基本资源化（仅复核）。
 
 修法：
+
 - 全部改 `stringResource(R.string.xxx)`，新增资源命名按 §7.5 推荐的分层前缀：`download_manage_title`、`download_empty_all_title`、`storage_clearing`、`file_delete_confirm` 等，同步补 `values/strings.xml`（英文）与 `values-zh/strings.xml`。
 - 带参文案用格式化串：`"正在清理 %1$s…"`、`"确定要删除 \"%1$s\" 吗？"`。
 - 下载管理 `DownloadTab` enum 的 `label: String` 改为 `labelRes: @StringRes Int`（禁止在数据层持有展示文案）。
@@ -66,6 +70,7 @@
 现状：4 个界面标题统一裸写 `fontSize = 20.sp`；`16.dp`/`12.dp`/`8.dp` 散落。
 
 修法：
+
 - 标题直接用 `MaterialTheme.typography.titleLarge`（不再 `.copy(fontSize = 20.sp)`）。
 - `Dimensions.kt` 目标态文件尚未建立：按 §7.2 落地前策略，先在 `ui/theme/` 下就近定义本批页面共用的尺寸常量（如 `PageDimens.screenPadding`、`PageDimens.cardSpacing`），禁止继续散落；`Dimensions.kt` 正式建立时再迁移。
 
@@ -78,6 +83,7 @@
 ### C7. Screen 文件内堆 `private fun` 组件、单文件超 400 行【人工，structure.md §1 / §11.1】
 
 修法：各 Feature 建 `components/` 子包归集私有组件（存储管理已有该结构，作为模板）：
+
 - `ui/download/components/DownloadTaskCard.kt`（连同 `StatusIcon`、状态文案/颜色映射）
 - `ui/file/components/`（`PathBreadcrumb`、`FileListItem`、`FileSearchBar`）
 - `ui/source/recycle/components/`（`SourceRecycleBinItem`、`SourceRecycleDropdownMenu(+Item)`）
@@ -103,6 +109,7 @@
 现状：`DownloadManageViewModel.openFile(context)`/`openFolder(context)`/`copyPath(context)` 直接调 `startActivity`、`ClipboardManager`、`toastOnUi`；Screen 把 `LocalContext` 传给 ViewModel。
 
 修法：
+
 1. ViewModel 定义事件流（§4.1 缓冲档位）：
 
    ```kotlin
@@ -114,6 +121,7 @@
    }
    // 导航/打开类关键事件：Channel(UNLIMITED)；Toast：Channel(CONFLATED) 并注释丢事件语义
    ```
+
 2. `openFile`/`openFolder`/`copyPath` 改为只做数据准备 + `trySend` 事件；`retryDownload(context, id)` 里的 context 依赖评估能否下沉到 `DownloadService`（若 `DownloadService.retryDownload` 必须要 context，则同样改为事件由 Activity 执行）。
 3. `DownloadManageActivity` 用 `repeatOnLifecycle(STARTED)` 收集事件并执行平台操作（§4.4）；Screen 不再接触 `LocalContext`。
 4. 事件发送失败（有界缓冲场景）按 §4.1 检查 `trySend` 返回值并打日志——本方案用 UNLIMITED/CONFLATED 天然规避。
@@ -123,6 +131,7 @@
 ### D3. 500ms 轮询
 
 现状：`startPolling()` 里 `while (true) { ...; delay(500) }`。数据轮询不属于 §7.6 动画条款，不算违规，但：
+
 - 页面不可见时轮询不停（费电）。修法：轮询协程挂在 `repeatOnLifecycle(STARTED)` 语义下——由 Screen 侧 `LaunchedEffect(Unit)` 触发 `viewModel.startPolling()`/离开自动取消，或 ViewModel 内监听 `ProcessLifecycleOwner`。选前者，实现更简单。
 - 长远可将 `DownloadState` 改为 `Flow` 推送（超出本次范围，记 TODO）。
 
@@ -135,6 +144,7 @@
 现状：`bitmapFromBytes()` 把 `FilePickerIcon` 的 PNG 字节数组解码成 `ImageBitmap`，`remember` 4 份图标。
 
 修法：
+
 - 图标是静态资源，直接替换为 Material Icons：文件夹 `Icons.Default.Folder`、文件 `Icons.Default.InsertDriveFile`、上级 `Icons.Default.SubdirectoryArrowLeft`（或 `ArrowUpward`）、面包屑箭头 `Icons.AutoMirrored.Filled.ChevronRight`， tint 走 `MaterialTheme.colorScheme`。
 - 删除 `bitmapFromBytes()` 与 `FilePickerIcon` 依赖；若视觉上必须保留原 PNG 风格，退路是放 `res/drawable` 用 `painterResource`，同样不允许手写 decode。
 
@@ -179,6 +189,7 @@
 ### R1. 13 个本地 `mutableStateOf` → State Holder【人工，§4.2 硬限 3 个】
 
 修法：
+
 - 7 个弹窗开关按 C2 收进 `UiState.dialog`（sealed）。
 - 选择态 `selectedIds`、搜索态 `showSearch`/`searchQuery`：`selectedIds` 提升到 ViewModel（批量操作本就需要 ViewModel 感知）；`searchQuery` 是用户输入，按 §4.2 用 `rememberSaveable` 保进程重建存活。
 - 菜单展开态 3 个保留本地 `remember`，合计不超 3 个。
@@ -205,13 +216,13 @@
 
 ## 六、实施顺序与里程碑
 
-| 阶段 | 内容 | 涉及界面 |
-|------|------|----------|
-| P1 行为正确性 | D1（ViewModel 去 Context）、S2（跳转下沉）、F1（去手写 decode）、S1/F2（补 key） | 下载、存储、文件 |
-| P2 机器项批量替换 | C1（collectAsStateWithLifecycle）、C3（stringResource）、C4（色值）、C5（.sp/dimens） | 全部 4 页 |
-| P3 状态结构 | C2（Dialog 进 UiState + 返回键拦截）、R1（State Holder）、R2/R3（事件化） | 全部 4 页 |
-| P4 结构拆分与无障碍 | C7（components/ 拆分）、C6（semantics）、F3（触控目标）、C9（AppPageTopBar） | 全部 4 页 |
-| P5 测试 | C8（4 个 ViewModelTest） | 全部 4 页 |
+| 阶段                | 内容                                                                                  | 涉及界面         |
+| ------------------- | ------------------------------------------------------------------------------------- | ---------------- |
+| P1 行为正确性       | D1（ViewModel 去 Context）、S2（跳转下沉）、F1（去手写 decode）、S1/F2（补 key）      | 下载、存储、文件 |
+| P2 机器项批量替换   | C1（collectAsStateWithLifecycle）、C3（stringResource）、C4（色值）、C5（.sp/dimens） | 全部 4 页        |
+| P3 状态结构         | C2（Dialog 进 UiState + 返回键拦截）、R1（State Holder）、R2/R3（事件化）             | 全部 4 页        |
+| P4 结构拆分与无障碍 | C7（components/ 拆分）、C6（semantics）、F3（触控目标）、C9（AppPageTopBar）          | 全部 4 页        |
+| P5 测试             | C8（4 个 ViewModelTest）                                                              | 全部 4 页        |
 
 每个阶段独立可提交，P1 完成后界面行为不变、只是架构归位；P2~P4 为纯重构。
 
