@@ -195,6 +195,25 @@ class FileManageViewModelTest {
     }
 
     @Test
+    fun `复制路径抛出当前目录的绝对路径`() = runTest(mainDispatcherRule.dispatcher) {
+        val viewModel = newViewModel()
+        advanceUntilIdle()
+
+        viewModel.copyCurrentPath()
+        viewModel.events.test {
+            assertEquals(FileManageEvent.CopyPath(rootDir.absolutePath), awaitItem())
+        }
+
+        viewModel.enterDir(subDir)
+        advanceUntilIdle()
+
+        viewModel.copyCurrentPath()
+        viewModel.events.test {
+            assertEquals(FileManageEvent.CopyPath(subDir.absolutePath), awaitItem())
+        }
+    }
+
+    @Test
     fun `外部路径跳转定位到文件所在目录`() = runTest(mainDispatcherRule.dispatcher) {
         val viewModel = newViewModel()
         advanceUntilIdle()

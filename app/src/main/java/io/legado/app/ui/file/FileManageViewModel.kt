@@ -25,11 +25,11 @@ data class FileManageUiState(
 
 /**
  * 文件管理一次性 UI 事件
- * 平台操作（FileProvider 打开文件、Toast）由 Activity 执行，ViewModel 只抛事件（state-events.md §4.1）
+ * 平台操作（FileProvider 打开文件、写剪贴板、Toast）由 Activity 执行，ViewModel 只抛事件（state-events.md §4.1）
  */
 sealed interface FileManageEvent {
     data class OpenFile(val file: File) : FileManageEvent
-    data class OpenWithChooser(val dir: File?) : FileManageEvent
+    data class CopyPath(val path: String) : FileManageEvent
     data class Toast(val message: String?) : FileManageEvent
 }
 
@@ -245,11 +245,13 @@ class FileManageViewModel(
     }
 
     /**
-     * 用系统选择器打开当前目录，让用户选择用哪个应用/文件管理器打开
-     * 平台操作（FileProvider + Chooser）由 Activity 执行（§4.1）
+     * 复制当前目录的绝对路径
+     * 剪贴板写入属于平台操作，由 Activity 执行（§4.1）
      */
-    fun openWithChooser() {
-        _events.trySend(FileManageEvent.OpenWithChooser(lastDir))
+    fun copyCurrentPath() {
+        // 外部存储不可用时 rootDoc 为 null，此时无路径可复制，静默忽略
+        val path = lastDir?.absolutePath ?: return
+        _events.trySend(FileManageEvent.CopyPath(path))
     }
 
     /**
