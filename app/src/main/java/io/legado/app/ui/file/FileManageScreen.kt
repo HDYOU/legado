@@ -128,16 +128,16 @@ fun FileManageScreen(
             } else {
                 FileList(
                     files = files,
-                    lastDir = viewModel.lastDir,
+                    currentDir = viewModel.currentDir,
                     onFileClick = { file ->
                         when {
-                            file == viewModel.lastDir -> viewModel.gotoLastDir()  // 点击 ".." 返回上级
+                            file == viewModel.currentDir -> viewModel.gotoParentDir()  // 点击 ".." 返回上级
                             file.isDirectory -> viewModel.enterDir(file)         // 进入文件夹
                             else -> viewModel.openFile(file)                     // 打开文件
                         }
                     },
                     onFileLongClick = { file ->
-                        if (file != viewModel.lastDir) {
+                        if (file != viewModel.currentDir) {
                             viewModel.requestDelete(file)
                         }
                     }
