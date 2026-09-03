@@ -7,7 +7,7 @@
 
 - 验证：`:app:compileAppMaxDebugKotlin` 通过
 - 人工回归：第 1-3 步已打包验证正常；第 4 步（调试工具 7 页）待回归
-- 口径偏差：滚动列表统一用 `Modifier.navigationBarsPadding()`，未采用计划里的 `contentPadding` 方案，因此内容不穿过导航条、底部有留白
+- 导航栏口径：滚动列表统一用 `LazyColumn`/`contentPadding` 底部补 `navigationBarBottomInset`（内容铺满、最后一项可滚上来完整可点）；整页 `verticalScroll` 列与固定控件仍用 `navigationBarsPadding()`。helper 见 `AppScaffold.kt`
 
 ## 背景
 

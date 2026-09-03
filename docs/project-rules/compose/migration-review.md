@@ -95,8 +95,9 @@ private fun ThemeAddBottomBar(...) { ... }
 
 **系统栏适配责任在内容侧**：`contentWindowInsets = 0` 只影响 content，与顶栏是否延伸到状态栏无关（顶栏由 `TopAppBar` 自身的 `windowInsets` 决定）。改用 `AppScaffold` 后必须补底部内边距：
 
-- 底部无固定控件：内容容器加 `Modifier.navigationBarsPadding()`
-- 底部有固定按钮 / 输入框：容器保持铺满，只给该控件加 `Modifier.navigationBarsPadding()`
+- 滚动列表（LazyColumn / LazyRow 等）：`contentPadding` 底部补导航条高度（用 `navigationBarBottomInset`，见 `AppScaffold.kt`），内容滚动时可从导航条下穿过（铺满），最后一项能滚上来完整可点
+- 整页可滚动列（Column + verticalScroll）：容器保持铺满，在内容末尾加 `Spacer(Modifier.navigationBarsPadding())`
+- 底部有固定控件（bottomBar / 固定按钮 / 输入框）：容器保持铺满，只给该控件加 `Modifier.navigationBarsPadding()`
 
 > 依据：`api-compat-rules.md` §5 Edge-to-Edge 强制（targetSdk 35+）。
 
