@@ -3,7 +3,7 @@
 > **生效范围**：`io.legado.app.ui` 包及以下所有代码
 > **本文件为原 `UI-ARCHITECTURE.md`（2026-08-19）拆分产物**：含原章节 §13、§14、§17，章节编号沿用原编号，跨文件引用按「文件名 §编号」格式书写。
 > 同目录全套：`structure.md`（§1/2/3/11/12）、`state-events.md`（§4/5/6）、`theme-styles.md`（§7）、`performance.md`（§8）、`navigation-preview.md`（§9/10）、`accessibility.md`（§15）、`testing.md`（§16）。
-> **最后更新**：2026-08-19
+> **最后更新**：2026-09-03
 
 ---
 
@@ -40,28 +40,28 @@ private fun ThemeAddBottomBar(...) { ... }
 
 ### 14.1 [机器] CI 硬卡（违规 = 构建红，不依赖 Reviewer 心情）
 
-| 规则 | 实现方式 |
-|------|--------|
-| 裸 `colorResource(R.color.xxx)`、硬编码 `Color(0xFF...)` | 自定义 lint 规则（白名单：`Color.Transparent` / 纯黑 / 纯白，见 `theme-styles.md` §7.1） |
-| Composable 体内裸魔法数字 `16.dp`、`12.dp`、`0.8f` | 自定义 lint 规则（标准动画参数豁免，见 `theme-styles.md` §7.2） |
-| Composable 的 `Modifier` 非第一参数 | Compose 官方 Lint Checks（`androidx.compose:compose-lint-checks` 依赖） |
-| `GlobalScope`、构造器/Factory 之外 `new Repository()` | Detekt `ForbiddenMethodCall` + 自定义规则（`new Repository` 需 AST 级检测） |
-| `collectAsState()` 替代 `collectAsStateWithLifecycle()` | 自定义 lint 规则 |
-| `Channel<Event>` 用 RENDEZVOUS / BUFFERED | 自定义 lint 规则（仅允许 UNLIMITED / CONFLATED，见 `state-events.md` §4.1） |
-| `Log.e` / `Log.w` 缺异常对象第三参数 | 自定义 lint 规则 |
-| Composable 内硬编码中文字符串（含 `contentDescription` 参数，见 `theme-styles.md` §7.5 / `accessibility.md` §15.1） | lint 硬编码字符串检测（白名单：Log、TODO、Preview） |
-| `tween` / `delay` 魔法数字时长不在三档（150/300/450）且未引用 `AnimationSpecs` 常量（`theme-styles.md` §7.6.1） | 自定义 lint 规则（常量引用豁免） |
-| `rememberInfiniteTransition` 缺 `label` 参数（`theme-styles.md` §7.6.3） | 自定义 lint 规则 |
-| `spring(...)` 调用点散落自定义 stiffness / dampingRatio（`theme-styles.md` §7.6.1） | 自定义 lint 规则（仅允许引用统一 SpringSpec 常量） |
-| Screen 函数参数超过 5 个 | Detekt `LongParameterList`（按文件类型设阈值） |
-| 阶段三起新增 `@Suppress("LegadoUiViolation")` | CI grep，直接挂 |
-| 新增 `*ViewModel.kt` 但无对应 `*ViewModelTest.kt`（`testing.md` §16.4） | CI 脚本对比 src/test 路径 |
+| 规则                                                                                                                | 实现方式                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 裸 `colorResource(R.color.xxx)`、硬编码 `Color(0xFF...)`                                                            | 自定义 lint 规则（白名单：`Color.Transparent` / 纯黑 / 纯白，见 `theme-styles.md` §7.1） |
+| Composable 体内裸魔法数字 `16.dp`、`12.dp`、`0.8f`                                                                  | 自定义 lint 规则（标准动画参数豁免，见 `theme-styles.md` §7.2）                          |
+| Composable 的 `Modifier` 非第一参数                                                                                 | Compose 官方 Lint Checks（`androidx.compose:compose-lint-checks` 依赖）                  |
+| `GlobalScope`、构造器/Factory 之外 `new Repository()`                                                               | Detekt `ForbiddenMethodCall` + 自定义规则（`new Repository` 需 AST 级检测）              |
+| `collectAsState()` 替代 `collectAsStateWithLifecycle()`                                                             | 自定义 lint 规则                                                                         |
+| `Channel<Event>` 用 RENDEZVOUS / BUFFERED                                                                           | 自定义 lint 规则（仅允许 UNLIMITED / CONFLATED，见 `state-events.md` §4.1）              |
+| `Log.e` / `Log.w` 缺异常对象第三参数                                                                                | 自定义 lint 规则                                                                         |
+| Composable 内硬编码中文字符串（含 `contentDescription` 参数，见 `theme-styles.md` §7.5 / `accessibility.md` §15.1） | lint 硬编码字符串检测（白名单：Log、TODO、Preview）                                      |
+| `tween` / `delay` 魔法数字时长不在三档（150/300/450）且未引用 `AnimationSpecs` 常量（`theme-styles.md` §7.6.1）     | 自定义 lint 规则（常量引用豁免）                                                         |
+| `rememberInfiniteTransition` 缺 `label` 参数（`theme-styles.md` §7.6.3）                                            | 自定义 lint 规则                                                                         |
+| `spring(...)` 调用点散落自定义 stiffness / dampingRatio（`theme-styles.md` §7.6.1）                                 | 自定义 lint 规则（仅允许引用统一 SpringSpec 常量）                                       |
+| Screen 函数参数超过 5 个                                                                                            | Detekt `LongParameterList`（按文件类型设阈值）                                           |
+| 阶段三起新增 `@Suppress("LegadoUiViolation")`                                                                       | CI grep，直接挂                                                                          |
+| 新增 `*ViewModel.kt` 但无对应 `*ViewModelTest.kt`（`testing.md` §16.4）                                             | CI 脚本对比 src/test 路径                                                                |
 
 > 机器规则统一维护在 `tools/lint-rules/` 独立模块并纳入 CI。**修改本表的 PR 必须同步更新规则代码**，只改文档不改规则的一律视为"未落地"，打回。
 
 ### 14.2 [人工] Reviewer 对照（任一 ❌ 打回）
 
-- [ ] 新 Screen 是否套了 `ConfigManageScaffold` / `AppScaffold` 等通用脚手架？还是裸 `Scaffold`？
+- [ ] 新 Screen 是否套了 `ConfigManageScaffold` / `AppScaffold` 等通用脚手架？还是裸 `Scaffold`？（页面级 / 内嵌片段的判定依据见 §14.3）
 - [ ] 回调命名是否 `onXxx` 风格？
 - [ ] 有无新增 `private fun` 形式的可复用组件？（Screen 内私有且仅在当前文件使用两次以上 = 违规）
 - [ ] ViewModel 是否直接调用 `clipboardManager` / `startActivity` / `toast`？
@@ -83,6 +83,22 @@ private fun ThemeAddBottomBar(...) { ... }
 - [ ] 可点击区域是否 ≥ 48×48 dp（小图标是否用 padding / `minimumInteractiveComponentSize` 撑命中区）？（`accessibility.md` §15.3）
 - [ ] 有无硬编码 `.sp`？有无固定高度容器硬裁文字？（`accessibility.md` §15.4）
 - [ ] 新增 ViewModel / 修改状态机的 PR 是否带对应单测？ViewModel 测试是否 `runTest` + Turbine，有无 `runBlocking` / 手写 collect / `Thread.sleep` / `@Ignore`？（`testing.md` §16）
+
+### 14.3 脚手架判定依据：`AppScaffold` 的适用范围
+
+`AppScaffold`（`ui/widget/components/AppScaffold.kt`）把 `containerColor` 设为 `Transparent`、`contentWindowInsets` 设为 0，**依赖外层 `LegadoBackgroundBox` 兜底背景**。因此适用范围以宿主为准：
+
+| 场景       | 宿主特征                                                                                                               | 结论                                                                |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| 页面级界面 | `BaseComposeActivity` 子类，或手动调用 `setLegadoContent`（外层有背景兜底）                                            | ✅ 必须套 `AppScaffold` / `ConfigManageScaffold`，禁止裸 `Scaffold` |
+| 内嵌片段   | 挂在 View 体系里的 `ComposeView`，外层无背景兜底（例：`HomepageScreen`、`BookshelfTagManageScreen`、`DebugLogScreen`） | ❌ 保持裸 `Scaffold` + 不透明容器；透明容器会露出窗口默认背景       |
+
+**系统栏适配责任在内容侧**：`contentWindowInsets = 0` 只影响 content，与顶栏是否延伸到状态栏无关（顶栏由 `TopAppBar` 自身的 `windowInsets` 决定）。改用 `AppScaffold` 后必须补底部内边距：
+
+- 底部无固定控件：内容容器加 `Modifier.navigationBarsPadding()`
+- 底部有固定按钮 / 输入框：容器保持铺满，只给该控件加 `Modifier.navigationBarsPadding()`
+
+> 依据：`api-compat-rules.md` §5 Edge-to-Edge 强制（targetSdk 35+）。
 
 ---
 

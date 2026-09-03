@@ -31,9 +31,9 @@ import androidx.compose.material3.MaterialTheme
  *
  * contentWindowInsets = 0 只影响 content 的左右/底部内边距，与顶栏是否延伸到状态栏
  * 无关（顶栏由 TopAppBar 自身的 windowInsets 决定）。适配 insets 的责任在内容侧：
- * - 滚动列表：在 LazyColumn 的 contentPadding 补底部导航条高度，内容滚动时仍可从
- *   导航栏下穿过（铺满），且最后一项能滚上来完整可点
- * - 底部固定按钮/输入框：自行加 Modifier.navigationBarsPadding()
+ * - 底部无固定控件：内容容器加 Modifier.navigationBarsPadding()，底部留出导航条高度
+ * - 底部有固定按钮/输入框：容器保持铺满，只给该控件加 Modifier.navigationBarsPadding()
+ * 判定依据与示例见 compose/migration-review.md §14.3
  *
  * @param modifier Modifier
  * @param topBar 顶栏插槽

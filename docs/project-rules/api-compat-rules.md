@@ -5,14 +5,14 @@
 
 ## 1. 项目现状（`app/build.gradle` + `gradle/libs.versions.toml`）
 
-| 项 | 值 | 影响 |
-|---|---|---|
-| compileSdk | 37 | 可以编译到新 API |
-| minSdk | **23** | 所有代码必须在 Android 6.0 能跑 |
-| targetSdk | **37** | 平台行为收紧按 targetSdk 37 生效（见 §5） |
-| AGP / Kotlin | 9.2.1 / 2.3.10 | 16KB 对齐检查可用 |
-| Desugaring | `desugar_jdk_libs_nio` **2.1.5**，JVM 17 工具链 | `java.time` / `java.nio.file`（Path/Files/ZipFS）可用，见 §3 |
-| Manifest | 存在 `tools:overrideLibrary="com.qmdeve.liquidglass"` | ⚠️ 有人绕过 manifest merger 的 minSdk 冲突，见 §4 |
+| 项           | 值                                                    | 影响                                                         |
+| ------------ | ----------------------------------------------------- | ------------------------------------------------------------ |
+| compileSdk   | 37                                                    | 可以编译到新 API                                             |
+| minSdk       | **23**                                                | 所有代码必须在 Android 6.0 能跑                              |
+| targetSdk    | **37**                                                | 平台行为收紧按 targetSdk 37 生效（见 §5）                    |
+| AGP / Kotlin | 9.2.1 / 2.3.10                                        | 16KB 对齐检查可用                                            |
+| Desugaring   | `desugar_jdk_libs_nio` **2.1.5**，JVM 17 工具链       | `java.time` / `java.nio.file`（Path/Files/ZipFS）可用，见 §3 |
+| Manifest     | 存在 `tools:overrideLibrary="com.qmdeve.liquidglass"` | ⚠️ 有人绕过 manifest merger 的 minSdk 冲突，见 §4            |
 
 ## 2. 新 API 调用的强制规则
 
@@ -51,13 +51,13 @@
 
 targetSdk 决定平台行为，**这些在 API 23 老设备上不存在、在新设备上强制执行**：
 
-| 项 | 要求 | 项目现状 |
-|---|---|---|
-| **16KB 内存页对齐**（Android 15+ 安装要求） | targetSdk 35+ 的 APK，所有 native `.so` 必须 16KB 对齐，否则在 16KB 页大小的设备上装不上/跑不了 | ⚠️ 发版前必须验证：Cronet so、Glide so、Rhino 相关 so。AGP 8.5+ 有 ABI 检查，或人工 `llvm-readelf` 验证 |
-| **Foreground Service type**（targetSdk 34+） | manifest 必须声明 `foregroundServiceType`，且启动 FGS 前持有对应权限 | ✅ 已声明（`dataSync` × 5、`mediaPlayback` × 4，见 `AndroidManifest.xml`）。**注意：Android 15+ 对 `dataSync` 有 6 小时使用上限**，长任务（整本书下载/缓存）要考虑分段或切 `mediaPlayback`/`specialUse` 的合规性 |
-| **Edge-to-Edge 强制**（targetSdk 35+） | 不再允许忽略系统栏 insets，所有页面（含 Dialog/BottomSheet/弹窗键盘避让）必须适配 insets | ⚠️ 新 Compose 页面必须用 `WindowInsets` 处理；View 页面用 `fitsSystemWindows`/`setDecorFitsSystemWindows`（现有 `AndroidAlertBuilder.fixDialogWindowCompat` 是 API 30+ 分支的正面例子） |
-| **POST_NOTIFICATIONS 运行时权限**（API 33+） | 通知需运行时授权 | ✅ `PermissionActivity` 已处理 TIRAMISU 分支 |
-| **Broadcast flag**（API 34+） | 动态注册广播必须显式 `RECEIVER_EXPORTED` / `RECEIVER_NOT_EXPORTED` | ⚠️ 存量有 `SuppressLint` 逃逸，见 §2.3 |
+| 项                                           | 要求                                                                                            | 项目现状                                                                                                                                                                                                                                                                                                                                                |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **16KB 内存页对齐**（Android 15+ 安装要求）  | targetSdk 35+ 的 APK，所有 native `.so` 必须 16KB 对齐，否则在 16KB 页大小的设备上装不上/跑不了 | ⚠️ 发版前必须验证：Cronet so、Glide so、Rhino 相关 so。AGP 8.5+ 有 ABI 检查，或人工 `llvm-readelf` 验证                                                                                                                                                                                                                                                 |
+| **Foreground Service type**（targetSdk 34+） | manifest 必须声明 `foregroundServiceType`，且启动 FGS 前持有对应权限                            | ✅ 已声明（`dataSync` × 5、`mediaPlayback` × 4，见 `AndroidManifest.xml`）。**注意：Android 15+ 对 `dataSync` 有 6 小时使用上限**，长任务（整本书下载/缓存）要考虑分段或切 `mediaPlayback`/`specialUse` 的合规性                                                                                                                                        |
+| **Edge-to-Edge 强制**（targetSdk 35+）       | 不再允许忽略系统栏 insets，所有页面（含 Dialog/BottomSheet/弹窗键盘避让）必须适配 insets        | ⚠️ 新 Compose 页面必须用 `WindowInsets` 处理；View 页面用 `fitsSystemWindows`/`setDecorFitsSystemWindows`（现有 `AndroidAlertBuilder.fixDialogWindowCompat` 是 API 30+ 分支的正面例子）。页面级 Compose 统一走 `AppScaffold`（`contentWindowInsets = 0`，内容铺满），**由内容侧自行补底部内边距**，判定依据与补法见 `compose/migration-review.md` §14.3 |
+| **POST_NOTIFICATIONS 运行时权限**（API 33+） | 通知需运行时授权                                                                                | ✅ `PermissionActivity` 已处理 TIRAMISU 分支                                                                                                                                                                                                                                                                                                            |
+| **Broadcast flag**（API 34+）                | 动态注册广播必须显式 `RECEIVER_EXPORTED` / `RECEIVER_NOT_EXPORTED`                              | ⚠️ 存量有 `SuppressLint` 逃逸，见 §2.3                                                                                                                                                                                                                                                                                                                  |
 
 ## 6. CI / Review 红线
 
