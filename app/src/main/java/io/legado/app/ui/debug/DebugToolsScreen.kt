@@ -27,6 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.legado.app.R
+import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 
 data class DebugTool(
     val titleRes: Int,
@@ -81,8 +83,7 @@ fun DebugToolsScreen(
         )
     )
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -117,7 +118,7 @@ fun DebugToolsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(vertical = 8.dp)
+            contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset)
         ) {
             items(tools) { tool ->
                 DebugToolItem(

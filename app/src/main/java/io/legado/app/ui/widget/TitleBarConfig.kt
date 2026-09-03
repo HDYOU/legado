@@ -130,8 +130,10 @@ private fun TitleBar.topBarContentColor(): Int {
     background.resolveSolidColor()
         ?.compositeOverPageBackground(context)
         ?.let { bgColor ->
+            // 背景越亮文字越深：亮背景(>0.5)用深色文字，暗背景用浅色文字。
+            // 与 MenuExtensions.getMenuColor 透明导航栏分支的取色约定保持一致。
             return context.getPrimaryTextColor(
-                ColorUtils.calculateLuminance(bgColor) <= 0.5
+                ColorUtils.calculateLuminance(bgColor) > 0.5
             )
         }
     return MenuExtensions.getMenuColor(context, topBarTheme)

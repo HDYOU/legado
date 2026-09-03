@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,8 +35,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -63,6 +62,8 @@ import io.legado.app.data.repository.ReadRecordRepository
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import io.legado.app.R
+import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.utils.formatReadDuration
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -115,7 +116,7 @@ fun BookReadRecordScreen(
 
     val totalSessionCount = timelineDays.sumOf { it.sessions.size }
 
-    Scaffold(
+    AppScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -139,11 +140,11 @@ fun BookReadRecordScreen(
             )
         }
     ) { padding ->
-        Surface(
+        // 改用透明容器：背景统一由外层 LegadoBackgroundBox 承载，主题背景图才能透出
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            color = MaterialTheme.colorScheme.background
+                .padding(padding)
         ) {
             if (timelineDays.isEmpty()) {
                 Box(
@@ -191,7 +192,7 @@ fun BookReadRecordScreen(
                                 )
                             }
                         },
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp + navigationBarBottomInset),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     item(key = "summary") {

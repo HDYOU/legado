@@ -1,5 +1,7 @@
 # Legado Max — Compose UI 架构规范
 
+> **本文为历史版本，已停用**：这是 2026-08-19 的旧版 Compose UI 规范，现行规范已迁移至 [`docs/project-rules/compose/`](../project-rules/compose/)，**以那边为准**。本文保留供对照与回顾，其中条款可能已与代码不符。
+
 > **生效范围**：`io.legado.app.ui` 包及以下所有代码  
 > **执行方式**：机器硬卡 + 人工软约束 — §14 中标 [机器] 的项由 lint/Detekt/CI 规则强制，违规直接构建失败；[人工] 项 Code Review 时人工对照，不达标 PR 打回  
 > **老代码策略**：分阶段迁移，允许 `@Suppress("LegadoUiViolation")` + TODO 临时过渡  
@@ -69,15 +71,15 @@ ui/
 
 ## 2. 文件命名规范
 
-| 类型 | 命名模式 | 示例 |
-|------|----------|------|
-| Screen（页面级 Composable） | `*Screen.kt` | `ReadRecordScreen.kt`、`ThemeManageScreen.kt` |
-| ViewModel | `*ViewModel.kt` | `ThemeManageViewModel.kt` |
-| Repository / DataSource | `*Repository.kt` / `*DataSource.kt` | `BookRepository.kt`、`ThemeRepository.kt` |
-| Feature 私有组件 | `*Card.kt` / `*Dialog.kt` / `*Menu.kt` 语义命名 | `ThemeCard.kt` 而非 `ThemeComponents.kt` |
-| 通用组件 | `*Sheet.kt` / `*Scaffold.kt` / 语义命名 | `BookBottomSheet.kt`、`ConfigManageScaffold.kt` |
-| State 定义 | `*State.kt` / `*UiState.kt` | `ThemeManageUiState.kt`、`ConfigManageState.kt` |
-| 工具函数扩展 | `*Utils.kt` / `*Extensions.kt` | `CodeViewExtensions.kt` |
+| 类型                        | 命名模式                                        | 示例                                            |
+| --------------------------- | ----------------------------------------------- | ----------------------------------------------- |
+| Screen（页面级 Composable） | `*Screen.kt`                                    | `ReadRecordScreen.kt`、`ThemeManageScreen.kt`   |
+| ViewModel                   | `*ViewModel.kt`                                 | `ThemeManageViewModel.kt`                       |
+| Repository / DataSource     | `*Repository.kt` / `*DataSource.kt`             | `BookRepository.kt`、`ThemeRepository.kt`       |
+| Feature 私有组件            | `*Card.kt` / `*Dialog.kt` / `*Menu.kt` 语义命名 | `ThemeCard.kt` 而非 `ThemeComponents.kt`        |
+| 通用组件                    | `*Sheet.kt` / `*Scaffold.kt` / 语义命名         | `BookBottomSheet.kt`、`ConfigManageScaffold.kt` |
+| State 定义                  | `*State.kt` / `*UiState.kt`                     | `ThemeManageUiState.kt`、`ConfigManageState.kt` |
+| 工具函数扩展                | `*Utils.kt` / `*Extensions.kt`                  | `CodeViewExtensions.kt`                         |
 
 ### 硬规则
 
@@ -244,11 +246,13 @@ fun ThemeManageScreen(
 ### 5.2 降级条件
 
 当以下任一情况成立时，允许不使用 Hilt：
+
 - 模块尚未接入 Hilt 插件（如独立编译的子模块）
 - 构建环境 KSP/KAPT 冲突无法解决
 - 老代码迁移过渡期，尚未完成 DI 改造
 
 降级时**必须**：
+
 - 文件头加注释：`// DI 降级原因：xxx，迁回 Hilt deadline：YYYY-MM-DD（#issue号）`——必须带**具体回填期限**，"后续"、"下个迭代"这类无期限表述一律视为未说明原因，PR 打回
 - 手动构造的对象通过 Factory 模式管理，禁止散落 `object` 单例
 
@@ -281,12 +285,12 @@ sealed interface UiError {
 
 ### 6.2 错误展示策略
 
-| 错误类型 | 展示方式 | 说明 |
-|---------|---------|------|
-| 网络异常 / 列表加载失败 | 全屏 `AppErrorState` | 占据内容区域，带重试按钮 |
-| 单项操作失败（复制、导入） | `Snackbar` | 不打断用户当前操作 |
-| 需要用户确认的错误 | `AlertDialog` | 如：导入冲突、数据覆盖 |
-| 非阻塞性提示 | `Snackbar` | 如：已复制、已删除 |
+| 错误类型                   | 展示方式             | 说明                     |
+| -------------------------- | -------------------- | ------------------------ |
+| 网络异常 / 列表加载失败    | 全屏 `AppErrorState` | 占据内容区域，带重试按钮 |
+| 单项操作失败（复制、导入） | `Snackbar`           | 不打断用户当前操作       |
+| 需要用户确认的错误         | `AlertDialog`        | 如：导入冲突、数据覆盖   |
+| 非阻塞性提示               | `Snackbar`           | 如：已复制、已删除       |
 
 ### 6.3 硬规则
 
@@ -312,7 +316,6 @@ sealed interface UiError {
 - **禁止**在 Composable 体内裸写 `16.dp`、`12.dp`、`0.8f`。
 - 动画参数（时长档位、easing、spring、无限动画）**必须**遵循 §7.6，禁止调用点随手写 `tween(200, ...)`、`tween(600, ...)` 这类无档位时长。
 - **禁止**自定义 `CubicBezier` / `keyframes` 曲线散落多处，新增自定义曲线必须集中定义在 `ui/theme/AnimationSpecs.kt`（**目标态文件，首次落地时创建**）并注释用途。
-
 
 ```kotlin
 // ui/theme/Dimensions.kt（目标态示例，落地时创建）
@@ -377,11 +380,11 @@ Text(stringResource(R.string.theme_copied, theme.name))
 
 时长**只允许三档**，禁止 `tween(200, ...)`、`tween(600, ...)` 这类档位外取值：
 
-| 档位 | 时长 | 用途 | 曲线 |
-|------|------|------|------|
-| 微交互 | 150ms | 按压缩放、颜色态切换、`animateColorAsState` | `FastOutSlowInEasing` |
-| 标准 | 300ms | 展开/收起、`AnimatedVisibility` 进出场 | `FastOutSlowInEasing` |
-| 进场过渡 | 450ms | 页面级 `Crossfade`、大图位替换 | `FastOutSlowInEasing` |
+| 档位     | 时长  | 用途                                        | 曲线                  |
+| -------- | ----- | ------------------------------------------- | --------------------- |
+| 微交互   | 150ms | 按压缩放、颜色态切换、`animateColorAsState` | `FastOutSlowInEasing` |
+| 标准     | 300ms | 展开/收起、`AnimatedVisibility` 进出场      | `FastOutSlowInEasing` |
+| 进场过渡 | 450ms | 页面级 `Crossfade`、大图位替换              | `FastOutSlowInEasing` |
 
 - **弹性动画**统一 `SpringSpec(stiffness = Spring.StiffnessMediumLow)`（存量 `CheckSourceScreen` 已在用，固化）；禁止调用点散落 `spring(...)` 随手传 stiffness/dampingRatio。
 - **禁止**手写帧循环（`withFrameNanos` / `while` 循环）实现动画——无限动画一律 `rememberInfiniteTransition`，一次性动画一律 `animate*AsState` 或 `Animatable`。
@@ -528,15 +531,18 @@ private fun AppListItemPreview() {
 ## 12. 注释规范
 
 ### 12.1 原则
+
 - **只写 "Why"，不写 "What"**。代码逻辑应自解释。
 
 ### 12.2 必须注释场景
+
 - 业务决策与直觉相反时。
 - 边界条件 / 防御性代码。
 - 魔法数字来源。
 - 暂时性 Hack。
 
 ### 12.3 KDoc 规范（公开 API 强制）
+
 - `ui/widget/components/` 及 `ui/[模块]/widget/` 下跨 Feature 暴露的 `public` Composable **必须**编写 KDoc。
 - 必须对所有非默认值参数进行说明。
 - 示例：
@@ -560,7 +566,7 @@ fun AppListItem(
     trailing: @Composable (() -> Unit)? = null
 )
 ```
-  
+
 ---
 
 ## 13. 老代码迁移规范（分阶段）
@@ -596,22 +602,22 @@ private fun ThemeAddBottomBar(...) { ... }
 
 ### 14.1 [机器] CI 硬卡（违规 = 构建红，不依赖 Reviewer 心情）
 
-| 规则 | 实现方式 |
-|------|--------|
-| 裸 `colorResource(R.color.xxx)`、硬编码 `Color(0xFF...)` | 自定义 lint 规则（白名单：`Color.Transparent` / 纯黑 / 纯白，见 §7.1） |
-| Composable 体内裸魔法数字 `16.dp`、`12.dp`、`0.8f` | 自定义 lint 规则（标准动画参数豁免，见 §7.2） |
-| Composable 的 `Modifier` 非第一参数 | Compose 官方 Lint Checks（`androidx.compose:compose-lint-checks` 依赖） |
-| `GlobalScope`、构造器/Factory 之外 `new Repository()` | Detekt `ForbiddenMethodCall` + 自定义规则（`new Repository` 需 AST 级检测） |
-| `collectAsState()` 替代 `collectAsStateWithLifecycle()` | 自定义 lint 规则 |
-| `Channel<Event>` 用 RENDEZVOUS / BUFFERED | 自定义 lint 规则（仅允许 UNLIMITED / CONFLATED，见 §4.1） |
-| `Log.e` / `Log.w` 缺异常对象第三参数 | 自定义 lint 规则 |
-| Composable 内硬编码中文字符串（含 `contentDescription` 参数，见 §7.5 / §15.1） | lint 硬编码字符串检测（白名单：Log、TODO、Preview） |
-| `tween` / `delay` 魔法数字时长不在三档（150/300/450）且未引用 `AnimationSpecs` 常量（§7.6.1） | 自定义 lint 规则（常量引用豁免） |
-| `rememberInfiniteTransition` 缺 `label` 参数（§7.6.3） | 自定义 lint 规则 |
-| `spring(...)` 调用点散落自定义 stiffness / dampingRatio（§7.6.1） | 自定义 lint 规则（仅允许引用统一 SpringSpec 常量） |
-| Screen 函数参数超过 5 个 | Detekt `LongParameterList`（按文件类型设阈值） |
-| 阶段三起新增 `@Suppress("LegadoUiViolation")` | CI grep，直接挂 |
-| 新增 `*ViewModel.kt` 但无对应 `*ViewModelTest.kt`（§16.4） | CI 脚本对比 src/test 路径 |
+| 规则                                                                                          | 实现方式                                                                    |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 裸 `colorResource(R.color.xxx)`、硬编码 `Color(0xFF...)`                                      | 自定义 lint 规则（白名单：`Color.Transparent` / 纯黑 / 纯白，见 §7.1）      |
+| Composable 体内裸魔法数字 `16.dp`、`12.dp`、`0.8f`                                            | 自定义 lint 规则（标准动画参数豁免，见 §7.2）                               |
+| Composable 的 `Modifier` 非第一参数                                                           | Compose 官方 Lint Checks（`androidx.compose:compose-lint-checks` 依赖）     |
+| `GlobalScope`、构造器/Factory 之外 `new Repository()`                                         | Detekt `ForbiddenMethodCall` + 自定义规则（`new Repository` 需 AST 级检测） |
+| `collectAsState()` 替代 `collectAsStateWithLifecycle()`                                       | 自定义 lint 规则                                                            |
+| `Channel<Event>` 用 RENDEZVOUS / BUFFERED                                                     | 自定义 lint 规则（仅允许 UNLIMITED / CONFLATED，见 §4.1）                   |
+| `Log.e` / `Log.w` 缺异常对象第三参数                                                          | 自定义 lint 规则                                                            |
+| Composable 内硬编码中文字符串（含 `contentDescription` 参数，见 §7.5 / §15.1）                | lint 硬编码字符串检测（白名单：Log、TODO、Preview）                         |
+| `tween` / `delay` 魔法数字时长不在三档（150/300/450）且未引用 `AnimationSpecs` 常量（§7.6.1） | 自定义 lint 规则（常量引用豁免）                                            |
+| `rememberInfiniteTransition` 缺 `label` 参数（§7.6.3）                                        | 自定义 lint 规则                                                            |
+| `spring(...)` 调用点散落自定义 stiffness / dampingRatio（§7.6.1）                             | 自定义 lint 规则（仅允许引用统一 SpringSpec 常量）                          |
+| Screen 函数参数超过 5 个                                                                      | Detekt `LongParameterList`（按文件类型设阈值）                              |
+| 阶段三起新增 `@Suppress("LegadoUiViolation")`                                                 | CI grep，直接挂                                                             |
+| 新增 `*ViewModel.kt` 但无对应 `*ViewModelTest.kt`（§16.4）                                    | CI 脚本对比 src/test 路径                                                   |
 
 > 机器规则统一维护在 `tools/lint-rules/` 独立模块并纳入 CI。**修改本表的 PR 必须同步更新规则代码**，只改文档不改规则的一律视为"未落地"，打回。
 
@@ -697,13 +703,13 @@ Row(
 
 ### 16.1 测什么（分档，强制）
 
-| 层 | 是否必须测 | 说明 |
-|------|-----------|------|
-| ViewModel（状态迁移 + 事件） | **必须** | UI 契约核心，测试成本低、回归价值最高。改了状态机没测试 = 拿线上用户当回归 |
-| Repository（聚合/转换/导入导出） | **必须** | 存量 `ReadRecordRepositoryTest` 模式照抄 |
-| 纯函数（解析/格式化/规则匹配） | **必须** | 无依赖，断言直给 |
-| Composable UI 层 | **不强制** | Preview ≠ 测试（Preview 只在 IDE 跑，CI 里从不执行，编译通过只证明语法对）；`createComposeRule` 的维护成本高于收益，UI 回归靠集成验证 + 人工，不强推 |
-| androidTest（JS 引擎 / HTTP 等真实环境） | **保留存量，不新增为主** | 慢 + 易 flaky，禁止进 PR CI，放 release 验证或手动触发 |
+| 层                                       | 是否必须测               | 说明                                                                                                                                                 |
+| ---------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ViewModel（状态迁移 + 事件）             | **必须**                 | UI 契约核心，测试成本低、回归价值最高。改了状态机没测试 = 拿线上用户当回归                                                                           |
+| Repository（聚合/转换/导入导出）         | **必须**                 | 存量 `ReadRecordRepositoryTest` 模式照抄                                                                                                             |
+| 纯函数（解析/格式化/规则匹配）           | **必须**                 | 无依赖，断言直给                                                                                                                                     |
+| Composable UI 层                         | **不强制**               | Preview ≠ 测试（Preview 只在 IDE 跑，CI 里从不执行，编译通过只证明语法对）；`createComposeRule` 的维护成本高于收益，UI 回归靠集成验证 + 人工，不强推 |
+| androidTest（JS 引擎 / HTTP 等真实环境） | **保留存量，不新增为主** | 慢 + 易 flaky，禁止进 PR CI，放 release 验证或手动触发                                                                                               |
 
 ### 16.2 技术选型与禁令（强制）
 

@@ -21,6 +21,12 @@ import io.legado.app.utils.ColorUtils
 import androidx.core.graphics.drawable.toDrawable
 import io.legado.app.lib.theme.elevation
 
+/**
+ * 主题化底部导航栏。
+ *
+ * 继承 BottomNavigationView，在初始化时根据当前主题设置背景色、透明度、
+ * 图标/文字着色，并支持应用 NavigationBarConfig 配置与 badge 视图添加。
+ */
 class ThemeBottomNavigationVIew(context: Context, attrs: AttributeSet) :
     BottomNavigationView(context, attrs) {
 

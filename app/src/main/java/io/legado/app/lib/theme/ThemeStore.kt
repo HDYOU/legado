@@ -14,6 +14,12 @@ import androidx.core.graphics.toColorInt
 import androidx.core.content.edit
 
 /**
+ * 主题配置存储类。
+ *
+ * 将主题颜色（主色、强调色、背景色、文本色等）及导航栏透明度等设置
+ * 通过 SharedPreferences 持久化，对外提供 fluent 链式 API 与静态读取方法。
+ * 所有写操作在提交前仅缓存在 Editor 中，调用 [apply] 时才落盘。
+ *
  * @author Aidan Follestad (afollestad), Karim Abou Zeid (kabouzeid)
  */
 @Suppress("unused")

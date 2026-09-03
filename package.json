@@ -2,7 +2,15 @@
   "name": "legado",
   "version": "1.0.0",
   "devDependencies": {
-    "cz-conventional-changelog": "^3.1.0"
+    "@commitlint/config-conventional": "^21.2.2",
+    "commitlint": "^21.2.2",
+    "conventional-changelog-cli": "^4.1.0",
+    "conventional-changelog-conventionalcommits": "^10.4.0",
+    "cz-conventional-changelog": "^3.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.6",
+    "standard-version": "^9.5.0"
   },
   "config": {
     "commitizen": {
@@ -12,17 +20,30 @@
   "description": "[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky",
+    "commit": "cz",
+    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s",
+    "changelog:all": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
+    "release": "standard-version"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx,vue,java}": [
+      "prettier --write"
+    ],
+    "*.md": [
+      "prettier --write"
+    ]
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/youfengknight/Legado_Max.git"
+    "url": "git+https://github.com/Suml-1/Legado_Max.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/youfengknight/Legado_Max/issues"
+    "url": "https://github.com/Suml-1/Legado_Max/issues"
   },
-  "homepage": "https://github.com/youfengknight/Legado_Max#readme"
+  "homepage": "https://github.com/Suml-1/Legado_Max#readme"
 }

@@ -2,17 +2,15 @@ package io.legado.app.ui.file
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.OpenWith
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -20,14 +18,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
 import io.legado.app.ui.file.components.FileList
 import io.legado.app.ui.file.components.PathBreadcrumb
-import io.legado.app.ui.theme.pageTopBarContainerColor
+import io.legado.app.ui.theme.pageTopBarBackground
+import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.AppPageTopBar
+import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
+import androidx.compose.foundation.layout.navigationBarsPadding
 import io.legado.app.ui.widget.components.AppSearchBar
 import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
 
@@ -55,7 +56,7 @@ fun FileManageScreen(
     // UI 状态（承载删除确认 Dialog 显隐，state-events.md §4.5）
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val topBarColor = pageTopBarContainerColor()
+    val topBarColors = pageTopBarColors()
 
     LaunchedEffect(initialPath) {
         initialPath?.let { viewModel.openPath(it) }
@@ -82,21 +83,19 @@ fun FileManageScreen(
         null -> Unit
     }
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
-            // 顶栏与搜索栏连成一体，AppPageTopBar 容器取透明（theme-styles.md §14.2）
-            Column(modifier = Modifier.background(topBarColor)) {
+            // 顶栏与搜索栏连体渲染，背景由外层容器统一承载（theme-styles.md §14.2）
+            Column(modifier = Modifier.pageTopBarBackground(topBarColors)) {
                 AppPageTopBar(
                     title = stringResource(R.string.file_manage),
                     onBackClick = onBackClick,
-                    containerColor = Color.Transparent
+                    showBackground = false
                 ) {
-                    // 用其他文件管理器打开当前路径
-                    IconButton(onClick = { viewModel.openWithChooser() }) {
+                    IconButton(onClick = { viewModel.copyCurrentPath() }) {
                         Icon(
-                            imageVector = Icons.Default.OpenWith,
-                            contentDescription = stringResource(R.string.open_with)
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = stringResource(R.string.copy_current_path)
                         )
                     }
                 }
@@ -114,6 +113,7 @@ fun FileManageScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .navigationBarsPadding()
         ) {
             // 路径导航条
             PathBreadcrumb(
@@ -128,16 +128,16 @@ fun FileManageScreen(
             } else {
                 FileList(
                     files = files,
-                    lastDir = viewModel.lastDir,
+                    currentDir = viewModel.currentDir,
                     onFileClick = { file ->
                         when {
-                            file == viewModel.lastDir -> viewModel.gotoLastDir()  // 点击 ".." 返回上级
+                            file == viewModel.currentDir -> viewModel.gotoParentDir()  // 点击 ".." 返回上级
                             file.isDirectory -> viewModel.enterDir(file)         // 进入文件夹
                             else -> viewModel.openFile(file)                     // 打开文件
                         }
                     },
                     onFileLongClick = { file ->
-                        if (file != viewModel.lastDir) {
+                        if (file != viewModel.currentDir) {
                             viewModel.requestDelete(file)
                         }
                     }

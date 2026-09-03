@@ -53,7 +53,7 @@ class FileManageViewModelTest {
             viewModel.files.value.map { it.name }
         )
         assertTrue(viewModel.subDocsFlow.value.isEmpty())
-        assertEquals(rootDir, viewModel.lastDir)
+        assertEquals(rootDir, viewModel.currentDir)
     }
 
     @Test
@@ -65,7 +65,7 @@ class FileManageViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf(subDir), viewModel.subDocsFlow.value)
-        assertEquals(subDir, viewModel.lastDir)
+        assertEquals(subDir, viewModel.currentDir)
         assertEquals(
             listOf(subDir, File(subDir, "inner.txt")),
             viewModel.files.value
@@ -79,7 +79,7 @@ class FileManageViewModelTest {
         viewModel.enterDir(subDir)
         advanceUntilIdle()
 
-        viewModel.gotoLastDir()
+        viewModel.gotoParentDir()
         advanceUntilIdle()
 
         assertTrue(viewModel.subDocsFlow.value.isEmpty())
@@ -191,6 +191,41 @@ class FileManageViewModelTest {
 
         viewModel.events.test {
             assertEquals(FileManageEvent.OpenFile(target), awaitItem())
+        }
+    }
+
+    @Test
+    fun `搜索时保留返回上级项`() = runTest(mainDispatcherRule.dispatcher) {
+        File(subDir, "note.txt").createNewFile()
+        val viewModel = newViewModel()
+        advanceUntilIdle()
+        viewModel.enterDir(subDir)
+        advanceUntilIdle()
+
+        viewModel.updateSearchQuery("note")
+
+        assertEquals(
+            listOf(subDir, File(subDir, "note.txt")),
+            viewModel.files.value
+        )
+    }
+
+    @Test
+    fun `复制路径抛出当前目录的绝对路径`() = runTest(mainDispatcherRule.dispatcher) {
+        val viewModel = newViewModel()
+        advanceUntilIdle()
+
+        viewModel.copyCurrentPath()
+        viewModel.events.test {
+            assertEquals(FileManageEvent.CopyPath(rootDir.absolutePath), awaitItem())
+        }
+
+        viewModel.enterDir(subDir)
+        advanceUntilIdle()
+
+        viewModel.copyCurrentPath()
+        viewModel.events.test {
+            assertEquals(FileManageEvent.CopyPath(subDir.absolutePath), awaitItem())
         }
     }
 

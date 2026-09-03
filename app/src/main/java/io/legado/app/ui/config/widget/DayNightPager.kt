@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.legado.app.R
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 
 /**
  * 日/夜分页管理器。
@@ -177,7 +178,12 @@ fun <T> ConfigList(
         LazyColumn(
             state = listState,
             modifier = modifier.fillMaxSize(),
-            contentPadding = contentPadding,
+            contentPadding = PaddingValues(
+                top = contentPadding.calculateTopPadding(),
+                bottom = contentPadding.calculateBottomPadding() + navigationBarBottomInset,
+                start = 16.dp,
+                end = 16.dp
+            ),
             verticalArrangement = verticalArrangement
         ) {
             items(

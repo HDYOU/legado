@@ -5,6 +5,11 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.AttrRes
 
 /**
+ * 主题属性解析工具。
+ *
+ * 从主题中解析颜色、尺寸、 drawable 等属性值，提供带降级默认值的安全读取。
+ * 所有方法均带 @JvmOverloads 以便 Java 侧调用。
+ *
  * @author Aidan Follestad (afollestad)
  */
 object ThemeUtils {

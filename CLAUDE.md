@@ -92,6 +92,7 @@ The project has three library modules in `modules/`:
 ### Source Layout
 
 `app/src/main/java/io/legado/app/`:
+
 - `ui/` — Activities/Fragments grouped by feature (book/, rss/, source/, config/, debuglog/, image/)
 - `model/` — domain logic (WebBook for HTTP fetching, analyzeRule for rule engine, ParagraphBubbleRenderer, BookCover)
 - `data/` — Room DB, DAOs, repositories
@@ -117,12 +118,26 @@ Compose 规范拆分为 8 个文件，位于 `docs/project-rules/compose/`：
 
 ## 项目级规范（必读）
 
-项目级强制规范库位于 `docs/project-rules/`，索引与领域覆盖矩阵见 [`docs/project-rules/README.md`](docs/project-rules/README.md)。写代码前先按"什么时候必须读"对照索引，规范与实现冲突时以源码为准并回头修规范。
+项目级强制规范库位于 `docs/project-rules/`，索引与领域覆盖矩阵见 [`docs/project-rules/README.md`](docs/project-rules/README.md)。写代码前先按"什么时候必须读"对照索引；改动代码后主动回看相关规范是否需要同步更新（规范跟着代码走，pre-commit 的 help-doc-sync 钩子会拦截"改了受管代码却没改对应文档"的提交）；规范与实现冲突时以源码为准并回头修规范。
 
 - **协程**：本项目使用自研链式协程包装（`BaseViewModel.execute` → `help/coroutine/Coroutine`）。使用协程前必读 [`docs/project-rules/coroutine-rules.md`](docs/project-rules/coroutine-rules.md)，其中包含 `execute` 链的时序坑、Scope 规则、Flow 位置与反面示例。
 - **数据层（Repository）**：[`docs/project-rules/repository-rules.md`](docs/project-rules/repository-rules.md)，新增数据访问逻辑必须遵循。
 - **API 兼容**：[`docs/project-rules/api-compat-rules.md`](docs/project-rules/api-compat-rules.md)。调用高于 minSdk 23 的 API、引入新依赖、发版前必读（SDK 分支写法、desugaring 边界、16KB 对齐等 targetSdk 37 红线）。
 - **事件总线**：[`docs/project-rules/live-event-bus-rules.md`](docs/project-rules/live-event-bus-rules.md)。新增跨组件事件、在 LiveEventBus 与 Compose `Channel<Event>` 之间选型时必读。
+- **架构与设计说明**：[`docs/architecture/`](docs/architecture/) 存放长期有效的模块架构、设计方案、技术笔记（Web 服务架构、高亮规则架构、Cookie 管理设计等）。想了解某个模块"现在是怎么设计的"先翻这里；一次性改造方案在 `docs/archive/`，两者不要混。
+
+### 计划/方案文档的收尾
+
+`docs/` 根目录不放散文档，只保留各规范子目录。任务收尾（实现 + 验证 + code-review + 提交）时，同一批处理本次产生的方案文档，不留悬空计划：
+
+- **一次性方案 / 计划 / 根因分析**（文件名含「方案」「计划」「分析」「评估」）：实现落地后 `git mv` 到 `docs/archive/`，沿用原文件名，不加日期前缀。
+- **结论已沉淀进代码和规范**的：直接删除，避免同一事实两处维护、日后文档与代码不同步。
+- **长期有效的约定 / checklist**：下沉到 `docs/project-rules/`，并在 `docs/project-rules/README.md` 索引登记。
+- **长期有效的架构说明**（模块架构、设计方案、技术笔记、功能说明）：放入 `docs/architecture/`，并在文件开头写明适用范围与是否仍然有效。
+
+判断依据：下次有人问"这块怎么做的"时还会不会来读这份文档——会，就进 `docs/architecture/` 或下沉成规范；不会，就归档或删除。
+
+> **代码永远比文档准确**：文档只记录某一个时刻的状态，会随迭代腐化。任何时候发现文档与代码不符，一律**以代码为准**，并顺手修正文档（或标注"已过时，见 xxx"）。文档是导航不是契约——用它找方向，别用它下结论。
 
 ## Coding Conventions
 
@@ -134,7 +149,9 @@ Compose 规范拆分为 8 个文件，位于 `docs/project-rules/compose/`：
 - 日志使用统一的 tag 格式：`AppTag.xxx`
 
 ## Comments
+
 > 注释优先表达**为什么这么做、特殊约束、业务背景**，代码本身负责表达“是什么、怎么做”。
+
 - **类注释**
   - 核心/复杂类（单例、引擎、解析器、管理器等）必须补充完整 KDoc。
   - 普通 `Activity` / `Adapter` / `ViewModel` 无需完整 KDoc，仅简短说明核心用途即可。
@@ -157,6 +174,7 @@ Compose 规范拆分为 8 个文件，位于 `docs/project-rules/compose/`：
 ## Testing Strategy
 
 这个视情况讨论，因为有时开发环境不允许。
+
 - 单元测试：`app/src/test/`
 - 集成测试：`app/src/androidTest/`
 - 测试覆盖率要求：核心模块 ≥ 80%
@@ -171,6 +189,7 @@ All dependency versions are in `gradle/libs.versions.toml`. In `build.gradle.kts
 ## Build Variants
 
 Three product flavors in dimension "app":
+
 - `appLegacy` — same package name as original Legado (`io.legado.app`)
 - `appMax` — coexistence package (`io.legado.app.yuedu`), the primary development target
 - `appS` — another coexistence package (`io.legado.app.yuedu.a`)
@@ -183,6 +202,7 @@ Release builds: minifyEnabled + shrinkResources + ProGuard (`app/proguard-rules.
 ## CI/CD
 
 GitHub Actions in `.github/workflows/`:
+
 - `test.yml` — builds all 3 release flavors on push to main; auto-creates GitHub/Gitee releases with changelog from `updateLog.md`
 - `web.yml` — builds the Vue frontend on changes to `modules/web/` and commits the output to `app/src/main/assets/web/vue/`
 - `cronet.yml` — updates Cronet native libraries
@@ -196,23 +216,41 @@ GitHub Actions in `.github/workflows/`:
 - Disabled build features: aidl, renderscript, resvalues, shaders. buildConfig is explicitly enabled (Cronet version fields); do not assume BuildConfig is absent.
 - Architecture documentation in `Structure/` directory (Chinese) covers app startup flow, database schema, reading flow, event bus, and module dependencies.
 
+## Git Commit 规范
+
+Conventional Commits 中文适配，husky + commitlint 自动校验。
+
+格式：`<type>(<scope>): <subject>`，type 用英文（feat/fix/docs/refactor/perf/test/chore/ci/revert/style），scope 和 subject 用中文，subject 为动宾短语不超 100 字符。
+
+交互式提交：`npm run commit`。不合规提交会被自动拦截。
+
+**新人首次使用需在项目根目录运行 `npm install`**，否则 git hook 不会生效。
+
+详细规范与常见问题见 `docs/git-hook/`。
+
+### 帮助文档同步检查（pre-commit 门禁）
+
+改了功能代码但没改对应的帮助文档？这个 hook 会拦下来。
+
+- 映射表：`docs/help-doc-sync/map.json`（代码路径 → 必须同步的 md 文档）
+- 脚本：`scripts/help-doc-sync.mjs`（由 `.husky/pre-commit` 调用）
+- 拦截行为：改了受管代码区域（如 `model/analyzeRule/**`）但没同时改对应的 md，commit 会被阻止并给出提示
+- 逃生口：`SKIP_DOC_SYNC=1 git commit ...`（仅限确认本次改动不涉及文档内容时使用）
+- 扩展映射：编辑 `docs/help-doc-sync/map.json` 即可，无需改脚本
+
 ## 核心规则
 
-1. **收到任务时，先检查是否有匹配的 skill** — 哪怕只有 1% 的可能性也要检查
+1. **Check Skills First**: 开始任务前，必须检查是否有匹配的 Skill。
 2. **设计先于编码** — 收到功能需求时，先用 brainstorming skill 做需求分析
 3. **测试先于实现** — 写代码前先写测试（TDD）
 4. **验证先于完成** — 声称完成前必须运行验证命令
+5. **发现无关 bug/优化 → follow-up 报告**：任务过程中发现的 bug 或优化点，如果与当前 change 无关，不在本次修，而是作为 follow-up 报告单独提出。
+6. **任务有歧义时选最直接的理解**：不要把其他可能的理解也一起做了，只实现最直接的那个理解。
+7. **测试文件只在需要时提交**：任务没有明确要求、仓库惯例也不需要时，不提交测试文件。需要提交时，规模参照旁边已有的测试文件。
+8. **沟通节奏**：开始执行任务之前，用一句话说明即将要做什么；工作过程中给出简短的进度更新；结尾写一段可以独立看懂的简短总结——发现了什么、做了什么、下一步是什么——让只看到最后一条消息的读者也能了解全貌。
+9. **改完代码后走 code-review**：任务完成、代码写完后，自动调用 code-review skill，按 Standards（是否符合项目编码规范）和 Spec（是否符合需求 spec）两个维度审查 diff，两份报告独立输出、不合并不排序。
 
-## Core Rules & Skills
-
-本项目配置了自动化 Skills (位于 `.claude/skills/`) 来辅助开发。Claude 在执行任务时必须遵循以下核心原则：
-
-1.  **Check Skills First**: 开始任务前，必须检查是否有匹配的 Skill。
-2.  **Design First**: 编码前必须进行设计分析。
-3.  **Test First**: 优先采用 TDD 方式开发。
-4.  **Verify Before Finish**: 完成任务必须运行验证命令。
-
-> **注意**：详细的技能列表和触发逻辑请查阅 `.claude/skills/` 目录，或者直接使用 Skill 工具调用。
+> **英文对照**：Design First（编码前设计分析）、Test First（TDD）、Verify Before Finish（完成前验证）。
 
 ## Skill 的使用
 
@@ -221,6 +259,7 @@ GitHub Actions in `.github/workflows/`:
 当任务明确匹配某个 skill 的应用场景时，应调用该 skill 检查。
 
 ## AI 探索项目的方式
+
 1. 先看本文件了解模块结构
 2. 定位目标模块，读项目模块的 build.gradle 确认依赖
 3. 找该模块的对外接口（api/ 目录或 interface），而不是直接钻进实现

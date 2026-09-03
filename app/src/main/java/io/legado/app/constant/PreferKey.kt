@@ -57,6 +57,8 @@ object PreferKey {
     const val debugLogOnlyEnabled = "debugLogOnlyEnabled" // 调试专属模式总开关
     const val debugLogOnlyCategories = "debugLogOnlyCategories" // 标记为"只进调试界面"的 DebugCategory 集合，逗号分隔
     const val copyCrashLog = "copyCrashLog" // 崩溃时复制日志到剪贴板
+    const val askClipboardImport = "askClipboardImport" // 已废弃，仅用于向 clipboardImportMode 迁移
+    const val clipboardImportMode = "clipboardImportMode" // 剪贴板导入口令模式，取值见 ClipboardImportMode
     const val mdLinkInnerBrowser = "mdLinkInnerBrowser" // MD链接用内置浏览器打开
     const val bookshelfLayout = "bookshelfLayout"
     const val bookshelfSort = "bookshelfSort"

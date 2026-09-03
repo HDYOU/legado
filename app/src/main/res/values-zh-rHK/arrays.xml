@@ -16,4 +16,10 @@
         <item>时间及仅电量图标</item>
         <item>时间及电量%</item>
     </string-array>
+
+    <string-array name="clipboard_import_mode_entries">
+        <item>每次詢問</item>
+        <item>始終自動匯入</item>
+        <item>從不讀取</item>
+    </string-array>
 </resources>

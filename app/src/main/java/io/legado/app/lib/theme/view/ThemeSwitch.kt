@@ -7,6 +7,11 @@ import io.legado.app.lib.theme.accentColor
 import io.legado.app.utils.applyTint
 
 /**
+ * 主题化开关。
+ *
+ * 在初始化时自动应用主题强调色着色（track / thumb 双状态），
+ * 并提供 [setOnUserCheckedChangeListener] 以区分用户主动操作与程序触发的选中状态变更。
+ *
  * @author Aidan Follestad (afollestad)
  */
 class ThemeSwitch(context: Context, attrs: AttributeSet) : SwitchCompat(context, attrs) {

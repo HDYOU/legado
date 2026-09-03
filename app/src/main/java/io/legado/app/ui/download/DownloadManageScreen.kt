@@ -21,7 +21,6 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -37,8 +36,11 @@ import io.legado.app.R
 import io.legado.app.service.DownloadStatus
 import io.legado.app.ui.download.components.DownloadTaskCard
 import io.legado.app.ui.theme.PageDimens
-import io.legado.app.ui.theme.pageTopBarContainerColor
+import io.legado.app.ui.theme.pageTopBarBackground
+import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.AppPageTopBar
+import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 
 /**
  * 下载管理主界面
@@ -53,68 +55,69 @@ fun DownloadManageScreen(
     val filteredTasks by viewModel.filteredTasks.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
 
-    val topBarColor = pageTopBarContainerColor()
+    val topBarColors = pageTopBarColors()
 
     val activeCount = allTasks.count { it.status == DownloadStatus.RUNNING || it.status == DownloadStatus.PENDING }
     val completedCount = allTasks.count { it.status == DownloadStatus.SUCCESSFUL }
     val failedCount = allTasks.count { it.status == DownloadStatus.FAILED }
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
-            // 统一顶栏（theme-styles.md §14.2）
-            AppPageTopBar(
-                title = stringResource(R.string.download_manage_title),
-                subtitle = if (allTasks.isNotEmpty()) {
-                    stringResource(
-                        R.string.download_manage_stats,
-                        activeCount, completedCount, failedCount
-                    )
-                } else {
-                    null
-                },
-                onBackClick = onBackClick
-            ) {
-                IconButton(onClick = { viewModel.clearCompletedTasks() }) {
-                    Icon(Icons.Default.DeleteSweep, contentDescription = stringResource(R.string.download_manage_clear_completed))
+            // 统一顶栏 + TabRow 连体（theme-styles.md §14.2），阴影落在整块底部
+            Column(modifier = Modifier.pageTopBarBackground(topBarColors)) {
+                AppPageTopBar(
+                    title = stringResource(R.string.download_manage_title),
+                    subtitle = if (allTasks.isNotEmpty()) {
+                        stringResource(
+                            R.string.download_manage_stats,
+                            activeCount, completedCount, failedCount
+                        )
+                    } else {
+                        null
+                    },
+                    onBackClick = onBackClick,
+                    showBackground = false
+                ) {
+                    IconButton(onClick = { viewModel.clearCompletedTasks() }) {
+                        Icon(Icons.Default.DeleteSweep, contentDescription = stringResource(R.string.download_manage_clear_completed))
+                    }
+                }
+                // TabRow（连体，承载于同一背景块）
+                val tabs = DownloadTab.values()
+                TabRow(
+                    selectedTabIndex = tabs.indexOf(selectedTab),
+                    containerColor = Color.Transparent,
+                    contentColor = topBarColors.contentColor
+                ) {
+                    tabs.forEach { tab ->
+                        val count = when (tab) {
+                            DownloadTab.ALL -> allTasks.size
+                            DownloadTab.DOWNLOADING -> activeCount
+                            DownloadTab.PAUSED -> allTasks.count { it.status == DownloadStatus.PAUSED }
+                            DownloadTab.COMPLETED -> completedCount
+                            DownloadTab.FAILED -> failedCount
+                        }
+                        Tab(
+                            selected = selectedTab == tab,
+                            onClick = { viewModel.selectTab(tab) },
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(text = stringResource(tab.labelRes), style = MaterialTheme.typography.bodySmall)
+                                    if (count > 0) {
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Badge(containerColor = MaterialTheme.colorScheme.primary) {
+                                            Text(text = count.toString(), style = MaterialTheme.typography.labelSmall)
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
-            // TabRow
-            val tabs = DownloadTab.values()
-            TabRow(
-                selectedTabIndex = tabs.indexOf(selectedTab),
-                containerColor = topBarColor,
-                contentColor = MaterialTheme.colorScheme.onSecondary
-            ) {
-                tabs.forEach { tab ->
-                    val count = when (tab) {
-                        DownloadTab.ALL -> allTasks.size
-                        DownloadTab.DOWNLOADING -> activeCount
-                        DownloadTab.PAUSED -> allTasks.count { it.status == DownloadStatus.PAUSED }
-                        DownloadTab.COMPLETED -> completedCount
-                        DownloadTab.FAILED -> failedCount
-                    }
-                    Tab(
-                        selected = selectedTab == tab,
-                        onClick = { viewModel.selectTab(tab) },
-                        text = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = stringResource(tab.labelRes), style = MaterialTheme.typography.bodySmall)
-                                if (count > 0) {
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Badge(containerColor = MaterialTheme.colorScheme.primary) {
-                                        Text(text = count.toString(), style = MaterialTheme.typography.labelSmall)
-                                    }
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-
             // 任务列表或空状态
             if (filteredTasks.isEmpty()) {
                 Box(
@@ -151,7 +154,12 @@ fun DownloadManageScreen(
                 }
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(PageDimens.screenPadding),
+                    contentPadding = PaddingValues(
+                        top = PageDimens.screenPadding,
+                        bottom = PageDimens.screenPadding + navigationBarBottomInset,
+                        start = PageDimens.screenPadding,
+                        end = PageDimens.screenPadding
+                    ),
                     verticalArrangement = Arrangement.spacedBy(PageDimens.cardSpacing)
                 ) {
                     items(filteredTasks, key = { it.id }) { task ->

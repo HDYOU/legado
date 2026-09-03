@@ -57,6 +57,8 @@ import io.legado.app.ui.theme.pageMutedIconTint
 import io.legado.app.ui.theme.pageSecondaryTextColor
 import io.legado.app.ui.theme.pageSurfaceVariantColor
 import io.legado.app.ui.theme.pageTopBarContainerColor
+import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.utils.sendToClip
 
 /**
@@ -82,8 +84,7 @@ fun CheckSourceScreen(
     var detailResult by remember { mutableStateOf<CheckResult?>(null) }
     var showSourcePicker by remember { mutableStateOf(false) }
     
-    Scaffold(
-        containerColor = Color.Transparent,
+    AppScaffold(
         topBar = {
             CheckSourceTopBar(
                 uiState = uiState,
@@ -1015,7 +1016,7 @@ fun ResultList(
     ) {
         LazyColumn(
             modifier = modifier,
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp + navigationBarBottomInset),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(
