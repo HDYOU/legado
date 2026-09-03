@@ -40,6 +40,7 @@ import io.legado.app.ui.theme.pageTopBarBackground
 import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.AppPageTopBar
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 
 /**
  * 下载管理主界面
@@ -153,7 +154,12 @@ fun DownloadManageScreen(
                 }
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(PageDimens.screenPadding),
+                    contentPadding = PaddingValues(
+                        top = PageDimens.screenPadding,
+                        bottom = PageDimens.screenPadding + navigationBarBottomInset,
+                        start = PageDimens.screenPadding,
+                        end = PageDimens.screenPadding
+                    ),
                     verticalArrangement = Arrangement.spacedBy(PageDimens.cardSpacing)
                 ) {
                     items(filteredTasks, key = { it.id }) { task ->

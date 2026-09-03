@@ -89,6 +89,7 @@ import io.legado.app.ui.theme.pageSurfaceVariantColor
 import io.legado.app.ui.theme.pageTopBarBackground
 import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.ui.widget.dialog.TextDialog
 import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.toastOnUi
@@ -315,7 +316,6 @@ fun CoverGalleryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .navigationBarsPadding()
         ) {
             AnimatedVisibility(visible = showSearch) {
                 OutlinedTextField(
@@ -368,7 +368,7 @@ fun CoverGalleryScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(12.dp),
+                    contentPadding = PaddingValues(top = 12.dp, bottom = 12.dp + navigationBarBottomInset),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(groups, key = { it.group.id }) { groupWithImages ->

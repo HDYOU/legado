@@ -2,11 +2,15 @@ package io.legado.app.ui.widget.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.MaterialTheme
 
@@ -31,8 +35,10 @@ import androidx.compose.material3.MaterialTheme
  *
  * contentWindowInsets = 0 只影响 content 的左右/底部内边距，与顶栏是否延伸到状态栏
  * 无关（顶栏由 TopAppBar 自身的 windowInsets 决定）。适配 insets 的责任在内容侧：
- * - 底部无固定控件：内容容器加 Modifier.navigationBarsPadding()，底部留出导航条高度
- * - 底部有固定按钮/输入框：容器保持铺满，只给该控件加 Modifier.navigationBarsPadding()
+ * - 滚动列表（LazyColumn/LazyRow 等）：contentPadding 底部补导航条高度（用 `navigationBarBottomInset`），
+ *   内容滚动时可从导航条下穿过（铺满），最后一项能滚上来完整可点
+ * - 整页可滚动列（Column + verticalScroll）：容器保持铺满，在内容末尾加 Spacer(Modifier.navigationBarsPadding())
+ * - 底部有固定控件（bottomBar / 固定按钮 / 输入框）：容器保持铺满，只给该控件加 Modifier.navigationBarsPadding()
  * 判定依据与示例见 compose/migration-review.md §14.3
  *
  * @param modifier Modifier
@@ -59,6 +65,19 @@ fun AppScaffold(
         content = content
     )
 }
+
+/**
+ * 底部导航条高度。用于在滚动容器 `contentPadding` 中补底部 inset，
+ * 使内容铺满系统栏、最后一项可滚动到导航条上方完整可点。
+ * 详见 compose/migration-review.md §14.3。
+ */
+val navigationBarBottomInset: Dp
+    @Composable
+    get() {
+        val density = LocalDensity.current
+        val px = WindowInsets.navigationBars.getBottom(density)
+        return (px / density.density).dp
+    }
 
 // ── 预览（§10.1 强制）────────────────────────────────────────
 

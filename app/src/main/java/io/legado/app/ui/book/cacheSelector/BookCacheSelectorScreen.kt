@@ -52,6 +52,7 @@ import io.legado.app.R
 import io.legado.app.ui.book.cacheSelector.components.BookCacheItemCard
 import io.legado.app.ui.theme.pageCardContainerColor
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.utils.ConvertUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -192,7 +193,7 @@ fun BookCacheSelectorScreen(
             is BookCacheSelectorUiState.Idle -> {
                 LazyColumn(
                     modifier = Modifier.padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp + navigationBarBottomInset),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // 汇总条

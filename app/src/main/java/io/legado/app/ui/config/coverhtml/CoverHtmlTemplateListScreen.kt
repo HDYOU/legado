@@ -22,6 +22,7 @@ import io.legado.app.R
 import io.legado.app.help.config.CoverHtmlTemplateConfig
 import io.legado.app.constant.EventBus
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.ui.widget.image.CoverImageView
 import io.legado.app.utils.postEvent
 import io.legado.app.utils.toastOnUi
@@ -114,9 +115,8 @@ fun CoverHtmlTemplateListScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .navigationBarsPadding(),
-                contentPadding = PaddingValues(vertical = 8.dp)
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset)
             ) {
                 items(templateList, key = { it.id }) { template ->
                     TemplateItem(

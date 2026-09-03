@@ -50,6 +50,7 @@ import io.legado.app.data.entities.UploadHistory
 import io.legado.app.data.entities.UploadHistoryWithRule
 import io.legado.app.ui.upload.DirectLinkUploadViewModel.*
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
 import java.text.SimpleDateFormat
 import java.util.*
@@ -170,7 +171,7 @@ fun DirectLinkUploadScreen(
         }
     ) { paddingValues ->
         // 主内容区域
-        Column(modifier = Modifier.padding(paddingValues).navigationBarsPadding()) {
+        Column(modifier = Modifier.padding(paddingValues)) {
             // 标签页布局
             TabRow(
                 selectedTabIndex = selectedTab,
@@ -423,7 +424,7 @@ fun RuleListTab(
         // 规则列表
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 8.dp)
+            contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset)
         ) {
             items(rules) { rule ->
                 RuleCard(
@@ -599,7 +600,7 @@ fun HistoryListTab(
         // 历史记录列表
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 8.dp)
+            contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset)
         ) {
             items(histories) { historyWithRule ->
                 HistoryCard(

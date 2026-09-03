@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.legado.app.R
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 
 data class DebugTool(
     val titleRes: Int,
@@ -116,9 +117,8 @@ fun DebugToolsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .navigationBarsPadding(),
-            contentPadding = PaddingValues(vertical = 8.dp)
+                .padding(paddingValues),
+            contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset)
         ) {
             items(tools) { tool ->
                 DebugToolItem(

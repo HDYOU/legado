@@ -27,6 +27,8 @@ import io.legado.app.ui.theme.pageTopBarBackground
 import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.AppPageTopBar
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
+import androidx.compose.foundation.layout.navigationBarsPadding
 import io.legado.app.ui.widget.components.AppSearchBar
 import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
 
@@ -112,6 +114,7 @@ fun FileManageScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .navigationBarsPadding()
         ) {
             // 路径导航条
             PathBreadcrumb(

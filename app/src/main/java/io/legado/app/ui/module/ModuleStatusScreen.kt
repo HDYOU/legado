@@ -41,6 +41,7 @@ import io.legado.app.ui.theme.pageCardContainerColor
 import io.legado.app.ui.theme.pageTopBarBackground
 import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 
 /**
  * 模块状态主界面
@@ -94,7 +95,7 @@ fun ModuleStatusScreen(
         // 模块列表
         LazyColumn(
             modifier = Modifier.padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp + navigationBarBottomInset),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(modules, key = { it.name }) { module ->

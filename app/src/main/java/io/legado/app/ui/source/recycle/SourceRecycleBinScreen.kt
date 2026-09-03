@@ -51,6 +51,7 @@ import io.legado.app.ui.source.recycle.components.SourceRecycleDropdownMenuItem
 import io.legado.app.ui.theme.pageSecondaryTextColor
 import io.legado.app.ui.widget.components.AppPageTopBar
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
 import kotlinx.coroutines.launch
 
@@ -345,7 +346,7 @@ fun SourceRecycleBinScreen(
                 }
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(12.dp),
+                    contentPadding = PaddingValues(top = 12.dp, bottom = 12.dp + navigationBarBottomInset),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(displayedItems, key = { it.id }) { item ->

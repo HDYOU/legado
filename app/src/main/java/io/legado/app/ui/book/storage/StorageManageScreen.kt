@@ -39,6 +39,7 @@ import io.legado.app.ui.theme.PageDimens
 import io.legado.app.ui.theme.pageCardContainerColor
 import io.legado.app.ui.widget.components.AppPageTopBar
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 
 // UI层
 // 4. StorageManageScreen.kt
@@ -172,7 +173,12 @@ fun StorageManageScreen(
             is StorageUiState.Idle -> {
                 LazyColumn(
                     modifier = Modifier.padding(paddingValues),
-                    contentPadding = PaddingValues(PageDimens.screenPadding),
+                    contentPadding = PaddingValues(
+                        top = PageDimens.screenPadding,
+                        bottom = PageDimens.screenPadding + navigationBarBottomInset,
+                        start = PageDimens.screenPadding,
+                        end = PageDimens.screenPadding
+                    ),
                     verticalArrangement = Arrangement.spacedBy(PageDimens.cardSpacing)
                 ) {
                     item {

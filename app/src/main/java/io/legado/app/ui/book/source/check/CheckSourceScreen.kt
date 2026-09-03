@@ -58,6 +58,7 @@ import io.legado.app.ui.theme.pageSecondaryTextColor
 import io.legado.app.ui.theme.pageSurfaceVariantColor
 import io.legado.app.ui.theme.pageTopBarContainerColor
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.utils.sendToClip
 
 /**
@@ -98,7 +99,6 @@ fun CheckSourceScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .navigationBarsPadding()
         ) {
             when (val state = uiState) {
                 is CheckSourceUIState.Idle -> {
@@ -1016,7 +1016,7 @@ fun ResultList(
     ) {
         LazyColumn(
             modifier = modifier,
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp + navigationBarBottomInset),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(

@@ -63,6 +63,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import io.legado.app.R
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.utils.formatReadDuration
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -144,7 +145,6 @@ fun BookReadRecordScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .navigationBarsPadding()
         ) {
             if (timelineDays.isEmpty()) {
                 Box(
@@ -192,7 +192,7 @@ fun BookReadRecordScreen(
                                 )
                             }
                         },
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp + navigationBarBottomInset),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     item(key = "summary") {

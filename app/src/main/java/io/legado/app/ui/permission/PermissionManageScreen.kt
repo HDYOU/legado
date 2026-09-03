@@ -22,6 +22,7 @@ import io.legado.app.ui.theme.pageSecondaryTextColor
 import io.legado.app.ui.theme.pageTopBarBackground
 import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.AppScaffold
+import io.legado.app.ui.widget.components.navigationBarBottomInset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +63,7 @@ fun PermissionManageScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(vertical = 8.dp)
+            contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset)
         ) {
             items(permissionSections.size, key = { permissionSections[it].titleRes }) { index ->
                 PermissionSectionCard(section = permissionSections[index])
