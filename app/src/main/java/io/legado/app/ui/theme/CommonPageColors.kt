@@ -80,7 +80,6 @@ fun pageTopBarColors(): PageTopBarColors {
     }
     val shadowElevation = when {
         transparentNavBar -> 0.dp
-        config.style == TopBarConfig.STYLE_REGULAR && config.cornerScale != 0f -> 0.dp
         alphaPercent < 100 -> 0.1.dp
         else -> with(LocalDensity.current) { context.elevation.toDp() }
     }
