@@ -33,7 +33,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import io.legado.app.R
 import io.legado.app.ui.theme.pageCardContainerColor
-import io.legado.app.ui.theme.pageTopBarContainerColor
+import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.dialog.BaseComposeDialogFragment
 import io.legado.app.utils.toastOnUi
 import sh.calvin.reorderable.ReorderableItem
@@ -42,8 +42,8 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 /**
  * 文本菜单项配置对话框 - Compose实现
  * 
- * 功能说明：
- * 提供一个界面让用户选择要显示/隐藏的文本菜单项
+ * 功能说明�?
+ * 提供一个界面让用户选择要显�?隐藏的文本菜单项
  */
 class TextMenuConfigDialog : BaseComposeDialogFragment() {
 
@@ -56,7 +56,7 @@ class TextMenuConfigDialog : BaseComposeDialogFragment() {
 }
 
 /**
- * 文本菜单配置对话框内容
+ * 文本菜单配置对话框内�?
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,13 +76,13 @@ fun TextMenuConfigDialogContent(
     }
     var editingItem by remember { mutableStateOf<TextMenuConfig.MenuItemInfo?>(null) }
     var showProcessTextConfig by remember { mutableStateOf(false) }
-    val topBarColor = pageTopBarContainerColor()
+    val topBarColor = pageTopBarColors().containerColor
     val cardColor = pageCardContainerColor()
 
     val listState = rememberLazyListState()
     val hapticFeedback = LocalHapticFeedback.current
 
-    // 拖拽排序状态
+    // 拖拽排序状�?
     val reorderableState = rememberReorderableLazyListState(listState) { from, to ->
         menuItems = menuItems.toMutableList().apply {
             if (isEmpty()) return@apply
@@ -393,7 +393,7 @@ fun ProcessTextConfigContent(
         }
     }
     
-    val topBarColor = pageTopBarContainerColor()
+    val topBarColor = pageTopBarColors().containerColor
     val cardColor = pageCardContainerColor()
 
     editingAppInfo?.let { appInfo ->
@@ -532,7 +532,7 @@ data class ProcessTextAppInfo(
 )
 
 /**
- * 获取能处理 ACTION_PROCESS_TEXT 的应用列表
+ * 获取能处�?ACTION_PROCESS_TEXT 的应用列�?
  */
 @Suppress("DEPRECATION")
 private fun getProcessTextApps(context: Context): List<ProcessTextAppInfo> {
