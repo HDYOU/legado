@@ -17,20 +17,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.legado.app.R
 import io.legado.app.ui.theme.pageCardContainerColor
-import io.legado.app.ui.theme.pageTopBarContainerColor
+import io.legado.app.ui.theme.pageTopBarColors
 
 /**
- * 多选项目数据模型
+ * 多选项目数据模�?
  */
 data class MultiSelectItem(
     val key: String,                    // 唯一标识
-    val title: String,                  // 主标题
-    val subtitle: String? = null,       // 副标题 (如文件名)
-    val size: String? = null,           // 大小信息 (如 "2.5 MB")
+    val title: String,                  // 主标�?
+    val subtitle: String? = null,       // 副标�?(如文件名)
+    val size: String? = null,           // 大小信息 (�?"2.5 MB")
     val rawSize: Long? = null,
-    val count: String? = null,          // 数量信息 (如 "128 个")
+    val count: String? = null,          // 数量信息 (�?"128 �?)
     val group: String,                  // 分组名称
-    val iconEmoji: String? = null,      // Emoji图标 (如 "📚")
+    val iconEmoji: String? = null,      // Emoji图标 (�?"📚")
     val selected: Boolean = true        // 是否选中
 )
 
@@ -46,39 +46,39 @@ data class MultiSelectGroup(
 /**
  * 通用的多选对话框组件
  * 
- * 功能特性:
+ * 功能特�?
  * - 分组展示项目
- * - 显示多种信息(标题、副标题、大小、数量、图标)
- * - 实时计算选中项总大小
- * - 全选/全不选快捷按钮
+ * - 显示多种信息(标题、副标题、大小、数量、图�?
+ * - 实时计算选中项总大�?
+ * - 全�?全不选快捷按�?
  * - 主题适配
- * - 可选插槽: 标题栏动作按钮、行尾内容、独立的确定回调(如"开始恢复")
+ * - 可选插�? 标题栏动作按钮、行尾内容、独立的确定回调(�?开始恢�?)
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun MultiSelectDialogContent(
-    title: String,                      // 对话框标题
+    title: String,                      // 对话框标�?
     description: String? = null,        // 描述文字
     groups: List<MultiSelectGroup>,     // 分组数据
     selectedKeys: Set<String>,          // 已选中的key集合
     totalSizeCalculator: (List<MultiSelectItem>) -> String?, // 总大小计算器
     onSelectionChange: (String, Boolean) -> Unit, // 选择变化回调
     onDismiss: () -> Unit,              // 关闭回调
-    onSelectAll: () -> Unit,            // 全选回调
-    onDeselectAll: () -> Unit,          // 全不选回调
-    headerAction: (@Composable () -> Unit)? = null, // 标题栏动作按钮插槽 (如"检测格式")
-    itemTrailing: (@Composable (MultiSelectItem) -> Unit)? = null, // 行尾内容插槽 (如验证状态图标)
+    onSelectAll: () -> Unit,            // 全选回�?
+    onDeselectAll: () -> Unit,          // 全不选回�?
+    headerAction: (@Composable () -> Unit)? = null, // 标题栏动作按钮插�?(�?检测格�?)
+    itemTrailing: (@Composable (MultiSelectItem) -> Unit)? = null, // 行尾内容插槽 (如验证状态图�?
     onConfirm: (() -> Unit)? = null     // 确定按钮回调, 为空时确定按钮仅关闭弹窗
 ) {
-    val topBarColor = pageTopBarContainerColor()
+    val topBarColor = pageTopBarColors().containerColor
     val cardColor = pageCardContainerColor()
     
-    // 计算选中项
+    // 计算选中�?
     val selectedItems = remember(groups, selectedKeys) {
         groups.flatMap { it.items }.filter { it.key in selectedKeys }
     }
     
-    // 计算总大小
+    // 计算总大�?
     val totalSize = remember(selectedItems) {
         totalSizeCalculator(selectedItems)
     }
@@ -102,7 +102,7 @@ fun MultiSelectDialogContent(
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // 标题栏
+                    // 标题�?
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -132,7 +132,7 @@ fun MultiSelectDialogContent(
                             }
                         }
 
-                        // 右侧：有动作按钮时放按钮（已选数量下移到底部），否则显示已选数量
+                        // 右侧：有动作按钮时放按钮（已选数量下移到底部），否则显示已选数�?
                         if (headerAction != null) {
                             Box(
                                 modifier = Modifier
@@ -165,7 +165,7 @@ fun MultiSelectDialogContent(
                             .padding(vertical = 8.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        // 分组展示 (分组名为空时按平铺列表处理, 不渲染分组头)
+                        // 分组展示 (分组名为空时按平铺列表处�? 不渲染分组头)
                         groups.forEach { group ->
                             if (group.name.isNotBlank()) {
                                 // 分组标题
@@ -385,7 +385,7 @@ private fun MultiSelectItemRow(
                 modifier = Modifier.padding(top = 2.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                // 副标题 (文件名)
+                // 副标�?(文件�?
                 if (item.subtitle != null) {
                     Text(
                         text = item.subtitle,
@@ -426,7 +426,7 @@ private fun MultiSelectItemRow(
             }
         }
 
-        // 行尾插槽 (如验证状态图标)
+        // 行尾插槽 (如验证状态图�?
         trailing?.invoke(item)
     }
 }

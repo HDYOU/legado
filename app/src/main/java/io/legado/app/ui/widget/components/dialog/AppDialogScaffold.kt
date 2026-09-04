@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import io.legado.app.ui.theme.pageCardContainerColor
-import io.legado.app.ui.theme.pageTopBarContainerColor
+import io.legado.app.ui.theme.pageTopBarColors
 // 弹窗骨架
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,12 +31,13 @@ fun AppDialogScaffold(
         .fillMaxWidth()
         .wrapContentHeight(),
     containerColor: Color = pageCardContainerColor(),
-    topBarContainerColor: Color = pageTopBarContainerColor(),
+    topBarContainerColor: Color = pageTopBarColors().containerColor,
     navigationContentDescription: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
     bottomBar: @Composable ColumnScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val topBarColors = pageTopBarColors()
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.large,
@@ -62,7 +63,7 @@ fun AppDialogScaffold(
                 actions = actions,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = topBarContainerColor,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                    titleContentColor = topBarColors.contentColor
                 )
             )
 
