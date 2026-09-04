@@ -10,11 +10,7 @@ import io.legado.app.ui.theme.pageHeaderContainerColor
 import io.legado.app.ui.theme.pageMutedIconTint
 import io.legado.app.ui.theme.pageSecondaryTextColor
 import io.legado.app.ui.theme.pageSurfaceVariantColor
-import io.legado.app.ui.theme.pageTopBarContainerColor
 import androidx.compose.ui.graphics.luminance
-
-@Composable
-fun readRecordTopBarContainerColor() = pageTopBarContainerColor()
 
 @Composable
 fun readRecordCardContainerColor() = pageCardElevatedContainerColor()

@@ -41,6 +41,8 @@ import io.legado.app.help.glide.ImageLoader
 import io.legado.app.ui.book.readRecord.components.HeatmapCalendarBottomSheet
 import io.legado.app.ui.book.readRecord.components.HeatmapMode
 import io.legado.app.ui.book.readRecord.components.SummaryCard
+import io.legado.app.ui.theme.pageTopBarBackground
+import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.ui.widget.components.swipe.SwipeActionContainer
@@ -74,7 +76,7 @@ fun ReadRecordScreen(
     var heatmapMode by remember { mutableStateOf(HeatmapMode.TIME) }
     val listState = rememberLazyListState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val topBarColor = readRecordTopBarContainerColor()
+    val topBarColors = pageTopBarColors()
     val searchFieldColor = readRecordCardContainerColor()
 
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -202,12 +204,13 @@ fun ReadRecordScreen(
         topBar = {
             if (state.isSelectionMode) {
                 TopAppBar(
+                    modifier = Modifier.pageTopBarBackground(topBarColors),
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = topBarColor,
-                        scrolledContainerColor = topBarColor,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onSecondary,
-                        titleContentColor = MaterialTheme.colorScheme.onSecondary,
-                        actionIconContentColor = MaterialTheme.colorScheme.onSecondary
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
+                        navigationIconContentColor = topBarColors.contentColor,
+                        titleContentColor = topBarColors.contentColor,
+                        actionIconContentColor = topBarColors.contentColor
                     ),
                     title = {
                         Text(
@@ -236,12 +239,13 @@ fun ReadRecordScreen(
                 )
             } else {
                 TopAppBar(
+                    modifier = Modifier.pageTopBarBackground(topBarColors),
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = topBarColor,
-                        scrolledContainerColor = topBarColor,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onSecondary,
-                        titleContentColor = MaterialTheme.colorScheme.onSecondary,
-                        actionIconContentColor = MaterialTheme.colorScheme.onSecondary
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
+                        navigationIconContentColor = topBarColors.contentColor,
+                        titleContentColor = topBarColors.contentColor,
+                        actionIconContentColor = topBarColors.contentColor
                     ),
                     title = {
                         Column {
@@ -257,7 +261,7 @@ fun ReadRecordScreen(
                                     DisplayMode.READ_TIME -> stringResource(R.string.rr_read_duration)
                                 },
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSecondary
+                                color = topBarColors.contentColor
                             )
                         }
                     },

@@ -129,6 +129,7 @@ fun ThemeEditDialog(
                 // 导航栏颜色透明
                 SwitchRow(
                     title = stringResource(R.string.imm_navigation_bar_s),
+                    subtitle = stringResource(R.string.top_bar_transparent_hint),
                     checked = config.transparentNavBar,
                     onCheckedChange = { checked -> onUpdateDraft { cfg -> cfg.copy(transparentNavBar = checked) } }
                 )
@@ -379,7 +380,8 @@ private fun BackgroundImageRow(
 private fun SwitchRow(
     title: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    subtitle: String? = null
 ) {
     Surface(
         modifier = Modifier
@@ -396,12 +398,21 @@ private fun SwitchRow(
                 .padding(horizontal = 14.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontSize = 15.sp,
-                modifier = Modifier.weight(1f)
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontSize = 15.sp
+                )
+                if (subtitle != null) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
 
             Switch(
                 checked = checked,
