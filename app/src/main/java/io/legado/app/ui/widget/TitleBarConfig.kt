@@ -101,7 +101,6 @@ private fun TitleBar.applyTopBarConfig(config: TopBarConfig.Config) {
         LayerDrawable(arrayOf(shape, wallpaper))
     }
     elevation = when {
-        config.style == TopBarConfig.STYLE_REGULAR && config.cornerScale != 0f -> 0f
         backgroundAlpha < 100 -> 0.1f
         else -> context.elevation
     }
