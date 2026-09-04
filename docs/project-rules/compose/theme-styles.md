@@ -138,7 +138,7 @@ TopAppBar(
 ```
 
 - **禁止**再使用旧 API `pageTopBarContainerColor()`、**禁止**手写 `MaterialTheme.colorScheme.secondary` 作为顶栏容器色。
-- 阴影规则（`shadowElevation`）：`transparentNavBar` → `0.dp`；`alphaPercent < 100` → `0.1.dp`；否则用 `context.elevation`。**禁止**因"regular 风格 + 圆角"而把阴影强制置零（历史 bug，已在 Compose 侧修复）。
+- 阴影规则（`shadowElevation`）：`transparentNavBar` → `0.dp`；`alphaPercent < 100` → `0.1.dp`；否则用 `context.elevation`。Compose 侧（`CommonPageColors.kt`）与 View 侧（`TitleBarConfig.kt`）**均已**按此规则实现，**禁止**再引入"regular 风格 + 圆角 → 阴影强制置零"的分支（历史 bug，两套体系均已修复）。
 
 #### 7.7.2 Dialog / 浮层顶栏
 
