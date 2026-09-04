@@ -51,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -78,7 +79,8 @@ import io.legado.app.ui.theme.pageCardElevatedContainerColor
 import io.legado.app.ui.theme.pageHeaderContainerColor
 import io.legado.app.ui.theme.pageMutedIconTint
 import io.legado.app.ui.theme.pageSecondaryTextColor
-import io.legado.app.ui.theme.pageTopBarContainerColor
+import io.legado.app.ui.theme.pageTopBarBackground
+import io.legado.app.ui.theme.pageTopBarColors
 import io.legado.app.ui.debuglog.viewmodel.DebugLogViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.legado.app.utils.putPrefBoolean
@@ -128,7 +130,7 @@ fun DebugLogScreen(
     val selectedRssSourceUrl by viewModel.selectedRssSourceUrl.collectAsState()
     val rssExecutionRecords by viewModel.rssExecutionRecords.collectAsState()
     val rssRuleRecords by viewModel.rssRuleRecords.collectAsState()
-    val topBarColor = pageTopBarContainerColor()
+    val topBarColors = pageTopBarColors()
     val cardColor = pageCardElevatedContainerColor()
     val secondaryTextColor = pageSecondaryTextColor()
     val mutedIconTint = pageMutedIconTint()
@@ -156,12 +158,13 @@ fun DebugLogScreen(
             Column {
                 // 顶部工具栏
                 TopAppBar(
+                    modifier = Modifier.pageTopBarBackground(topBarColors),
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = topBarColor,
-                        scrolledContainerColor = topBarColor,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onSecondary,
-                        titleContentColor = MaterialTheme.colorScheme.onSecondary,
-                        actionIconContentColor = MaterialTheme.colorScheme.onSecondary
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
+                        navigationIconContentColor = topBarColors.contentColor,
+                        titleContentColor = topBarColors.contentColor,
+                        actionIconContentColor = topBarColors.contentColor
                     ),
                     title = { Text("调试日志") },
                     navigationIcon = {
