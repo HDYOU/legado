@@ -25,7 +25,6 @@
 - 动画参数（时长档位、easing、spring、无限动画）**必须**遵循 §7.6，禁止调用点随手写 `tween(200, ...)`、`tween(600, ...)` 这类无档位时长。
 - **禁止**自定义 `CubicBezier` / `keyframes` 曲线散落多处，新增自定义曲线必须集中定义在 `ui/theme/AnimationSpecs.kt`（**目标态文件，首次落地时创建**）并注释用途。
 
-
 ```kotlin
 // ui/theme/Dimensions.kt（目标态示例，落地时创建）
 object AppDimens {
@@ -89,11 +88,11 @@ Text(stringResource(R.string.theme_copied, theme.name))
 
 时长**只允许三档**，禁止 `tween(200, ...)`、`tween(600, ...)` 这类档位外取值：
 
-| 档位 | 时长 | 用途 | 曲线 |
-|------|------|------|------|
-| 微交互 | 150ms | 按压缩放、颜色态切换、`animateColorAsState` | `FastOutSlowInEasing` |
-| 标准 | 300ms | 展开/收起、`AnimatedVisibility` 进出场 | `FastOutSlowInEasing` |
-| 进场过渡 | 450ms | 页面级 `Crossfade`、大图位替换 | `FastOutSlowInEasing` |
+| 档位     | 时长  | 用途                                        | 曲线                  |
+| -------- | ----- | ------------------------------------------- | --------------------- |
+| 微交互   | 150ms | 按压缩放、颜色态切换、`animateColorAsState` | `FastOutSlowInEasing` |
+| 标准     | 300ms | 展开/收起、`AnimatedVisibility` 进出场      | `FastOutSlowInEasing` |
+| 进场过渡 | 450ms | 页面级 `Crossfade`、大图位替换              | `FastOutSlowInEasing` |
 
 - **弹性动画**统一 `SpringSpec(stiffness = Spring.StiffnessMediumLow)`（存量 `CheckSourceScreen` 已在用，固化）；禁止调用点散落 `spring(...)` 随手传 stiffness/dampingRatio。
 - **禁止**手写帧循环（`withFrameNanos` / `while` 循环）实现动画——无限动画一律 `rememberInfiniteTransition`，一次性动画一律 `animate*AsState` 或 `Animatable`。
@@ -114,5 +113,51 @@ Text(stringResource(R.string.theme_copied, theme.name))
 - 读取 `Settings.Global.ANIMATION_SCALE`，`CompositionLocal`（建议 `LocalAnimationScale`，Application 初始化读一次 + `ContentObserver` 监听变化）下发。
 - `scale < 0.5f` 时：装饰性动画（shimmer、转圈、背景流动）**时长归零直接 snap 到终态或静态样式**；功能性动画（页面进出场）保留。
 - **禁止** Composable 内直接读 `Settings.Global`（读 ContentResolver 有 IPC 成本，不能进 composition 热路径）。
+
+### 7.7 顶栏（TopBar）统一规范
+
+> 本项目的顶栏颜色/背景/阴影统一由 `TopBarConfig`（用户可配置：样式 default/regular、主色 tagBarColor、透明度 tagBarAlpha、常规样式壁纸 wallpaper）驱动。Compose 与 View 两套体系各有其接入入口，**禁止**在调用点直接硬编码 `MaterialTheme.colorScheme.secondary` 或 `ThemeStore.primaryColor` 绕过统一体系。
+
+#### 7.7.1 Compose 页面顶栏（强制）
+
+- **必须**通过 `pageTopBarColors()`（`ui/theme/CommonPageColors.kt`）取色，返回 `PageTopBarColors`（containerColor/contentColor/cornerRadius/shadowElevation/wallpaperFile/wallpaperAlpha）。
+- **必须**用 `Modifier.pageTopBarBackground(colors)` 承载顶栏容器（fillMaxWidth + shadow + clip + background + 壁纸），将 `containerColor` 设为 `Color.Transparent` 并把图标/标题色设为 `topBarColors.contentColor`（避免容器色被 TopAppBar 自身重绘覆盖）：
+
+```kotlin
+val topBarColors = pageTopBarColors()
+TopAppBar(
+    modifier = Modifier.pageTopBarBackground(topBarColors),
+    colors = TopAppBarDefaults.topAppBarColors(
+        containerColor = Color.Transparent,
+        scrolledContainerColor = Color.Transparent,
+        navigationIconContentColor = topBarColors.contentColor,
+        titleContentColor = topBarColors.contentColor,
+        actionIconContentColor = topBarColors.contentColor
+    ), ...
+)
+```
+
+- **禁止**再使用旧 API `pageTopBarContainerColor()`、**禁止**手写 `MaterialTheme.colorScheme.secondary` 作为顶栏容器色。
+- 阴影规则（`shadowElevation`）：`transparentNavBar` → `0.dp`；`alphaPercent < 100` → `0.1.dp`；否则用 `context.elevation`。**禁止**因"regular 风格 + 圆角"而把阴影强制置零（历史 bug，已在 Compose 侧修复）。
+
+#### 7.7.2 Dialog / 浮层顶栏
+
+- 在 `Dialog` / `Surface` 浮层内，**禁止**用 `pageTopBarBackground` modifier（其内部依赖 `context.transparentNavBar`，在浮层语义下可能不符预期）。
+- **必须**改用 `pageTopBarColors().containerColor` 方案：取 `val topBarColors = pageTopBarColors()`，`TopAppBar` 的 `containerColor = topBarColors.containerColor`，`titleContentColor` / `navigationIconContentColor` / `actionIconContentColor` 全用 `topBarColors.contentColor`（同 §7.7.1 示例，仅容器色不同：填实色而非 Transparent + pageTopBarBackground）。
+
+#### 7.7.3 View 体系顶栏
+
+- View 体系页面/弹窗顶栏 **必须**统一走 `TitleBar`（`ui/widget/TitleBar.kt`）`applyTopBarConfig()`，由 `TopBarConfig` 计算背景/圆角/壁纸/文字色。
+- 裸 `androidx.appcompat.widget.Toolbar` 如需接入统一色，**必须**通过 `TopBarConfig` 计算容器色（`withOpacity(backgroundColor, alphaPercent)`，`STYLE_REGULAR` 用 `resolveBackgroundColor` / `wallpaperAlpha`，否则 `tagBarColor ?: primaryColor` / `tagBarAlpha`），**禁止**直接 `setBackgroundColor(primaryColor)` 写死。
+- `TitleBar` 上的 `skipTopBarConfig="true"` 是「有意跳过统一主题」的显式声明，使用前必须确认意图（见 §7.7.4）。
+
+#### 7.7.4 有意例外（改前必读，禁止"修掉"）
+
+以下两处顶栏**有意**不走统一主题，属于设计决策而非 bug，**禁止**在无需求变更时把它们"接入"统一色：
+
+- **书籍详情页**（`ui/book/info/BookInfoActivity.kt`）：顶栏被强制为透明（`binding.titleBar.setBackgroundResource(R.color.transparent)`），使封面图从顶栏后方露出。改成统一色会破坏封面展示。
+- **书籍阅读页**（`ui/book/read/ReadMenu.kt`）：`view_read_menu.xml` 中 TitleBar 声明 `skipTopBarConfig="true"`。immersive 菜单顶栏跟随**阅读页背景色**（`ReadBookConfig.durConfig.curBgStr()`），非 immersive 用 `primaryColor`——跟随阅读主题是有意为之。
+
+> 若确有需求要统一这两处（如"阅读页也想用全局顶栏壁纸"），需作为独立需求评审，禁止顺手改。
 
 ---
