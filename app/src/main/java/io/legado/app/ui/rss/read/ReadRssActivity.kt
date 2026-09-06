@@ -136,13 +136,6 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
         }
     }
     private val rssJsExtensions by lazy { RssJsExtensions(this, viewModel.rssSource) }
-    
-    /**
-     * WebView性能追踪器
-     * 用于测量页面加载各阶段耗时（HTML下载、解析、JS注入、DOM渲染等）
-     * 仅在订阅源的 showWebLog 字段为 true 时启用
-     */
-    private var perfTracker: RssWebViewPerfTracker? = null
 
     private val refreshNameList: MutableList<String> by lazy { mutableListOf() }
     private var findCurrentIndex = 0
@@ -544,20 +537,7 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
                 upWebviewSettings()
                 initJavascriptInterface()
                 val rssSource = viewModel.rssSource
-                
-                val showPerfLog = rssSource?.showWebLog == true
-                if (showPerfLog && rssSource != null) {
-                    perfTracker = RssWebViewPerfTracker(rssSource)
-                    perfTracker!!.start()
-                    perfTracker!!.htmlParseStart()
-                }
-                
                 val html = viewModel.clHtml(content, rssSource?.style)
-                
-                if (showPerfLog) {
-                    perfTracker?.htmlParseEnd()
-                }
-                
                 val url = NetworkUtils.getAbsoluteURL(it.origin, it.link).substringBefore("@js")
                 val baseUrl = if (rssSource?.loadWithBaseUrl == false) null else url
                 currentWebView.loadDataWithBaseURL(
@@ -574,13 +554,6 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
             upWebviewSettings(urlState.getUserAgent())
             initJavascriptInterface()
             CookieManager.applyToWebView(urlState.url)
-            
-            val source = viewModel.rssSource
-            if (source?.showWebLog == true) {
-                perfTracker = RssWebViewPerfTracker(source)
-                perfTracker!!.start()
-            }
-            
             currentWebView.loadUrl(urlState.url, urlState.headerMap)
         }
         /**
@@ -592,13 +565,6 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
             viewModel.rssSource?.let {
                 upWebviewSettings()
                 initJavascriptInterface()
-                
-                if (it.showWebLog) {
-                    perfTracker = RssWebViewPerfTracker(it)
-                    perfTracker!!.start()
-                    perfTracker!!.htmlParseStart()
-                }
-                
                 val baseUrl = if (it.loadWithBaseUrl) it.sourceUrl else null
                 currentWebView.loadDataWithBaseURL(
                     baseUrl, html, "text/html", "utf-8", it.sourceUrl
@@ -829,16 +795,6 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
             }
             super.onPageStarted(view, url, favicon)
             currentWebView.evaluateJavascript(basicJs, null)
-            
-            val source = viewModel.rssSource
-            if (source?.showWebLog == true) {
-                // 如果还没有开始追踪，才创建新的追踪器
-                // 这样可以保留 contentLiveData 等地方已经记录的阶段数据
-                if (perfTracker == null || perfTracker!!.startTime == 0L) {
-                    perfTracker = RssWebViewPerfTracker(source)
-                    perfTracker!!.start()
-                }
-            }
         }
 
         private var jsInjected = false
@@ -880,22 +836,11 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
                 val preloadJs = source.preloadJs ?: ""
                 // JS_INJECTION：包含ajaxAwait、downloadFileAwait等Promise封装的异步函数
                 val injectionContent = "(() => {$JS_INJECTION\n$preloadJs\n})();"
-                
-                if (source.showWebLog) {
-                    perfTracker?.jsInjectStart()
-                }
-                
-                val response = WebResourceResponse(
+                return WebResourceResponse(
                     "text/javascript",
                     "utf-8",
                     ByteArrayInputStream(injectionContent.toByteArray())
                 )
-                
-                if (source.showWebLog) {
-                    perfTracker?.jsInjectEnd(injectionContent.length)
-                }
-                
-                return response
             }
             
             // 3. 黑名单检查：匹配则返回空白资源
@@ -944,14 +889,6 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
          */
         private suspend fun getModifiedContentWithJs(url: String, request: WebResourceRequest): WebResourceResponse? {
             try {
-                val source = viewModel.rssSource
-                val showPerfLog = source?.showWebLog == true
-                
-                // 阶段1：HTML下载
-                if (showPerfLog) {
-                    perfTracker?.htmlDownloadStart()
-                }
-                
                 // 发送OkHttp请求，携带Cookie和原始请求头
                 val cookie = webCookieManager.getCookie(url)
                 val res = okHttpClient.newCallResponse {
@@ -963,12 +900,6 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
                     request.requestHeaders?.forEach { (key, value) ->
                         addHeader(key, value)
                     }
-                }
-                
-                // 阶段2：HTML解析（注入JS标签）
-                if (showPerfLog) {
-                    perfTracker?.htmlDownloadEnd()
-                    perfTracker?.htmlParseStart()
                 }
                 
                 // 保存Set-Cookie
@@ -1000,10 +931,6 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
                     }
                 }
                 
-                if (showPerfLog) {
-                    perfTracker?.htmlParseEnd()
-                }
-                
                 return WebResourceResponse(
                     mimeType,
                     charsetSre,
@@ -1016,24 +943,17 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
 
         /**
          * 页面加载完成回调
-         * 1. 记录DOM渲染结束时间并输出性能报告
-         * 2. 更新标题栏
+         * 更新标题栏
          */
         override fun onPageFinished(view: WebView, url: String) {
             super.onPageFinished(view, url)
-            
+
             // 页面加载完成后恢复订阅源配置的缓存模式（刷新时临时设为 LOAD_NO_CACHE）
             viewModel.rssSource?.let {
                 view.settings.cacheMode =
                     if (it.cacheFirst) WebSettings.LOAD_CACHE_ELSE_NETWORK else WebSettings.LOAD_DEFAULT
             }
-            
-            // 阶段5：DOM渲染完成，记录性能数据
-            if (viewModel.rssSource?.showWebLog == true) {
-                perfTracker?.domRenderEnd()
-                perfTracker?.report()
-            }
-            
+
             // 更新标题栏
             view.title?.let { title ->
                 if (title != url
