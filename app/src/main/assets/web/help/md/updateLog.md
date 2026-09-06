@@ -24,6 +24,12 @@
 - [Github分支GEd520](https://github.com/GEd520/legados)
 - [Github分支Suml-1](https://github.com/Suml-1/Legado_Max)
 
+**2026/9/06*
+- fix(书架): 修复分组标签样式下当前分组指示器下划线消失的问题
+- fix(阅读页): 限制气泡 js 执行并发
+- refactor(订阅源): 移除 WebView 性能追踪器
+- fix(书源): 修复并发场景下书源变量写入丢失的问题
+
 **2026/9/04**
 
 - fix(顶栏): 修复常规样式圆角顶栏阴影被强制置零的问题，恢复阴影显示（Compose 与 View 两套体系一并修复）
