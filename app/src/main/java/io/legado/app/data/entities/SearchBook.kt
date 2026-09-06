@@ -14,6 +14,7 @@ import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import java.util.concurrent.ConcurrentHashMap
 
 @Parcelize
 @Entity(
@@ -73,8 +74,8 @@ data class SearchBook(
     @delegate:Transient
     @delegate:Ignore
     @IgnoredOnParcel
-    override val variableMap: HashMap<String, String> by lazy {
-        GSON.fromJsonObject<HashMap<String, String>>(variable).getOrNull() ?: HashMap()
+    override val variableMap: ConcurrentHashMap<String, String> by lazy {
+        ConcurrentHashMap(GSON.fromJsonObject<Map<String, String>>(variable).getOrNull() ?: emptyMap())
     }
 
     @delegate:Transient

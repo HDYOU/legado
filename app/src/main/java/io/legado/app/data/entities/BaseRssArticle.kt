@@ -12,8 +12,10 @@ interface BaseRssArticle : RuleDataInterface {
     var variable: String?
 
     override fun putVariable(key: String, value: String?): Boolean {
-        if (super.putVariable(key, value)) {
-            variable = GSON.toJson(variableMap)
+        synchronized(variableMap) {
+            if (super.putVariable(key, value)) {
+                variable = GSON.toJson(variableMap)
+            }
         }
         return true
     }

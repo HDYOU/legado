@@ -177,8 +177,10 @@ var readCount = book.getVariable("readCount");
 ```kotlin
 // BaseBook.kt
 override fun putVariable(key: String, value: String?): Boolean {
-    if (super.putVariable(key, value)) {
-        variable = GSON.toJson(variableMap)  // 序列化到数据库字段
+    synchronized(variableMap) {
+        if (super.putVariable(key, value)) {
+            variable = GSON.toJson(variableMap)  // 序列化到数据库字段
+        }
     }
     return true
 }
@@ -193,9 +195,10 @@ override fun getBigVariable(key: String): String? {
 ```
 
 **特点**：
-- 小数据（<10000字符）：存在内存 `HashMap`，序列化到 `Book.variable` 数据库字段
+- 小数据（<10000字符）：存在内存 `ConcurrentHashMap`，序列化到 `Book.variable` 数据库字段
 - 大数据（>=10000字符）：通过 `RuleBigDataHelp` 存到文件系统
 - 随书籍持久化，App 重启还在
+- **线程安全**：渐进式目录加载 / 预下载时，目录规则与正文规则的 JS 会并发读写同一 book 实例的变量，`variableMap` 使用并发容器且写入时同步序列化，不会出现并发写入丢数据
 - 适合存：书籍自定义信息、阅读配置等
 
 ---
@@ -217,8 +220,10 @@ var imgList = chapter.getVariable("imgList");
 ```kotlin
 // BookChapter.kt
 override fun putVariable(key: String, value: String?): Boolean {
-    if (super.putVariable(key, value)) {
-        variable = GSON.toJson(variableMap)  // 序列化到数据库字段
+    synchronized(variableMap) {
+        if (super.putVariable(key, value)) {
+            variable = GSON.toJson(variableMap)  // 序列化到数据库字段
+        }
     }
     return true
 }

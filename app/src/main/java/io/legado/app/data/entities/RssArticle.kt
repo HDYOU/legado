@@ -6,6 +6,7 @@ import androidx.room.Ignore
 import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
 import kotlinx.parcelize.IgnoredOnParcel
+import java.util.concurrent.ConcurrentHashMap
 
 @Entity(
     tableName = "rssArticles",
@@ -43,8 +44,8 @@ data class RssArticle(
     @delegate:Transient
     @delegate:Ignore
     @IgnoredOnParcel
-    override val variableMap: HashMap<String, String> by lazy {
-        GSON.fromJsonObject<HashMap<String, String>>(variable).getOrNull() ?: hashMapOf()
+    override val variableMap: ConcurrentHashMap<String, String> by lazy {
+        ConcurrentHashMap(GSON.fromJsonObject<Map<String, String>>(variable).getOrNull() ?: emptyMap())
     }
 
     fun toStar() = RssStar(

@@ -4,6 +4,7 @@ import io.legado.app.help.RuleBigDataHelp
 import io.legado.app.model.analyzeRule.RuleDataInterface
 import io.legado.app.utils.GSON
 import io.legado.app.utils.splitNotBlank
+import java.util.concurrent.ConcurrentHashMap
 
 interface BaseBook : RuleDataInterface {
     var name: String
@@ -17,8 +18,12 @@ interface BaseBook : RuleDataInterface {
     var tocHtml: String?
 
     override fun putVariable(key: String, value: String?): Boolean {
-        if (super.putVariable(key, value)) {
-            variable = GSON.toJson(variableMap)
+        // 同步块保证 map 变更与 variable JSON 序列化原子完成，
+        // 避免并发写入时 JSON 与内存 map 不一致
+        synchronized(variableMap) {
+            if (super.putVariable(key, value)) {
+                variable = GSON.toJson(variableMap)
+            }
         }
         return true
     }

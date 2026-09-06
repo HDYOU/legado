@@ -27,6 +27,7 @@ import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import java.nio.charset.Charset
 import java.time.LocalDate
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.max
 
 @Parcelize
@@ -140,8 +141,8 @@ data class Book(
     @delegate:Transient
     @delegate:Ignore
     @IgnoredOnParcel
-    override val variableMap: HashMap<String, String> by lazy {
-        GSON.fromJsonObject<HashMap<String, String>>(variable).getOrNull() ?: hashMapOf()
+    override val variableMap: ConcurrentHashMap<String, String> by lazy {
+        ConcurrentHashMap(GSON.fromJsonObject<Map<String, String>>(variable).getOrNull() ?: emptyMap())
     }
 
     @Ignore
