@@ -73,15 +73,14 @@ data class BookChapter(
     }
 
     fun putLyric(value: String?) { //存入歌词文本
-        if (super.putVariable("lyric", value)) {
-            variable = GSON.toJson(variableMap)
+        // 走 putVariable 的同步协议，避免与并发的 chapter.putVariable 互相覆盖序列化结果
+        if (putVariable("lyric", value)) {
             update()
         }
     }
 
     fun putDanmaku(value: String?) { //存入弹幕文本
-        if (super.putVariable("danmaku", value)) {
-            variable = GSON.toJson(variableMap)
+        if (putVariable("danmaku", value)) {
             update()
         }
     }

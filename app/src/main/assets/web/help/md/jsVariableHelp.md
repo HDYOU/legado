@@ -495,7 +495,7 @@ evalJS() (临时作用域)
     │                 ┌────┼────┐
     │                 ▼    ▼    ▼
     │              章节级 书籍级 书源级
-    │              HashMap HashMap CacheManager
+    │              ConcurrentHashMap ConcurrentHashMap CacheManager
     │                 │    │      │
     │                 ▼    ▼      ▼
     │             BookChapter Book  持久化存储
