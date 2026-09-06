@@ -26,6 +26,7 @@ import io.legado.app.R
 import io.legado.app.constant.Theme
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.TopBarConfig
+import io.legado.app.lib.theme.accentColor
 import io.legado.app.lib.theme.backgroundColor
 import io.legado.app.lib.theme.elevation
 import io.legado.app.lib.theme.getPrimaryTextColor
@@ -207,10 +208,7 @@ private fun TitleBar.applyTransparentTopBarChildConfig() {
         setBackgroundColor(Color.TRANSPARENT)
         setTabTextColors(tabTextColorStateList(contentColor))
         setSelectedTabIndicatorColor(
-            TopBarConfig.withOpacity(
-                config.tagSelectedColor ?: context.primaryColor,
-                config.tagSelectedAlpha
-            )
+            resolveTabIndicatorColor(context, config, Color.TRANSPARENT)
         )
     }
     findViewById<View?>(R.id.search_view)?.applyTopBarChildConfig(config, contentColor)
@@ -220,13 +218,13 @@ private fun View.applyTopBarChildConfig(config: TopBarConfig.Config, contentColo
     if (this !is TabLayout && id != R.id.search_view) return
     val tagBarColor = config.tagBarColor
         ?: ContextCompat.getColor(context, R.color.background_menu)
-    val selectedColor = config.tagSelectedColor ?: context.primaryColor
     if (this is TabLayout && id == R.id.tab_layout) {
         val tagBarAlpha = if (context.transparentNavBar) 0 else config.tagBarAlpha
-        setBackgroundColor(TopBarConfig.withOpacity(tagBarColor, tagBarAlpha))
+        val barColor = TopBarConfig.withOpacity(tagBarColor, tagBarAlpha)
+        setBackgroundColor(barColor)
         setTabTextColors(tabTextColorStateList(contentColor))
         setSelectedTabIndicatorColor(
-            TopBarConfig.withOpacity(selectedColor, config.tagSelectedAlpha)
+            resolveTabIndicatorColor(context, config, barColor)
         )
     }
     if (id == R.id.search_view) {
@@ -234,6 +232,25 @@ private fun View.applyTopBarChildConfig(config: TopBarConfig.Config, contentColo
         applyTint(contentColor)
         (this as? SearchView)?.setContentTint(contentColor)
     }
+}
+
+/**
+ * 解析分组 TabLayout 的指示器（当前分组下划线）颜色。
+ * 默认顶栏配置中"选中标签颜色"与"标签栏背景色"同为 primaryColor，
+ * 指示器会与标签栏背景融为一体而不可见，此时回退为全局强调色保证下划线可见；
+ * 选中色透明度为 0 时同样回退。
+ */
+private fun resolveTabIndicatorColor(
+    context: Context,
+    config: TopBarConfig.Config,
+    barColor: Int
+): Int {
+    val selectedColor = config.tagSelectedColor
+        ?.let { TopBarConfig.withOpacity(it, config.tagSelectedAlpha) }
+        ?: context.primaryColor
+    val visible = TopBarConfig.opacityToAlpha(config.tagSelectedAlpha) > 0 &&
+        selectedColor != barColor
+    return if (visible) selectedColor else context.accentColor
 }
 
 private fun View.searchViewBackground(): Drawable {
