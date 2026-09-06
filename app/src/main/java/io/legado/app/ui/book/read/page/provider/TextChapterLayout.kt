@@ -46,7 +46,9 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import java.util.LinkedList
 import kotlin.math.roundToInt
 import android.util.Size
@@ -2230,9 +2232,16 @@ class TextChapterLayout(
         if (!AppConfig.forceSoftwareParagraphBubble) return contents
         val source = ReadBook.bookSource ?: return contents
 
+        // 限制气泡 js 执行并发：对话生成气泡场景下几乎每段正文都是含 js 字段的气泡，
+        // 全量并行执行会在瞬间向书源服务器发起大量请求（js 内含 java.ajax 等网络调用），
+        // 触发服务器限流/过载返回 HTML 错误页，连带正文的 /content 请求也拿到 HTML，
+        // 导致书源规则里的 JSON.parse 抛出
+        // "SyntaxError: Unexpected token: <"（表现为获取正文失败，刷新后可恢复）。
+        val jsSemaphore = Semaphore(BUBBLE_JS_MAX_CONCURRENCY)
+
         // 并行处理每个段落
         return contents.map { content ->
-            scope.async { preprocessBubbleJsInText(content, source) }
+            scope.async { preprocessBubbleJsInText(content, source, jsSemaphore) }
         }.awaitAll()
     }
 
@@ -2241,7 +2250,8 @@ class TextChapterLayout(
      */
     private suspend fun preprocessBubbleJsInText(
         text: String,
-        source: BaseSource
+        source: BaseSource,
+        jsSemaphore: Semaphore
     ): String {
         val matcher = AppPattern.imgPattern.matcher(text)
         // 收集需要处理的 (start, end, originalSrc)
@@ -2254,11 +2264,13 @@ class TextChapterLayout(
         }
         if (tasks.isEmpty()) return text
 
-        // 段落内多个 img 的 JS 并行执行
+        // 段落内多个 img 的 JS 执行同样受全局信号量限制，避免并发请求轰炸书源服务器
         val results = tasks.map { (_, _, src) ->
             scope.async {
                 currentCoroutineContext().ensureActive()
-                executeBubbleJs(src, source)
+                jsSemaphore.withPermit {
+                    executeBubbleJs(src, source)
+                }
             }
         }.awaitAll()
 
@@ -2335,6 +2347,8 @@ class TextChapterLayout(
     }
 
     private companion object {
+        /** 气泡 js 执行的最大并发数，防止瞬时请求压垮书源服务器（见 preprocessBubbleJs 注释） */
+        private const val BUBBLE_JS_MAX_CONCURRENCY = 2
         val FORCED_BUBBLE_TEXT_REGEX = Regex(
             """<text\b[^>]*>(.*?)</text>""",
             setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
