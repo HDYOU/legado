@@ -19,6 +19,7 @@ import com.google.android.material.tabs.TabLayout
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import io.legado.app.R
 import io.legado.app.base.VMBaseActivity
+import io.legado.app.data.appDb
 import io.legado.app.data.entities.RssSource
 import io.legado.app.databinding.ActivityRssSourceEditBinding
 import io.legado.app.help.config.LocalConfig
@@ -61,6 +62,7 @@ import io.legado.app.utils.viewbindingdelegate.viewBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.CancellationException
 import splitties.views.bottomPadding
 import kotlin.text.isNotEmpty
 
@@ -153,11 +155,51 @@ class RssSourceEditActivity :
     }
 
     /**
-     * 保存订阅源。所有保存入口统一走这里：
+     * 保存闸门：所有会写库的入口（保存/调试/登录/设置源变量）统一先经过这里。
+     *
+     * 检测待保存地址是否命中列表中"另一条"已存在的订阅源——命中则弹覆盖警告，
+     * 用户确认后才真正保存，取消则中止。sourceUrl 是主键，未改地址时命中的就是本条源自身，
+     * 无覆盖风险，直接放行不查询。
+     */
+    private fun saveSource(source: RssSource, onSuccess: ((RssSource) -> Unit)? = null) {
+        val url = source.sourceUrl
+        val originalUrl = viewModel.rssSource?.sourceUrl
+        if (url.isBlank() || url == originalUrl) {
+            performSave(source, onSuccess)
+            return
+        }
+        lifecycleScope.launch {
+            // 只兜真正的查询异常（检测本身绝不能阻断保存）；
+            // 协程取消（界面销毁）必须原样抛出，否则续体会在已销毁界面上继续跑
+            val existing = runCatching {
+                withContext(Dispatchers.IO) { appDb.rssSourceDao.getByKey(url) }
+            }.getOrElse { if (it is CancellationException) throw it; null }
+            // 续体恢复时界面可能已销毁：此时弹 alert 会 BadTokenException，
+            // 保存也会落进已清理的 scope，故直接放弃本次操作
+            if (isFinishing || isDestroyed) return@launch
+            if (existing != null) {
+                alert(R.string.rss_source_url_duplicate_title) {
+                    setMessage(
+                        getString(
+                            R.string.rss_source_url_duplicate_cover_msg,
+                            existing.sourceName.ifBlank { url }
+                        )
+                    )
+                    positiveButton(R.string.overwrite) { performSave(source, onSuccess) }
+                    negativeButton(R.string.cancel)
+                }
+            } else {
+                performSave(source, onSuccess)
+            }
+        }
+    }
+
+    /**
+     * 真正执行保存。所有保存入口经 saveSource 闸门确认后走到这里：
      * 保存期间保持 pendingSaveCount > 0（阻止退出导致协程被取消），
      * 成功回调与 finally 只结算一次，成功回调先扣减再触发，保证内部 finish() 不被守卫拦下。
      */
-    private fun saveSource(source: RssSource, onSuccess: ((RssSource) -> Unit)? = null) {
+    private fun performSave(source: RssSource, onSuccess: ((RssSource) -> Unit)? = null) {
         pendingSaveCount++
         var settled = false
         fun settle(savedSource: RssSource?) {

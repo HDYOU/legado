@@ -70,6 +70,7 @@ import io.legado.app.utils.viewbindingdelegate.viewBinding
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.CancellationException
 import splitties.views.bottomPadding
 
 /**
@@ -778,12 +779,55 @@ class BookSourceEditActivity :
     }
 
     /**
-     * 保存书源。URL 变更时的书籍迁移在 ViewModel 的保存协程内完成，
-     * 这里只负责 isSaving 状态与成功回调：
-     * 保存期间保持 isSaving=true（阻止退出导致协程被取消），
-     * 迁移完成、结果回传与 isSaving 复位在同一批执行，成功回调不会再丢。
+     * 保存闸门：所有会写库的入口（保存/调试/源所用API/登录/搜索/设置源变量）统一先经过这里。
+     *
+     * 检测待保存地址是否命中列表中"另一条"已存在的书源——命中则弹覆盖警告，
+     * 用户确认后才真正保存，取消则中止（调试/登录/搜索等入口因此不会跳转）。
+     * bookSourceUrl 是主键，未改地址时命中的就是本条源自身，无覆盖风险，直接放行不查询。
      */
     private fun saveSource(
+        source: BookSource,
+        onSuccess: ((BookSource) -> Unit)? = null
+    ) {
+        val url = source.bookSourceUrl
+        val originalUrl = viewModel.bookSource?.bookSourceUrl
+        if (url.isBlank() || url == originalUrl) {
+            performSave(source, onSuccess)
+            return
+        }
+        lifecycleScope.launch {
+            // 只兜真正的查询异常（检测本身绝不能阻断保存）；
+            // 协程取消（界面销毁）必须原样抛出，否则续体会在已销毁界面上继续跑
+            val existing = runCatching {
+                withContext(IO) { appDb.bookSourceDao.getBookSource(url) }
+            }.getOrElse { if (it is CancellationException) throw it; null }
+            // 续体恢复时界面可能已销毁：此时弹 alert 会 BadTokenException，
+            // 保存也会落进已清理的 scope，故直接放弃本次操作
+            if (isFinishing || isDestroyed) return@launch
+            if (existing != null) {
+                alert(R.string.source_url_duplicate_title) {
+                    setMessage(
+                        getString(
+                            R.string.source_url_duplicate_cover_msg,
+                            existing.bookSourceName.ifBlank { url }
+                        )
+                    )
+                    positiveButton(R.string.overwrite) { performSave(source, onSuccess) }
+                    negativeButton(R.string.cancel)
+                }
+            } else {
+                performSave(source, onSuccess)
+            }
+        }
+    }
+
+    /**
+     * 真正执行保存。URL 变更时的书籍迁移在 ViewModel 的保存协程内完成，
+     * 这里只负责保存计数与成功回调：
+     * 保存期间保持 pendingSaveCount > 0（阻止退出导致协程被取消），
+     * 迁移完成、结果回传与计数复位在同一批执行，成功回调不会再丢。
+     */
+    private fun performSave(
         source: BookSource,
         onSuccess: ((BookSource) -> Unit)? = null
     ) {
