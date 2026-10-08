@@ -14,6 +14,7 @@ import io.legado.app.help.http.CookieStore
 import io.legado.app.help.http.newCallStrResponse
 import io.legado.app.help.http.okHttpClient
 import io.legado.app.help.source.SourceHelp
+import io.legado.app.help.source.SourceRecycleBinHelp
 import io.legado.app.help.source.clearExploreKindsCache
 import io.legado.app.help.storage.ImportOldData
 import io.legado.app.model.SharedJsScope
@@ -33,6 +34,9 @@ class BookSourceEditViewModel(application: Application) : BaseViewModel(applicat
     var autoComplete = false
     var bookSource: BookSource? = null
 
+    /** 本次编辑对象的原始地址，initData 同步取自 intent，用于判定"是否原地更新"，不依赖异步加载字段 */
+    private var originalUrl: String? = null
+
     /**
      * 加载待编辑的书源并回调界面。
      *
@@ -40,6 +44,7 @@ class BookSourceEditViewModel(application: Application) : BaseViewModel(applicat
      * 且调用方用于区分"是否保存过"的引用会停留在 null，退出时会误报 RESULT_OK。
      */
     fun initData(intent: Intent, onFinally: () -> Unit) {
+        originalUrl = intent.getStringExtra("sourceUrl")
         executeLazy {
             val sourceUrl = intent.getStringExtra("sourceUrl")
             var source: BookSource? = null
@@ -90,6 +95,13 @@ class BookSourceEditViewModel(application: Application) : BaseViewModel(applicat
                 } else {
                     appDb.bookSourceDao.delete(it)
                     SourceConfig.removeSource(it.bookSourceUrl)
+                }
+            }
+            // 目标地址命中"另一条"已存在书源（覆盖场景）：先把被覆盖的旧源送进回收站再 REPLACE 写入，
+            // 避免它被静默丢弃。以同步取自 intent 的原始地址判定是否原地更新，即便异步字段未就绪也不会误回收自身。
+            if (source.bookSourceUrl != originalUrl) {
+                appDb.bookSourceDao.getBookSource(source.bookSourceUrl)?.let { overwritten ->
+                    SourceRecycleBinHelp.recycleBookSources(listOf(overwritten))
                 }
             }
             appDb.bookSourceDao.insert(source)
