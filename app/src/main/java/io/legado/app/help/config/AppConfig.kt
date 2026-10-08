@@ -1063,7 +1063,7 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         }
 
     var sourceRecycleBinEnabled: Boolean
-        get() = appCtx.getPrefBoolean(PreferKey.sourceRecycleBinEnabled, false)
+        get() = appCtx.getPrefBoolean(PreferKey.sourceRecycleBinEnabled, true)
         set(value) {
             appCtx.putPrefBoolean(PreferKey.sourceRecycleBinEnabled, value)
         }
