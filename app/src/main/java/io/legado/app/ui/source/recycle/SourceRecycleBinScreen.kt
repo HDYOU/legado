@@ -42,7 +42,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.stringResource
 import io.legado.app.R
@@ -54,6 +57,7 @@ import io.legado.app.ui.widget.components.AppPageTopBar
 import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.navigationBarBottomInset
 import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
+import io.legado.app.utils.showHelp
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,6 +104,8 @@ fun SourceRecycleBinScreen(
     }
 
     val secondaryTextColor = pageSecondaryTextColor()
+    // 帮助按钮需要 AppCompatActivity 才能调用 showHelp 扩展（与首页/阅读菜单一致）
+    val activity = LocalContext.current as? AppCompatActivity
 
     // 返回键拦截：有 Dialog 时先关闭 Dialog，无则正常返回（state-events.md §4.5）
     val hasDialog = dialog != null
@@ -207,6 +213,16 @@ fun SourceRecycleBinScreen(
                             }
                         }
                     } else {
+                        if (activity != null) {
+                            IconButton(
+                                onClick = { activity.showHelp("sourceRecycleBinHelp") }
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_help),
+                                    contentDescription = stringResource(R.string.help)
+                                )
+                            }
+                        }
                         IconButton(
                             onClick = {
                                 searchQuery = if (searchQuery == null) "" else null
