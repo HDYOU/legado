@@ -2,7 +2,7 @@
 
 仓库自带的技能目录，作为仓库操作技能的一部分随代码分发。整体策略：**通用技能以用户级注册表为主源（当前运行时唯一加载源），本目录是镜像副本 + 项目专属技能的唯一载体**。
 
-## 内容清单（18 个）
+## 内容清单（20 个）
 
 ### 项目专属（本仓库原生，其他地方拿不到）
 
@@ -18,19 +18,21 @@
 
 ### 通用技能（从用户级 `.agents/skills` 镜像，仅镜像时点快照）
 
-| 技能                            | 用途                                |
-| ------------------------------- | ----------------------------------- |
-| `grill-with-docs`               | 需求梳理并同步产出 ADR/词汇表       |
-| `to-spec`                       | 把讨论合成 spec 并发布到 issue 追踪 |
-| `to-tickets`                    | 把计划拆成 tracer-bullet 工单       |
-| `research`                      | 高可信一手资料调研并落 Markdown     |
-| `tdd`                           | 测试驱动开发流程                    |
-| `diagnosing-bugs`               | 疑难 bug / 性能回归诊断             |
-| `code-review`                   | Standards + Spec 双维度 diff 审查   |
-| `domain-modeling`               | 统一术语并产出 ADR / 词汇表         |
-| `improve-codebase-architecture` | 扫描架构深化点并产出 HTML 报告      |
-| `resolving-merge-conflicts`     | git 合并 / 变基冲突逐个解析         |
-| `teach`                         | 面向场景组织项目知识教学            |
+| 技能                            | 用途                                                              |
+| ------------------------------- | ----------------------------------------------------------------- |
+| `grill-with-docs`               | 需求梳理并同步产出 ADR/词汇表                                     |
+| `to-spec`                       | 把讨论合成 spec 并发布到 issue 追踪                               |
+| `to-tickets`                    | 把计划拆成 tracer-bullet 工单                                     |
+| `research`                      | 高可信一手资料调研并落 Markdown                                   |
+| `tdd`                           | 测试驱动开发流程                                                  |
+| `diagnosing-bugs`               | 疑难 bug / 性能回归诊断                                           |
+| `code-review`                   | Standards + Spec 双维度 diff 审查                                 |
+| `domain-modeling`               | 统一术语并产出 ADR / 词汇表                                       |
+| `improve-codebase-architecture` | 扫描架构深化点并产出 HTML 报告                                    |
+| `resolving-merge-conflicts`     | git 合并 / 变基冲突逐个解析                                       |
+| `teach`                         | 面向场景组织项目知识教学                                          |
+| `writing-for-agents`            | 撰写/重构智能体消费的文档（skill、AGENTS.md/CLAUDE.md、指针体系） |
+| `show-me`                       | 用图表/代码草图/HTML 可视化讲解当前话题                           |
 
 ## 更新策略
 

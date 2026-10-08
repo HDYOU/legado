@@ -110,6 +110,7 @@ Compose 规范拆分为 8 个文件，位于 `docs/project-rules/compose/`（目
 12. **术语歧义走 domain-modeling** — 讨论中出现术语含义不一致、概念边界模糊或需要记录架构决策时，加载 `domain-modeling` 统一术语并把结论写进 `docs/adr/`（决策）与根目录 `CONTEXT.md`（术语表 / ubiquitous language，首次用到该 skill 时创建）。
 13. **不确定的技术事实走 research** — 涉及外部 API、规范、库行为、版本差异等凭记忆说不准的事实时，先走 `research` 用高置信一手资料查证并落成文档结论，不凭记忆作答。
 14. **合并/重摊冲突走 resolving-merge-conflicts** — 遇到 git merge 或 rebase 冲突时，加载 `resolving-merge-conflicts` 按意图逐个 resolve（**绝不 `--abort`、不随手挑一行**），全部解决后再完成操作。
+15. **写智能体文档走 writing-for-agents** — 需要新建或修订 AGENTS.md / CLAUDE.md、编写与重构 skill、按层级深化一套复杂智能体文档体系（context pointer、分支逻辑、information hierarchy），或排查 Agent 执行过程不稳定（variance）时，加载 `writing-for-agents`，按其指针 sharpening、progressive disclosure、leading word、pruning 原则落笔。
 
 ## Coding Conventions
 
