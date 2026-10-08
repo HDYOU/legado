@@ -947,6 +947,13 @@
     <string name="reverse_content">反轉內容</string>
     <string name="debug">除錯</string>
     <string name="source_used_api">源所用API</string>
+    <string name="source_info">源資訊</string>
+    <string name="source_info_name">名稱</string>
+    <string name="source_info_order">排序編號</string>
+    <string name="source_info_update_time">最後更新時間</string>
+    <string name="source_info_code_lines">代碼行數</string>
+    <string name="source_info_file_size">檔案大小</string>
+    <string name="source_info_never">未更新</string>
     <string name="api_category_variable">內建變數</string>
     <string name="api_category_function">內建函數</string>
     <string name="api_category_source_method">源物件方法</string>

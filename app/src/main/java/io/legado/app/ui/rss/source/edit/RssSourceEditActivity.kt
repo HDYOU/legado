@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import io.legado.app.R
 import io.legado.app.base.VMBaseActivity
@@ -37,6 +39,7 @@ import io.legado.app.ui.qrcode.QrCodeResult
 import io.legado.app.ui.rss.source.debug.RssSourceDebugActivity
 import io.legado.app.ui.widget.dialog.UrlOptionDialog
 import io.legado.app.ui.widget.dialog.CookieViewerDialog
+import io.legado.app.ui.widget.dialog.SourceInfoDialog
 import io.legado.app.ui.widget.dialog.VariableDialog
 import io.legado.app.ui.widget.keyboard.KeyboardToolPop
 import io.legado.app.ui.widget.text.EditEntity
@@ -439,6 +442,7 @@ class RssSourceEditActivity :
             )
 
             R.id.menu_log -> showDialogFragment<AppLogDialog>()
+            R.id.menu_source_info -> showSourceInfo()
             R.id.menu_help -> showHelp("rssRuleHelp")
             R.id.menu_view_cookie -> showDialogFragment(CookieViewerDialog(getRssSource().sourceUrl))
         }
@@ -812,6 +816,27 @@ class RssSourceEditActivity :
                 }
             }
         }
+    }
+
+    /**
+     * 展示源信息：排序编号、最后更新时间、代码行数、整个源所占的文件大小。
+     * 代码行数取美化后 JSON 的行数，文件大小取紧凑 JSON（导出/分享格式）的字节数。
+     */
+    private fun showSourceInfo() {
+        val source = getRssSource()
+        val raw = GSON.toJson(source)
+        val pretty = runCatching {
+            GsonBuilder().setPrettyPrinting().create().toJson(JsonParser.parseString(raw))
+        }.getOrDefault(raw)
+        showDialogFragment(
+            SourceInfoDialog().apply {
+                sourceName = source.sourceName
+                customOrder = source.customOrder
+                lastUpdateTime = source.lastUpdateTime
+                codeLines = pretty.split("\n").size
+                fileSize = raw.toByteArray(Charsets.UTF_8).size.toLong()
+            }
+        )
     }
 
     private fun showSourceJsonEdit() {
