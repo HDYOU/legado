@@ -43,6 +43,7 @@ import io.legado.app.model.AudioPlay
 import io.legado.app.model.BookCover
 import io.legado.app.model.ReadBook
 import io.legado.app.model.ReadManga
+import io.legado.app.model.SharedJsScope
 import io.legado.app.model.analyzeRule.AnalyzeUrl
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.model.webBook.WebBook
@@ -165,6 +166,8 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
             } else {
                 appDb.bookSourceDao.getBookSource(book.origin)?.also {
                     hasCustomBtn = it.customButton
+                    // 后台异步预下载 jsLib URL，避免首次 useweb 渲染时主线程 runBlocking 卡住
+                    SharedJsScope.prefetch(it.jsLib)
                 }
             }
             bookData.postValue(book)

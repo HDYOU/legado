@@ -15,6 +15,7 @@ import io.legado.app.domain.model.BookShelfState
 import io.legado.app.help.book.BookshelfMatcher
 import io.legado.app.model.blockrule.BlockRule
 import io.legado.app.model.blockrule.BlockRuleStore
+import io.legado.app.model.SharedJsScope
 import io.legado.app.model.webBook.WebBook
 import io.legado.app.utils.printOnDebug
 import io.legado.app.utils.stackTraceStr
@@ -110,6 +111,7 @@ class ExploreShowViewModel(application: Application) : BaseViewModel(application
         if (sourceUrl.isBlank()) return
         execute {
             bookSource = appDb.bookSourceDao.getBookSource(sourceUrl)
+            SharedJsScope.prefetch(bookSource?.jsLib)
             loadSourceData(sourceUrl, currentKindBaseUrl)
         }
     }
@@ -127,6 +129,8 @@ class ExploreShowViewModel(application: Application) : BaseViewModel(application
         } else if (sourceUrl != null && bookSource?.bookSourceUrl != sourceUrl) {
             bookSource = appDb.bookSourceDao.getBookSource(sourceUrl)
         }
+        // 后台异步预下载 jsLib URL，避免首次 useweb 渲染时主线程 runBlocking 卡住
+        SharedJsScope.prefetch(bookSource?.jsLib)
         if (newExploreUrl != null) {
             exploreUrl = newExploreUrl
             // 记住分类的基准 URL：explore() 会把 exploreUrl 原地改写成带页码的请求地址，
