@@ -29,6 +29,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.DialogFragment
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
 import io.legado.app.R
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.utils.ConvertUtils
@@ -56,7 +58,7 @@ class SourceInfoDialog : DialogFragment() {
     /** 最后更新时间时间戳（毫秒），<=0 视为未更新 */
     var lastUpdateTime: Long = 0L
 
-    /** 代码行数 */
+    /** 代码行数：各规则字段内容实际行数之和 */
     var codeLines: Int = 0
 
     /** 整个源所占的文件大小（字节） */
@@ -92,6 +94,30 @@ class SourceInfoDialog : DialogFragment() {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
             setGravity(Gravity.CENTER)
+        }
+    }
+
+    companion object {
+        /**
+         * 统计源的真实"代码行数"。
+         *
+         * 直接对序列化后的 JSON 取行数并不可靠：每个规则字段里的多行 JS/正则在 JSON 中
+         * 会被转义成单行字符串（换行变成 \n），只算 1 行；同时 JSON 的括号、键名又各自占行，
+         * 数出来的其实是"结构行数"。这里改为遍历整棵 JSON 树，把每个字符串字段内容自身的
+         * 行数（换行数 + 1）累加，空字段记 0，得到的才是源作者实际写下的规则/JS 总行数。
+         */
+        fun countSourceCodeLines(sourceJson: String): Int = runCatching {
+            countStringLines(JsonParser.parseString(sourceJson))
+        }.getOrDefault(0)
+
+        private fun countStringLines(element: JsonElement): Int = when {
+            element.isJsonNull -> 0
+            element.isJsonObject -> element.asJsonObject.entrySet().sumOf { countStringLines(it.value) }
+            element.isJsonArray -> element.asJsonArray.sumOf { countStringLines(it) }
+            else -> {
+                val text = element.asString
+                if (text.isBlank()) 0 else text.split("\n").size
+            }
         }
     }
 }

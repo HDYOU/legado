@@ -12,8 +12,6 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.tabs.TabLayout
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonParser
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import io.legado.app.R
 import io.legado.app.base.VMBaseActivity
@@ -1149,20 +1147,17 @@ class BookSourceEditActivity :
 
     /**
      * 展示源信息：排序编号、最后更新时间、代码行数、整个源所占的文件大小。
-     * 代码行数取美化后 JSON 的行数，文件大小取紧凑 JSON（导出/分享格式）的字节数。
+     * 代码行数取各规则字段内容的实际行数之和，文件大小取序列化 JSON 的字节数。
      */
     private fun showSourceInfo() {
         val source = getSource()
         val raw = GSON.toJson(source)
-        val pretty = runCatching {
-            GsonBuilder().setPrettyPrinting().create().toJson(JsonParser.parseString(raw))
-        }.getOrDefault(raw)
         showDialogFragment(
             SourceInfoDialog().apply {
                 sourceName = source.bookSourceName
                 customOrder = source.customOrder
                 lastUpdateTime = source.lastUpdateTime
-                codeLines = pretty.split("\n").size
+                codeLines = SourceInfoDialog.countSourceCodeLines(raw)
                 fileSize = raw.toByteArray(Charsets.UTF_8).size.toLong()
             }
         )
