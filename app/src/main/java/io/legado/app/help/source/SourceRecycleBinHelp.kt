@@ -145,12 +145,22 @@ object SourceRecycleBinHelp {
         when (item.type) {
             TYPE_BOOK_SOURCE -> {
                 val source = GSON.fromJsonObject<BookSource>(item.payload).getOrNull() ?: return
-                if (!overwrite && appDb.bookSourceDao.has(source.bookSourceUrl)) return
+                val existing = appDb.bookSourceDao.getBookSource(source.bookSourceUrl)
+                if (existing != null) {
+                    if (!overwrite) return
+                    // 同意覆盖：被覆盖的旧源先送进回收站，再由恢复的源 REPLACE 掉它
+                    recycleBookSources(listOf(existing))
+                }
                 appDb.bookSourceDao.insert(source)
             }
             TYPE_RSS_SOURCE -> {
                 val source = GSON.fromJsonObject<RssSource>(item.payload).getOrNull() ?: return
-                if (!overwrite && appDb.rssSourceDao.has(source.sourceUrl)) return
+                val existing = appDb.rssSourceDao.getByKey(source.sourceUrl)
+                if (existing != null) {
+                    if (!overwrite) return
+                    // 同意覆盖：被覆盖的旧源先送进回收站，再由恢复的源 REPLACE 掉它
+                    recycleRssSources(listOf(existing))
+                }
                 appDb.rssSourceDao.insert(source)
             }
             TYPE_REPLACE_RULE -> {

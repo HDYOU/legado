@@ -776,6 +776,11 @@
     <string name="search_engine_rule">Search engine rule</string>
     <string name="filter">Filter</string>
     <string name="overwrite">Overwrite</string>
+    <string name="source_url_duplicate_title">Duplicate book source URL</string>
+    <string name="source_url_duplicate_cover_msg">A book source with the same URL "%1$s" already exists. Saving will overwrite it. Continue?</string>
+    <string name="rss_source_url_duplicate_title">Duplicate RSS source URL</string>
+    <string name="rss_source_url_duplicate_cover_msg">An RSS source with the same URL "%1$s" already exists. Saving will overwrite it. Continue?</string>
+    <string name="overwrite_irrecoverable_hint">The rule recycle bin is disabled. The overwritten source will be permanently deleted and cannot be restored.</string>
     <string name="delete_forever">Delete forever</string>
     <string name="more">More</string>
     <string name="service_starting">Starting service</string>
@@ -1123,6 +1128,13 @@
     <string name="reverse_content">Reverse content</string>
     <string name="debug">Debug</string>
     <string name="source_used_api">Source Used API</string>
+    <string name="source_info">Source Info</string>
+    <string name="source_info_name">Name</string>
+    <string name="source_info_order">Sort Order</string>
+    <string name="source_info_update_time">Last Updated</string>
+    <string name="source_info_code_lines">Code Lines</string>
+    <string name="source_info_file_size">File Size</string>
+    <string name="source_info_never">Never</string>
     <string name="api_category_variable">Built-in Variables</string>
     <string name="api_category_function">Built-in Functions</string>
     <string name="api_category_source_method">Source Methods</string>

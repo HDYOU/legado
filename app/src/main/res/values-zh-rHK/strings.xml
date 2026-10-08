@@ -523,6 +523,12 @@
     <string name="input_replace_url">輸入替換規則網址</string>
     <string name="get_book_list_success">搜索列表獲取成功%d</string>
     <string name="non_null_name_url">名稱和 URL 不能為空</string>
+    <string name="overwrite">覆蓋</string>
+    <string name="source_url_duplicate_title">書源網址重複</string>
+    <string name="source_url_duplicate_cover_msg">已存在相同網址的書源「%1$s」，保存將覆蓋它，是否繼續？</string>
+    <string name="rss_source_url_duplicate_title">訂閲源網址重複</string>
+    <string name="rss_source_url_duplicate_cover_msg">已存在相同網址的訂閲源「%1$s」，保存將覆蓋它，是否繼續？</string>
+    <string name="overwrite_irrecoverable_hint">回收站已停用，被覆蓋的源將被徹底刪除、無法還原。</string>
     <string name="gallery">圖庫</string>
     <string name="get_ali_pay_hb">領支付寶紅包</string>
     <string name="non_update_url">沒有獲取到更新地址</string>
@@ -943,6 +949,13 @@
     <string name="reverse_content">反轉內容</string>
     <string name="debug">調試</string>
     <string name="source_used_api">源所用API</string>
+    <string name="source_info">源資訊</string>
+    <string name="source_info_name">名稱</string>
+    <string name="source_info_order">排序編號</string>
+    <string name="source_info_update_time">最後更新時間</string>
+    <string name="source_info_code_lines">代碼行數</string>
+    <string name="source_info_file_size">檔案大小</string>
+    <string name="source_info_never">未更新</string>
     <string name="api_category_variable">內建變數</string>
     <string name="api_category_function">內建函數</string>
     <string name="api_category_source_method">源物件方法</string>

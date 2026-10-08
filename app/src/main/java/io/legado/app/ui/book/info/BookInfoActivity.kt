@@ -695,40 +695,14 @@ class BookInfoActivity :
                 introTextView.text = intro
                 return
             }
-            val html = wrapUseWebHtml(intro.substring(8, lastIndex), viewModel.bookSource)
-            val pooledWebView = this.pooledWebView ?: let {
-                val pooledWebView = WebViewPool.acquire(this, Scope.INLINE)
-                val webView = pooledWebView.realWebView
-                webView.onResume()
-                prepareForInlineContent(webView)
-                installInlineContentRefitOnTouch(webView) {
-                    binding.tvIntroContainer.requestLayout()
-                }
-                webView.webViewClient = CustomWebViewClient(viewModel.bookSource)
-                webView.addJavascriptInterface(WebCacheManager, nameCache)
-                viewModel.bookSource?.let {
-                    webView.addJavascriptInterface(it as BaseSource, nameSource)
-                    val webJsExtensions = WebJsExtensions(it, this, webView)
-                    webView.addJavascriptInterface(webJsExtensions, nameJava)
-                }
-                pooledWebView
+            val rawHtml = intro.substring(8, lastIndex)
+            val source = viewModel.bookSource
+            // wrapUseWebHtml 会同步拼装 jsLib，URL 未命中缓存时内部 runBlocking 会阻塞主线程
+            // 因此先切 IO 拼装，完成后回主线程做 WebView 装配 + loadDataWithBaseURL
+            lifecycleScope.launch {
+                val html = withContext(IO) { wrapUseWebHtml(rawHtml, source) }
+                bindUseWebIntro(html, source)
             }
-            val webView = pooledWebView.realWebView
-            prepareForInlineContent(webView)
-            installInlineContentRefitOnTouch(webView) {
-                binding.tvIntroContainer.requestLayout()
-            }
-            if (initIntroView || this.pooledWebView == null) {
-                initIntroView = false
-                this.pooledWebView = pooledWebView
-                binding.tvIntroContainer.removeAllViews()
-            }
-            (webView.parent as? ViewGroup)?.removeView(webView)
-            binding.tvIntroContainer.addView(webView)
-            val bookUrl = viewModel.getBook()?.bookUrl
-                ?.takeIf { it.startsWith("http", true) }
-                ?.substringBefore(",")
-            webView.loadDataWithBaseURL(bookUrl, html, "text/html", "utf-8", bookUrl)
             return
         }
         if (!initIntroView || pooledWebView != null) {
@@ -804,6 +778,48 @@ class BookInfoActivity :
         } else {
             tvIntro.text = intro
         }
+    }
+
+    /**
+     * 主线程执行 useweb 简介的 WebView 装配与内容加载。
+     *
+     * 前置假设：html 已经在 IO 线程拼装完成（参考 [showBookIntro] 的 <useweb> 分支），
+     * 本方法内不再触碰 SharedJsScope 相关的同步接口，避免主线程重新陷入 runBlocking。
+     */
+    private fun bindUseWebIntro(html: String, source: BookSource?) {
+        val pooledWebView = this.pooledWebView ?: let {
+            val pooledWebView = WebViewPool.acquire(this, Scope.INLINE)
+            val webView = pooledWebView.realWebView
+            webView.onResume()
+            prepareForInlineContent(webView)
+            installInlineContentRefitOnTouch(webView) {
+                binding.tvIntroContainer.requestLayout()
+            }
+            webView.webViewClient = CustomWebViewClient(source)
+            webView.addJavascriptInterface(WebCacheManager, nameCache)
+            source?.let {
+                webView.addJavascriptInterface(it as BaseSource, nameSource)
+                val webJsExtensions = WebJsExtensions(it, this, webView)
+                webView.addJavascriptInterface(webJsExtensions, nameJava)
+            }
+            pooledWebView
+        }
+        val webView = pooledWebView.realWebView
+        prepareForInlineContent(webView)
+        installInlineContentRefitOnTouch(webView) {
+            binding.tvIntroContainer.requestLayout()
+        }
+        if (initIntroView || this.pooledWebView == null) {
+            initIntroView = false
+            this.pooledWebView = pooledWebView
+            binding.tvIntroContainer.removeAllViews()
+        }
+        (webView.parent as? ViewGroup)?.removeView(webView)
+        binding.tvIntroContainer.addView(webView)
+        val bookUrl = viewModel.getBook()?.bookUrl
+            ?.takeIf { it.startsWith("http", true) }
+            ?.substringBefore(",")
+        webView.loadDataWithBaseURL(bookUrl, html, "text/html", "utf-8", bookUrl)
     }
 
     private fun upKinds(book: Book) = binding.run {
