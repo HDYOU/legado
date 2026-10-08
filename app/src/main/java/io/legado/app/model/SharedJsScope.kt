@@ -4,6 +4,7 @@ import androidx.collection.LruCache
 import com.google.gson.reflect.TypeToken
 import com.script.ScriptBindings
 import com.script.rhino.RhinoScriptEngine
+import io.legado.app.constant.AppLog
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.http.newCallStrResponse
 import io.legado.app.help.http.okHttpClient
@@ -12,6 +13,10 @@ import io.legado.app.utils.GSON
 import io.legado.app.utils.MD5Utils
 import io.legado.app.utils.isAbsUrl
 import io.legado.app.utils.isJsonObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
@@ -51,6 +56,12 @@ object SharedJsScope {
      * 防止外部不再引用时仍被 object 生命周期锁住，允许 GC 回收。
      */
     private val scopeMap = LruCache<String, WeakReference<Scriptable>>(16)
+
+    /**
+     * [prefetch] 专用的后台协程作用域：IO + SupervisorJob，
+     * 单个 URL 下载失败不影响其他 URL，也不向上传播到调用者。
+     */
+    private val prefetchScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     /**
      * jsLib 解析核心：下载 URL 片段并按顺序拼装成一段可执行的 JS 字符串。
@@ -163,6 +174,51 @@ object SharedJsScope {
      */
     fun getJsLibString(jsLib: String?): String? {
         return resolveJsLibString(jsLib)
+    }
+
+    /**
+     * 后台异步预下载 jsLib 里的 URL 片段到磁盘缓存。
+     *
+     * 语义：
+     * - 若 jsLib 为 null / 空 / 纯内联 JS（非 JSON 对象）：no-op；
+     * - 若 jsLib 是 JSON 对象：遍历 URL 型 value，对未命中 [aCache] 的 URL 在后台下载并写入；
+     * - 下载失败静默，仅打 [AppLog]，不抛；
+     * - 立即返回，不阻塞调用者。
+     *
+     * 建议在 UI 渲染前提前调用（例如 ViewModel 拿到 bookSource 之后、
+     * 书源导入 / 换源 完成后），让首次 useweb 走到 [resolveJsLibString]
+     * 时大概率能命中缓存，避免 [runBlocking] 阻塞主线程。
+     */
+    fun prefetch(jsLib: String?) {
+        if (jsLib.isNullOrBlank() || !jsLib.isJsonObject()) return
+        val jsMap: Map<String, String> = runCatching {
+            GSON.fromJson(
+                jsLib,
+                TypeToken.getParameterized(
+                    Map::class.java,
+                    String::class.java,
+                    String::class.java
+                ).type
+            ) as? Map<String, String>
+        }.getOrNull() ?: return
+        jsMap.values.forEach { value ->
+            if (!value.isAbsUrl()) return@forEach
+            val fileName = MD5Utils.md5Encode(value)
+            if (aCache.getAsString(fileName) != null) return@forEach
+            prefetchScope.launch {
+                runCatching {
+                    okHttpClient.newCallStrResponse {
+                        url(value)
+                    }.body
+                }.onSuccess { body ->
+                    if (!body.isNullOrBlank()) {
+                        aCache.put(fileName, body)
+                    }
+                }.onFailure { e ->
+                    AppLog.put("预下载 jsLib 失败: $value", e)
+                }
+            }
+        }
     }
 
     /**
