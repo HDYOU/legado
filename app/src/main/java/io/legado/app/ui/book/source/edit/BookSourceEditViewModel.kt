@@ -133,6 +133,9 @@ class BookSourceEditViewModel(application: Application) : BaseViewModel(applicat
         }.start()
     }
 
+    /** 按地址查已存在的书源，供保存前的重复覆盖检测使用（DB 访问收在 ViewModel，UI 不直连 DAO） */
+    suspend fun findByUrl(url: String): BookSource? = appDb.bookSourceDao.getBookSource(url)
+
     fun pasteSource(onSuccess: (source: BookSource) -> Unit) {
         execute(context = Dispatchers.Main) {
             val text = context.getClipText()

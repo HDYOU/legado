@@ -780,6 +780,7 @@
     <string name="source_url_duplicate_cover_msg">A book source with the same URL "%1$s" already exists. Saving will overwrite it. Continue?</string>
     <string name="rss_source_url_duplicate_title">Duplicate RSS source URL</string>
     <string name="rss_source_url_duplicate_cover_msg">An RSS source with the same URL "%1$s" already exists. Saving will overwrite it. Continue?</string>
+    <string name="overwrite_irrecoverable_hint">The rule recycle bin is disabled. The overwritten source will be permanently deleted and cannot be restored.</string>
     <string name="delete_forever">Delete forever</string>
     <string name="more">More</string>
     <string name="service_starting">Starting service</string>

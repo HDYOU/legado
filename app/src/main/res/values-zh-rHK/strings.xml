@@ -528,6 +528,7 @@
     <string name="source_url_duplicate_cover_msg">已存在相同網址的書源「%1$s」，保存將覆蓋它，是否繼續？</string>
     <string name="rss_source_url_duplicate_title">訂閲源網址重複</string>
     <string name="rss_source_url_duplicate_cover_msg">已存在相同網址的訂閲源「%1$s」，保存將覆蓋它，是否繼續？</string>
+    <string name="overwrite_irrecoverable_hint">回收站已停用，被覆蓋的源將被徹底刪除、無法還原。</string>
     <string name="gallery">圖庫</string>
     <string name="get_ali_pay_hb">領支付寶紅包</string>
     <string name="non_update_url">沒有獲取到更新地址</string>

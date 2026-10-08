@@ -19,7 +19,6 @@ import com.google.android.material.tabs.TabLayout
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import io.legado.app.R
 import io.legado.app.base.VMBaseActivity
-import io.legado.app.data.appDb
 import io.legado.app.data.entities.RssSource
 import io.legado.app.databinding.ActivityRssSourceEditBinding
 import io.legado.app.help.config.LocalConfig
@@ -62,7 +61,6 @@ import io.legado.app.utils.viewbindingdelegate.viewBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.CancellationException
 import splitties.views.bottomPadding
 import kotlin.text.isNotEmpty
 
@@ -168,30 +166,35 @@ class RssSourceEditActivity :
             performSave(source, onSuccess)
             return
         }
-        lifecycleScope.launch {
-            // 只兜真正的查询异常（检测本身绝不能阻断保存）；
-            // 协程取消（界面销毁）必须原样抛出，否则续体会在已销毁界面上继续跑
-            val existing = runCatching {
-                withContext(Dispatchers.IO) { appDb.rssSourceDao.getByKey(url) }
-            }.getOrElse { if (it is CancellationException) throw it; null }
-            // 续体恢复时界面可能已销毁：此时弹 alert 会 BadTokenException，
-            // 保存也会落进已清理的 scope，故直接放弃本次操作
-            if (isFinishing || isDestroyed) return@launch
-            if (existing != null) {
-                alert(R.string.rss_source_url_duplicate_title) {
-                    setMessage(
-                        getString(
-                            R.string.rss_source_url_duplicate_cover_msg,
-                            existing.sourceName.ifBlank { url }
+        // 经 ViewModel 的 execute 链（协程写在 VM 内，UI 不直连 DAO）：block 默认在 IO 上跑、回调回 Main；
+        // Coroutine 对 CancellationException 直接重抛、且仅在 scope 活跃时派发回调，取消不会被当作错误
+        viewModel.execute { viewModel.findByUrl(url) }
+            .onSuccess { existing ->
+                // 回调在 Main 且 Coroutine 仅在 scope 活跃时派发；为保险仍防一道销毁守卫
+                if (isFinishing || isDestroyed) return@onSuccess
+                if (existing != null) {
+                    // 回收站停用时覆盖等于永久丢弃，弹窗补不可恢复提醒
+                    val binHint = if (AppConfig.sourceRecycleBinEnabled) "" else
+                        "\n\n" + getString(R.string.overwrite_irrecoverable_hint)
+                    alert(R.string.rss_source_url_duplicate_title) {
+                        setMessage(
+                            getString(
+                                R.string.rss_source_url_duplicate_cover_msg,
+                                existing.sourceName.ifBlank { url }
+                            ) + binHint
                         )
-                    )
-                    positiveButton(R.string.overwrite) { performSave(source, onSuccess) }
-                    negativeButton(R.string.cancel)
+                        positiveButton(R.string.overwrite) { performSave(source, onSuccess) }
+                        negativeButton(R.string.cancel)
+                    }
+                } else {
+                    performSave(source, onSuccess)
                 }
-            } else {
+            }
+            .onError {
+                // 检测本身绝不能阻断保存：查询异常走此分支照常保存
+                if (isFinishing || isDestroyed) return@onError
                 performSave(source, onSuccess)
             }
-        }
     }
 
     /**

@@ -112,6 +112,9 @@ class RssSourceEditViewModel(application: Application) : BaseViewModel(applicati
         }.start()
     }
 
+    /** 按地址查已存在的订阅源，供保存前的重复覆盖检测使用（DB 访问收在 ViewModel，UI 不直连 DAO） */
+    suspend fun findByUrl(url: String): RssSource? = appDb.rssSourceDao.getByKey(url)
+
     fun pasteSource(onSuccess: (source: RssSource) -> Unit) {
         execute(context = Dispatchers.Main) {
             var source: RssSource? = null

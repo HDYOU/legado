@@ -779,6 +779,7 @@
     <string name="source_url_duplicate_cover_msg">已存在相同地址的书源“%1$s”，保存将覆盖它，是否继续？</string>
     <string name="rss_source_url_duplicate_title">订阅源地址重复</string>
     <string name="rss_source_url_duplicate_cover_msg">已存在相同地址的订阅源“%1$s”，保存将覆盖它，是否继续？</string>
+    <string name="overwrite_irrecoverable_hint">回收站已关闭，被覆盖的源将被彻底删除、无法恢复。</string>
     <string name="delete_forever">彻底删除</string>
     <string name="more">更多</string>
     <string name="service_starting">正在启动服务</string>
