@@ -8,23 +8,24 @@
 
 Gradle wrapper（Windows 下为 `gradlew.bat`），JDK 17 要求。
 
-| 命令                                            | 说明                                                                                                                              |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `./gradlew assembleDebug`                       | Debug 构建（默认 flavor：appMax）                                                                                                 |
-| `./gradlew assembleRelease`                     | Release 构建（ProGuard + resource shrinking）                                                                                     |
-| `./gradlew assembleAppMaxDebug`                 | appMax（`io.legado.app.yuedu`，共存包）                                                                                           |
-| `./gradlew assembleAppLegacyRelease`            | appLegacy（`io.legado.app`，与原版一致）                                                                                          |
-| `./gradlew assembleAppSDebug`                   | appS（`io.legado.app.yuedu.a`）                                                                                                   |
-| `./gradlew installDebug` / `installAppMaxDebug` | 安装到设备                                                                                                                        |
-| `./gradlew test`                                | 单元测试                                                                                                                          |
-| `./gradlew connectedAndroidTest`                | 仪器测试（Instrumented tests）                                                                                                    |
-| `./gradlew stop`                                | 停止 Gradle daemon                                                                                                                |
-| `./gradlew.bat :app:compileAppMaxDebugKotlin`   | 语法检查式编译（"Grammar Test"）                                                                                                  |
-| `./gradlew lint`                                | Android Lint（CI 实际入口为 `:app:lintAppMaxDebug` 单变体）。**迭代期用 IDE 内联 lint，CLI 全量作收尾/CI 门禁**；范围自适应见下节 |
-| `./gradlew spotlessCheck`                       | Kotlin 格式检查：只检查自 origin/main 以来的改动（CI 为可选警示，continue-on-error 不阻塞）                                       |
-| `./gradlew spotlessApply`                       | 自动修正全部 Kotlin 格式问题；提交前可手动执行                                                                                    |
-| `./gradlew app:downloadCronet`                  | **首次构建前必须执行**，下载 Cronet 原生库                                                                                        |
-| `./gradlew assembleDebug --warning-mode all`    | 查看 DSL 语法警告（Windows/Mac/Linux 同命令）                                                                                     |
+| 命令                                            | 说明                                                                                                                                                            |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `./gradlew assembleDebug`                       | Debug 构建（默认 flavor：appMax）                                                                                                                               |
+| `./gradlew assembleRelease`                     | Release 构建（ProGuard + resource shrinking）                                                                                                                   |
+| `./gradlew assembleAppMaxDebug`                 | appMax（`io.legado.app.yuedu`，共存包）                                                                                                                         |
+| `./gradlew assembleAppLegacyRelease`            | appLegacy（`io.legado.app`，与原版一致）                                                                                                                        |
+| `./gradlew assembleAppSDebug`                   | appS（`io.legado.app.yuedu.a`）                                                                                                                                 |
+| `./gradlew installDebug` / `installAppMaxDebug` | 安装到设备                                                                                                                                                      |
+| `./gradlew test`                                | 单元测试                                                                                                                                                        |
+| `./gradlew connectedAndroidTest`                | 仪器测试（Instrumented tests）                                                                                                                                  |
+| `./gradlew clean`                               | 清理各模块 `build/` 产物（含 `build/intermediates/lint-cache`，会打断 lint/编译增量缓存；仅在构建产物污染、切 flavor 后异常、或 CI 收尾时用，日常迭代别轻易跑） |
+| `./gradlew stop`                                | 停止 Gradle daemon                                                                                                                                              |
+| `./gradlew.bat :app:compileAppMaxDebugKotlin`   | 语法检查式编译（"Grammar Test"）                                                                                                                                |
+| `./gradlew lint`                                | Android Lint（CI 实际入口为 `:app:lintAppMaxDebug` 单变体）。**迭代期用 IDE 内联 lint，CLI 全量作收尾/CI 门禁**；范围自适应见下节                               |
+| `./gradlew spotlessCheck`                       | Kotlin 格式检查：只检查自 origin/main 以来的改动（CI 为可选警示，continue-on-error 不阻塞）                                                                     |
+| `./gradlew spotlessApply`                       | 自动修正全部 Kotlin 格式问题；提交前可手动执行                                                                                                                  |
+| `./gradlew app:downloadCronet`                  | **首次构建前必须执行**，下载 Cronet 原生库                                                                                                                      |
+| `./gradlew assembleDebug --warning-mode all`    | 查看 DSL 语法警告（Windows/Mac/Linux 同命令）                                                                                                                   |
 
 ### Android Lint 门禁与提速
 
