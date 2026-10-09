@@ -4,6 +4,7 @@ import android.text.TextUtils
 import com.script.ScriptBindings
 import com.script.rhino.RhinoScriptEngine
 import io.legado.app.R
+import io.legado.app.constant.AppLog
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
@@ -284,6 +285,10 @@ object BookChapterList {
         body ?: throw NoStackTraceException(
             appCtx.getString(R.string.error_get_web_content, baseUrl)
         )
+        AppLog.putReaderDebug(
+            "[TOC] analyzeChapterListFlow进入 flow{}: baseUrl='$baseUrl', " +
+                    "redirectUrl='$redirectUrl', body.len=${body.length}"
+        )
         val chapterList = ArrayList<BookChapter>()
         Debug.log(bookSource.bookSourceUrl, "≡获取成功:${baseUrl}")
         Debug.log(bookSource.bookSourceUrl, body, state = 30)
@@ -298,10 +303,16 @@ object BookChapterList {
         if (listRule.startsWith("+")) {
             listRule = listRule.substring(1)
         }
+        val tParse = System.currentTimeMillis()
+        AppLog.putReaderDebug("[TOC] analyzeChapterListFlow 首页解析开始")
         var chapterData = analyzeChapterList(
             book, baseUrl, redirectUrl, body,
             tocRule, listRule, bookSource, log = true,
             isFromBookInfo = isFromBookInfo
+        )
+        AppLog.putReaderDebug(
+            "[TOC] analyzeChapterListFlow 首页解析完成: 耗时${System.currentTimeMillis() - tParse}ms, " +
+                    "first.size=${chapterData.first.size}, second.size=${chapterData.second.size}"
         )
         chapterList.addAll(chapterData.first)
         //渐进加载中旧章节会被中间结果逐批替换, 先取旧章节创建迁移器, 每次发射时接力迁移缓存文件
@@ -315,11 +326,14 @@ object BookChapterList {
         when (chapterData.second.size) {
             0 -> {
                 // 单页目录，直接发射最终结果
+                AppLog.putReaderDebug("[TOC] analyzeChapterListFlow 分支[单页]: 准备 emit complete")
                 val finalList = finalizeChapterList(sortedFirstPage, tocRule, book, bookSource, cacheMigrator)
                 emit(PartialChapterList(finalList, isComplete = true))
+                AppLog.putReaderDebug("[TOC] analyzeChapterListFlow 分支[单页]: emit 完成 count=${finalList.size}")
             }
             1 -> {
                 // 串行多页目录，每加载完一页就发射一次
+                AppLog.putReaderDebug("[TOC] analyzeChapterListFlow 分支[串行多页]: 首次 emit partial count=${sortedFirstPage.size}")
                 emit(PartialChapterList(sortedFirstPage, isComplete = false))
                 var nextUrl = chapterData.second[0]
                 var emittedComplete = false
@@ -366,6 +380,7 @@ object BookChapterList {
                 }
             }
             else -> {
+                AppLog.putReaderDebug("[TOC] analyzeChapterListFlow 分支[并发多页]: 首次 emit partial count=${sortedFirstPage.size}, 总页数=${chapterData.second.size}")
                 emit(PartialChapterList(sortedFirstPage, isComplete = false))
                 // 并发多页目录，无法逐页发射，全部加载完后发射最终结果
                 Debug.log(
