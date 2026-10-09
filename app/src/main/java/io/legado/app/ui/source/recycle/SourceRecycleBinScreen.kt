@@ -1,6 +1,7 @@
 package io.legado.app.ui.source.recycle
 
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +43,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.appcompat.app.AppCompatActivity
@@ -105,7 +105,7 @@ fun SourceRecycleBinScreen(
 
     val secondaryTextColor = pageSecondaryTextColor()
     // 帮助按钮需要 AppCompatActivity 才能调用 showHelp 扩展（与首页/阅读菜单一致）
-    val activity = LocalContext.current as? AppCompatActivity
+    val activity = LocalActivity.current as? AppCompatActivity
 
     // 返回键拦截：有 Dialog 时先关闭 Dialog，无则正常返回（state-events.md §4.5）
     val hasDialog = dialog != null
