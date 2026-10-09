@@ -170,6 +170,14 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
                     SharedJsScope.prefetch(it.jsLib)
                 }
             }
+            AppLog.putReaderDebug(
+                "[TOC] upBook入口快照: name=${book.name}, author=${book.author}, " +
+                        "bookUrl=${book.bookUrl}, tocUrl='${book.tocUrl}', " +
+                        "intro.len=${book.intro?.length ?: -1}, intro.prefix='${book.intro?.take(16) ?: "null"}', " +
+                        "coverUrl='${book.coverUrl?.take(40) ?: "null"}', " +
+                        "latestChapterTitle='${book.latestChapterTitle}', " +
+                        "inBookshelf=$inBookshelf, isLocal=${book.isLocal}"
+            )
             bookData.postValue(book)
             upCoverByRule(book)
             if (book.tocUrl.isEmpty() && !book.isLocal) {
@@ -179,8 +187,10 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
                 val chapterList = appDb.bookChapterDao.getChapterList(book.bookUrl)
                 AppLog.putReaderDebug("[TOC] upBook: DB已有${chapterList.size}章, isTocPartialLoad=${AppConfig.isTocPartialLoad}")
                 if (chapterList.isNotEmpty()) {
+                    AppLog.putReaderDebug("[TOC] upBook: 仅刷新目录、不走loadBookInfo（intro停留在DB快照）")
                     chapterListData.postValue(chapterList)
                 } else {
+                    AppLog.putReaderDebug("[TOC] upBook: tocUrl非空但DB无目录，仅 loadChapter、不走loadBookInfo")
                     loadChapter(book, isFromBookInfo = true)
                 }
             }
@@ -260,7 +270,13 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
             WebBook.getBookInfo(scope, bookSource, book, canReName = canReName)
                 .onSuccess(IO) {
                     try {
-                        AppLog.putReaderDebug("[TOC] loadBookInfo成功: bookUrl=${book.bookUrl}, isWebFile=${it.isWebFile}, tocUrl=${it.tocUrl}")
+                        AppLog.putReaderDebug(
+                            "[TOC] loadBookInfo成功: bookUrl=${book.bookUrl}, isWebFile=${it.isWebFile}, " +
+                                    "tocUrl='${it.tocUrl}', intro.len=${it.intro?.length ?: -1}, " +
+                                    "intro.prefix='${it.intro?.take(16) ?: "null"}', " +
+                                    "coverUrl='${it.coverUrl?.take(40) ?: "null"}', " +
+                                    "latestChapterTitle='${it.latestChapterTitle}'"
+                        )
                         val dbBook = appDb.bookDao.getBook(book.name, book.author)
                         if (!inBookshelf && dbBook != null && !dbBook.isNotShelf && dbBook.origin == book.origin) {
                             dbBook.updateTo(it)

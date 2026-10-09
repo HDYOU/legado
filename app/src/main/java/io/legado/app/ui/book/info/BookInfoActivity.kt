@@ -615,6 +615,13 @@ class BookInfoActivity :
     }
 
     private fun showBook(book: Book) = binding.run {
+        AppLog.putReaderDebug(
+            "[TOC] showBook回调: name=${book.name}, " +
+                    "intro.len=${book.intro?.length ?: -1}, intro.prefix='${book.intro?.take(16) ?: "null"}', " +
+                    "coverUrl='${book.coverUrl?.take(40) ?: "null"}', " +
+                    "latestChapterTitle='${book.latestChapterTitle}', " +
+                    "totalChapterNum=${book.totalChapterNum}"
+        )
         showCover(book)
         tvName.text = book.name
         tvAuthor.text = getString(R.string.author_show, book.getRealAuthor())
