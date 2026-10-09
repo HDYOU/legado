@@ -207,6 +207,10 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
                 ReadBookConfig.useZhLayout =
                     appCtx.getPrefBoolean(PreferKey.useZhLayout)
 
+            PreferKey.allowPunctAtLineStart ->
+                ReadBookConfig.allowPunctAtLineStart =
+                    appCtx.getPrefBoolean(PreferKey.allowPunctAtLineStart)
+
             PreferKey.userAgent -> userAgent = getPrefUserAgent()
 
             PreferKey.customHosts -> {

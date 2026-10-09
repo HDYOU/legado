@@ -11,6 +11,10 @@ import kotlin.math.max
 /**
  * 针对中文的断行排版处理-by hoodie13
  * 因为StaticLayout对标点处理不符合国人习惯，继承Layout
+ *
+ * @param ignorePunctRules true = 无视中文标点禁则：行满时一律按宽度正常断行，
+ *   收尾标点可出现在行首（连带放行：开引号可出现在行尾、不再做标点压缩）。
+ *   默认 false，保持原有的行首/行尾禁则与压缩行为。
  * */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class ZhLayout(
@@ -19,14 +23,10 @@ class ZhLayout(
     width: Int,
     words: List<String>,
     widths: List<Float>,
-    indentSize: Int
+    indentSize: Int,
+    private val ignorePunctRules: Boolean = false
 ) : Layout(text, textPaint, width, Alignment.ALIGN_NORMAL, 0f, 0f) {
     companion object {
-        private val postPanc = hashSetOf(
-            "，", "。", "：", "？", "！", "、", "”", "’", "）", "》", "}",
-            "】", ")", ">", "]", "}", ",", ".", "?", "!", ":", "」", "；", ";"
-        )
-        private val prePanc = hashSetOf("“", "（", "《", "【", "‘", "‘", "(", "<", "[", "{", "「")
         private val cnCharWidthCache = WeakHashMap<Paint, Float>()
     }
 
@@ -65,8 +65,12 @@ class ZhLayout(
             var breakCharCnt = 0
 
             if (lineW > width) {
+                /*无视标点规则时：不区分标点，一律正常断行（标点可落在行首）*/
+                breakMod = if (ignorePunctRules) {
+                    BreakMod.NORMAL
+                }
                 /*禁止在行尾的标点处理*/
-                breakMod = if (index >= 1 && isPrePanc(words[index - 1])) {
+                else if (index >= 1 && isPrePanc(words[index - 1])) {
                     if (index >= 2 && isPrePanc(words[index - 2])) BreakMod.CPS_2//如果后面还有一个禁首标点则异常
                     else BreakMod.BREAK_ONE_CHAR //无异常场景
                 }
@@ -194,11 +198,11 @@ class ZhLayout(
     }
 
     private fun isPostPanc(string: String): Boolean {
-        return postPanc.contains(string)
+        return PunctuationRules.isPostPunctuation(string)
     }
 
     private fun isPrePanc(string: String): Boolean {
-        return prePanc.contains(string)
+        return PunctuationRules.isPrePunctuation(string)
     }
 
     private fun inCompressible(width: Float): Boolean {

@@ -261,6 +261,9 @@ object ReadBookConfig {
     var hideNavigationBar = appCtx.getPrefBoolean(PreferKey.hideNavigationBar)
     var useZhLayout = appCtx.getPrefBoolean(PreferKey.useZhLayout)
 
+    /** 标点允许出现在行首：无视中文标点禁则，行满一律按宽度断行（需配合 ZhLayout） */
+    var allowPunctAtLineStart = appCtx.getPrefBoolean(PreferKey.allowPunctAtLineStart)
+
     val config get() = if (shareLayout) shareConfig else durConfig
 
     var bgAlpha: Int

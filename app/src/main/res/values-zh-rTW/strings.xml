@@ -974,6 +974,7 @@
     <string name="api_source_not_found">找不到該書源</string>
     <string name="crash_log">當機日誌</string>
     <string name="use_zh_layout">使用自訂中文分行</string>
+    <string name="allow_punct_at_line_start">標點允許出現在行首</string>
     <string name="image_style">圖片樣式</string>
     <string name="system_tts">系統TTS</string>
     <string name="export_type">匯出格式</string>

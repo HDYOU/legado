@@ -74,6 +74,13 @@
         app:isBottomBackground="true" />
 
     <io.legado.app.lib.prefs.SwitchPreference
+        android:defaultValue="false"
+        android:key="allowPunctAtLineStart"
+        android:title="@string/allow_punct_at_line_start"
+        app:iconSpaceReserved="false"
+        app:isBottomBackground="true" />
+
+    <io.legado.app.lib.prefs.SwitchPreference
         android:defaultValue="true"
         android:key="textFullJustify"
         android:title="@string/text_full_justify"
