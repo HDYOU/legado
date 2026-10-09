@@ -1149,6 +1149,7 @@
     <string name="api_source_not_found">Source not found</string>
     <string name="crash_log">Crash log</string>
     <string name="use_zh_layout">Custom Chinese line feed</string>
+    <string name="allow_punct_at_line_start">Allow punctuation at line start</string>
     <string name="image_style">Style of Images</string>
     <string name="system_tts">System tts</string>
     <string name="export_type">Exported file format</string>
