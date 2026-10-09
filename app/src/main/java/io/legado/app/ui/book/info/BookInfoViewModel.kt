@@ -184,55 +184,17 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
                 AppLog.putReaderDebug("[TOC] upBook: tocUrl为空, 走loadBookInfo分支")
                 loadBookInfo(book, runPreUpdateJs = inBookshelf)
             } else {
-                // tocUrl 已缓存：保留目录快路径，但并行拉一次 bookInfo 刷新 intro/封面/最后章节，
-                // 避免“目录一直在流但简介区停留在DB快照”的旧行为。
-                // 参考 docs/archive/bugfix-useweb-intro-startup-jank-analysis.md 同一调用链上的另一个回归。
-                refreshBookInfoParallel(book)
                 val chapterList = appDb.bookChapterDao.getChapterList(book.bookUrl)
                 AppLog.putReaderDebug("[TOC] upBook: DB已有${chapterList.size}章, isTocPartialLoad=${AppConfig.isTocPartialLoad}")
                 if (chapterList.isNotEmpty()) {
-                    AppLog.putReaderDebug("[TOC] upBook: 先显DB缓存目录 + 并行刷新详情")
+                    AppLog.putReaderDebug("[TOC] upBook: 仅刷新目录、不走loadBookInfo（intro停留在DB快照）")
                     chapterListData.postValue(chapterList)
                 } else {
-                    AppLog.putReaderDebug("[TOC] upBook: tocUrl非空但DB无目录，loadChapter + 并行刷新详情")
+                    AppLog.putReaderDebug("[TOC] upBook: tocUrl非空但DB无目录，仅 loadChapter、不走loadBookInfo")
                     loadChapter(book, isFromBookInfo = true)
                 }
             }
         }
-    }
-
-    /**
-     * 并行刷新入口：向服务端重拉最新详情（intro/封面/最后章节等），
-     * 拉到后 [MutableLiveData.postValue] 通知详情页重新渲染，不触发目录加载。
-     *
-     * 适用于 tocUrl 已有缓存、目录已经或正在另一条链上加载的场景，
-     * 避免旧逻辑“tocUrl 非空 → 直接跳过 loadBookInfo”导致 intro 停留在DB快照。
-     *
-     * 失败不弹 toast（对用户体验无伤大雅，避免网络差时弹无底个提示）。
-     */
-    private fun refreshBookInfoParallel(book: Book) {
-        if (book.isLocal) return
-        val bookSource = bookSource ?: return
-        AppLog.putReaderDebug("[TOC] refreshBookInfoParallel 启动: bookUrl=${book.bookUrl}")
-        WebBook.getBookInfo(viewModelScope, bookSource, book, canReName = false)
-            .onSuccess(IO) {
-                AppLog.putReaderDebug(
-                    "[TOC] refreshBookInfoParallel 成功: " +
-                            "intro.len=${it.intro?.length ?: -1}, " +
-                            "coverUrl='${it.coverUrl?.take(40) ?: "null"}', " +
-                            "latestChapterTitle='${it.latestChapterTitle}'"
-                )
-                bookData.postValue(it)
-                if (inBookshelf) {
-                    runCatching { it.save() }
-                        .onFailure { e ->
-                            AppLog.putReaderDebug("[TOC] refreshBookInfoParallel 写DB失败: ${e.localizedMessage}", e)
-                        }
-                }
-            }
-            .onError {
-                AppLog.putReaderDebug("[TOC] refreshBookInfoParallel 失败: ${it.localizedMessage}", it)
-            }
     }
 
     private fun upCoverByRule(book: Book) {
