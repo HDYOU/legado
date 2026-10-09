@@ -170,21 +170,69 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
                     SharedJsScope.prefetch(it.jsLib)
                 }
             }
+            AppLog.putReaderDebug(
+                "[TOC] upBook入口快照: name=${book.name}, author=${book.author}, " +
+                        "bookUrl=${book.bookUrl}, tocUrl='${book.tocUrl}', " +
+                        "intro.len=${book.intro?.length ?: -1}, intro.prefix='${book.intro?.take(16) ?: "null"}', " +
+                        "coverUrl='${book.coverUrl?.take(40) ?: "null"}', " +
+                        "latestChapterTitle='${book.latestChapterTitle}', " +
+                        "inBookshelf=$inBookshelf, isLocal=${book.isLocal}"
+            )
             bookData.postValue(book)
             upCoverByRule(book)
             if (book.tocUrl.isEmpty() && !book.isLocal) {
                 AppLog.putReaderDebug("[TOC] upBook: tocUrl为空, 走loadBookInfo分支")
                 loadBookInfo(book, runPreUpdateJs = inBookshelf)
             } else {
+                // tocUrl 已缓存：保留目录快路径，但并行拉一次 bookInfo 刷新 intro/封面/最后章节，
+                // 避免“目录一直在流但简介区停留在DB快照”的旧行为。
+                // 参考 docs/archive/bugfix-useweb-intro-startup-jank-analysis.md 同一调用链上的另一个回归。
+                refreshBookInfoParallel(book)
                 val chapterList = appDb.bookChapterDao.getChapterList(book.bookUrl)
                 AppLog.putReaderDebug("[TOC] upBook: DB已有${chapterList.size}章, isTocPartialLoad=${AppConfig.isTocPartialLoad}")
                 if (chapterList.isNotEmpty()) {
+                    AppLog.putReaderDebug("[TOC] upBook: 先显DB缓存目录 + 并行刷新详情")
                     chapterListData.postValue(chapterList)
                 } else {
+                    AppLog.putReaderDebug("[TOC] upBook: tocUrl非空但DB无目录，loadChapter + 并行刷新详情")
                     loadChapter(book, isFromBookInfo = true)
                 }
             }
         }
+    }
+
+    /**
+     * 并行刷新入口：向服务端重拉最新详情（intro/封面/最后章节等），
+     * 拉到后 [MutableLiveData.postValue] 通知详情页重新渲染，不触发目录加载。
+     *
+     * 适用于 tocUrl 已有缓存、目录已经或正在另一条链上加载的场景，
+     * 避免旧逻辑“tocUrl 非空 → 直接跳过 loadBookInfo”导致 intro 停留在DB快照。
+     *
+     * 失败不弹 toast（对用户体验无伤大雅，避免网络差时弹无底个提示）。
+     */
+    private fun refreshBookInfoParallel(book: Book) {
+        if (book.isLocal) return
+        val bookSource = bookSource ?: return
+        AppLog.putReaderDebug("[TOC] refreshBookInfoParallel 启动: bookUrl=${book.bookUrl}")
+        WebBook.getBookInfo(viewModelScope, bookSource, book, canReName = false)
+            .onSuccess(IO) {
+                AppLog.putReaderDebug(
+                    "[TOC] refreshBookInfoParallel 成功: " +
+                            "intro.len=${it.intro?.length ?: -1}, " +
+                            "coverUrl='${it.coverUrl?.take(40) ?: "null"}', " +
+                            "latestChapterTitle='${it.latestChapterTitle}'"
+                )
+                bookData.postValue(it)
+                if (inBookshelf) {
+                    runCatching { it.save() }
+                        .onFailure { e ->
+                            AppLog.putReaderDebug("[TOC] refreshBookInfoParallel 写DB失败: ${e.localizedMessage}", e)
+                        }
+                }
+            }
+            .onError {
+                AppLog.putReaderDebug("[TOC] refreshBookInfoParallel 失败: ${it.localizedMessage}", it)
+            }
     }
 
     private fun upCoverByRule(book: Book) {
@@ -260,7 +308,13 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
             WebBook.getBookInfo(scope, bookSource, book, canReName = canReName)
                 .onSuccess(IO) {
                     try {
-                        AppLog.putReaderDebug("[TOC] loadBookInfo成功: bookUrl=${book.bookUrl}, isWebFile=${it.isWebFile}, tocUrl=${it.tocUrl}")
+                        AppLog.putReaderDebug(
+                            "[TOC] loadBookInfo成功: bookUrl=${book.bookUrl}, isWebFile=${it.isWebFile}, " +
+                                    "tocUrl='${it.tocUrl}', intro.len=${it.intro?.length ?: -1}, " +
+                                    "intro.prefix='${it.intro?.take(16) ?: "null"}', " +
+                                    "coverUrl='${it.coverUrl?.take(40) ?: "null"}', " +
+                                    "latestChapterTitle='${it.latestChapterTitle}'"
+                        )
                         val dbBook = appDb.bookDao.getBook(book.name, book.author)
                         if (!inBookshelf && dbBook != null && !dbBook.isNotShelf && dbBook.origin == book.origin) {
                             dbBook.updateTo(it)

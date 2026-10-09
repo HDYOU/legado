@@ -24,6 +24,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -155,7 +156,12 @@ private fun SourceInfoContent(
             InfoRow(
                 stringResource(R.string.source_info_update_time),
                 if (lastUpdateTime > 0) {
-                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                    // 从可观察的 LocalLocale 取当前语言/地区构造 java.locale，避免在非可观察方式下读 Locale.getDefault()
+                    val composeLocale = LocalLocale.current
+                    SimpleDateFormat(
+                        "yyyy-MM-dd HH:mm:ss",
+                        Locale(composeLocale.language, composeLocale.region)
+                    )
                         .format(Date(lastUpdateTime))
                 } else {
                     stringResource(R.string.source_info_never)
