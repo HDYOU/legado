@@ -8,23 +8,33 @@
 
 Gradle wrapper（Windows 下为 `gradlew.bat`），JDK 17 要求。
 
-| 命令                                            | 说明                                                                                        |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `./gradlew assembleDebug`                       | Debug 构建（默认 flavor：appMax）                                                           |
-| `./gradlew assembleRelease`                     | Release 构建（ProGuard + resource shrinking）                                               |
-| `./gradlew assembleAppMaxDebug`                 | appMax（`io.legado.app.yuedu`，共存包）                                                     |
-| `./gradlew assembleAppLegacyRelease`            | appLegacy（`io.legado.app`，与原版一致）                                                    |
-| `./gradlew assembleAppSDebug`                   | appS（`io.legado.app.yuedu.a`）                                                             |
-| `./gradlew installDebug` / `installAppMaxDebug` | 安装到设备                                                                                  |
-| `./gradlew test`                                | 单元测试                                                                                    |
-| `./gradlew connectedAndroidTest`                | 仪器测试（Instrumented tests）                                                              |
-| `./gradlew stop`                                | 停止 Gradle daemon                                                                          |
-| `./gradlew.bat :app:compileAppMaxDebugKotlin`   | 语法检查式编译（"Grammar Test"）                                                            |
-| `./gradlew lint`                                | Android Lint（CI 实际入口为 `:app:lintAppMaxDebug` 单变体）                                 |
-| `./gradlew spotlessCheck`                       | Kotlin 格式检查：只检查自 origin/main 以来的改动（CI 为可选警示，continue-on-error 不阻塞） |
-| `./gradlew spotlessApply`                       | 自动修正全部 Kotlin 格式问题；提交前可手动执行                                              |
-| `./gradlew app:downloadCronet`                  | **首次构建前必须执行**，下载 Cronet 原生库                                                  |
-| `./gradlew assembleDebug --warning-mode all`    | 查看 DSL 语法警告（Windows/Mac/Linux 同命令）                                               |
+| 命令                                            | 说明                                                                                                                              |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `./gradlew assembleDebug`                       | Debug 构建（默认 flavor：appMax）                                                                                                 |
+| `./gradlew assembleRelease`                     | Release 构建（ProGuard + resource shrinking）                                                                                     |
+| `./gradlew assembleAppMaxDebug`                 | appMax（`io.legado.app.yuedu`，共存包）                                                                                           |
+| `./gradlew assembleAppLegacyRelease`            | appLegacy（`io.legado.app`，与原版一致）                                                                                          |
+| `./gradlew assembleAppSDebug`                   | appS（`io.legado.app.yuedu.a`）                                                                                                   |
+| `./gradlew installDebug` / `installAppMaxDebug` | 安装到设备                                                                                                                        |
+| `./gradlew test`                                | 单元测试                                                                                                                          |
+| `./gradlew connectedAndroidTest`                | 仪器测试（Instrumented tests）                                                                                                    |
+| `./gradlew stop`                                | 停止 Gradle daemon                                                                                                                |
+| `./gradlew.bat :app:compileAppMaxDebugKotlin`   | 语法检查式编译（"Grammar Test"）                                                                                                  |
+| `./gradlew lint`                                | Android Lint（CI 实际入口为 `:app:lintAppMaxDebug` 单变体）。**迭代期用 IDE 内联 lint，CLI 全量作收尾/CI 门禁**；范围自适应见下节 |
+| `./gradlew spotlessCheck`                       | Kotlin 格式检查：只检查自 origin/main 以来的改动（CI 为可选警示，continue-on-error 不阻塞）                                       |
+| `./gradlew spotlessApply`                       | 自动修正全部 Kotlin 格式问题；提交前可手动执行                                                                                    |
+| `./gradlew app:downloadCronet`                  | **首次构建前必须执行**，下载 Cronet 原生库                                                                                        |
+| `./gradlew assembleDebug --warning-mode all`    | 查看 DSL 语法警告（Windows/Mac/Linux 同命令）                                                                                     |
+
+### Android Lint 门禁与提速
+
+- **定位**：lint 是本地最后一道门禁（验证顺序：单测 → lint），CI 通过 `.github/workflows/lint.yaml` 跑 `:app:lintAppMaxDebug` 单变体；`abortOnError` 生效——只要出现 **baseline 之外的新增 error** 就 `BUILD FAILED`。
+- **存量基线**：`app/lint-baseline.xml` 收录历史问题，lint 只拦新增；存量修复后基线对应项需 `./gradlew :app:lintAppMaxDebug -DupdateBaseline=true`（或 IDE）刷新，勿手改。
+- **范围自适应**（配置在 `app/build.gradle` 的 `lintResolveScope()`，按 git 改动路径自动决定，详见 [docs/architecture/android-lint-门禁与提速.md](../architecture/android-lint-门禁与提速.md)）：
+  - 只改 `app/src/main/**` → 快跑（关 `checkDependencies` + `checkTestSources`）；触及 `modules/*`、`**/src/test`、`**/src/androidTest`、任意 `build.gradle`、`lint-baseline.xml` 等 → 全量。
+  - CI（env `CI`/`GITHUB_ACTIONS`）**永远全量**，门禁不降级。
+  - 手动覆盖：`-PlintFast` 强制快跑 / `-PlintFull` 强制全量 / `-PlintBase=<ref>` 指定比较基线（默认 `origin/main`，首次用前需 `git fetch origin main`）。
+- **提速真相**：本项目耗时大头是 app 主源码自身分析（单次冷跑约 7 分钟），范围裁剪实测几乎不减墙钟时间。真正有效的做法：**迭代期靠 IDE 内联 lint（按文件增量、改哪查哪）**，别在改代码循环里反复跑 CLI；CLI 全量只在 push 前 / CI 执行。跑 CLI 时尽量保持 daemon 与 `build/intermediates/lint-cache` 存活（反复 `--stop` / `clean` 会打断增量）。
 
 ### Kotlin 代码格式（spotless + ktlint）
 
