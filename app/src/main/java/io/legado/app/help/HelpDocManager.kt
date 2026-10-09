@@ -74,6 +74,7 @@ object HelpDocManager {
         HelpDoc("readMenuHelp", "阅读界面帮助文档"),
         HelpDoc("homepageHelp", "首页功能使用帮助"),
         HelpDoc("bubbleHelp", "段评气泡管理帮助"),
+        HelpDoc("sourceRecycleBinHelp", "规则回收站帮助"),
         HelpDoc("webDavBookHelp", "WebDav书籍简明使用教程"),
         HelpDoc("webDavHelp", "WebDav备份教程"),
         HelpDoc("updateLog", "更新日志")

@@ -8,7 +8,7 @@
 所有 `execute` 方法最终都收敛到 `Coroutine.async()`：
 
 ```kotlin
-// BaseViewModel.kt（Activity/Fragment/DialogFragment/Service/BaseViewModel 中同名方法语义一致）
+// BaseViewModel.kt（execute/executeLazy/submit 仅定义于 BaseViewModel、BaseDialogFragment、BaseService）
 fun <T> execute(
     scope: CoroutineScope = viewModelScope,   // 各宿主类默认值不同，见下
     context: CoroutineContext = Dispatchers.IO,   // 业务逻辑执行线程
@@ -19,12 +19,15 @@ fun <T> execute(
 ): Coroutine<T>
 ```
 
-| 宿主类                          | `scope` 默认值   | 文件                         |
-| ------------------------------- | ---------------- | ---------------------------- |
-| `BaseViewModel`                 | `viewModelScope` | `base/BaseViewModel.kt`      |
-| `BaseActivity` / `BaseFragment` | `lifecycleScope` | `base/` 对应文件             |
-| `BaseDialogFragment`            | `lifecycleScope` | `base/BaseDialogFragment.kt` |
-| `BaseService`                   | `lifecycleScope` | `base/BaseService.kt`        |
+| 宿主类               | `scope` 默认值   | 文件                         |
+| -------------------- | ---------------- | ---------------------------- |
+| `BaseViewModel`      | `viewModelScope` | `base/BaseViewModel.kt`      |
+| `BaseDialogFragment` | `lifecycleScope` | `base/BaseDialogFragment.kt` |
+| `BaseService`        | `lifecycleScope` | `base/BaseService.kt`        |
+
+> ⚠️ `BaseActivity` / `BaseFragment` **不提供** `execute`/`executeLazy`/`submit`（实测调用会报 `Unresolved reference 'execute'`）。
+> Activity / Fragment 侧的一次性任务：优先下沉到 `ViewModel` 用 `execute`；确需在界面就地做的（如即时读取），
+> 用 `lifecycleScope.launch { withContext(IO) { … } }`（参考 `BookSourceEditActivity.alertGroups`）。
 
 返回的 `Coroutine<T>` 是**链式包装类**，不是 `kotlinx.coroutines.Coroutine<T>`（接口），别混淆。支持链式方法：
 
@@ -49,8 +52,9 @@ execute {
 
 ## 2. 强制规则
 
-1. **View 系屏幕（Activity/Fragment，以及继承 `BaseViewModel` 的 ViewModel）里启动一次性任务，用 `execute`，不要裸 `viewModelScope.launch { }`。**
+1. **`ViewModel`（继承 `BaseViewModel`）里启动一次性任务，用 `execute`，不要裸 `viewModelScope.launch { }`。**
    理由：项目里 99% 的现有代码是 `execute` 链式风格，错误处理、线程切换、取消语义已统一。混用裸 `launch` 会让错误处理散落各处。
+   **Activity / Fragment 没有 `execute` 可用**：一次性任务优先下沉到 `ViewModel` 用 `execute`（UI 持有 `viewModel` 即可 `viewModel.execute { … }`）；确需在界面就地做的用 `lifecycleScope.launch { withContext(IO) { … } }`。
    **例外——Compose 屏幕**：Compose 侧的 ViewModel 不继承 `BaseViewModel`，没有 `execute` 可用；一次性增删改用 `viewModelScope.launch` + `try-catch`（更新 `UiState` + 抛 `Event`），见 `compose/state-events.md` §4.1.1。两者不冲突：`execute` 的 scope 默认就是 `viewModelScope`，取消语义相同，区别只在错误出口（回调链 vs try-catch）。
 2. **`execute` 内禁止在 UI 线程做耗时操作。** 默认 `context = Dispatchers.IO`，网络/DB/文件 IO 直接写；CPU 密集（EPUB 解析、大量文本处理）显式传 `context = Dispatchers.Default`。
 3. **禁止 `GlobalScope`、禁止 `CoroutineScope(Dispatchers.Main + SupervisorJob())` 手动全局 scope。**

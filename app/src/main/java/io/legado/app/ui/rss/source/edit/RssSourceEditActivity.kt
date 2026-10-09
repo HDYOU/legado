@@ -37,6 +37,7 @@ import io.legado.app.ui.qrcode.QrCodeResult
 import io.legado.app.ui.rss.source.debug.RssSourceDebugActivity
 import io.legado.app.ui.widget.dialog.UrlOptionDialog
 import io.legado.app.ui.widget.dialog.CookieViewerDialog
+import io.legado.app.ui.widget.dialog.SourceInfoDialog
 import io.legado.app.ui.widget.dialog.VariableDialog
 import io.legado.app.ui.widget.keyboard.KeyboardToolPop
 import io.legado.app.ui.widget.text.EditEntity
@@ -152,11 +153,56 @@ class RssSourceEditActivity :
     }
 
     /**
-     * 保存订阅源。所有保存入口统一走这里：
+     * 保存闸门：所有会写库的入口（保存/调试/登录/设置源变量）统一先经过这里。
+     *
+     * 检测待保存地址是否命中列表中"另一条"已存在的订阅源——命中则弹覆盖警告，
+     * 用户确认后才真正保存，取消则中止。sourceUrl 是主键，未改地址时命中的就是本条源自身，
+     * 无覆盖风险，直接放行不查询。
+     */
+    private fun saveSource(source: RssSource, onSuccess: ((RssSource) -> Unit)? = null) {
+        val url = source.sourceUrl
+        val originalUrl = viewModel.rssSource?.sourceUrl
+        if (url.isBlank() || url == originalUrl) {
+            performSave(source, onSuccess)
+            return
+        }
+        // 经 ViewModel 的 execute 链（协程写在 VM 内，UI 不直连 DAO）：block 默认在 IO 上跑、回调回 Main；
+        // Coroutine 对 CancellationException 直接重抛、且仅在 scope 活跃时派发回调，取消不会被当作错误
+        viewModel.execute { viewModel.findByUrl(url) }
+            .onSuccess { existing ->
+                // 回调在 Main 且 Coroutine 仅在 scope 活跃时派发；为保险仍防一道销毁守卫
+                if (isFinishing || isDestroyed) return@onSuccess
+                if (existing != null) {
+                    // 回收站停用时覆盖等于永久丢弃，弹窗补不可恢复提醒
+                    val binHint = if (AppConfig.sourceRecycleBinEnabled) "" else
+                        "\n\n" + getString(R.string.overwrite_irrecoverable_hint)
+                    alert(R.string.rss_source_url_duplicate_title) {
+                        setMessage(
+                            getString(
+                                R.string.rss_source_url_duplicate_cover_msg,
+                                existing.sourceName.ifBlank { url }
+                            ) + binHint
+                        )
+                        positiveButton(R.string.overwrite) { performSave(source, onSuccess) }
+                        negativeButton(R.string.cancel)
+                    }
+                } else {
+                    performSave(source, onSuccess)
+                }
+            }
+            .onError {
+                // 检测本身绝不能阻断保存：查询异常走此分支照常保存
+                if (isFinishing || isDestroyed) return@onError
+                performSave(source, onSuccess)
+            }
+    }
+
+    /**
+     * 真正执行保存。所有保存入口经 saveSource 闸门确认后走到这里：
      * 保存期间保持 pendingSaveCount > 0（阻止退出导致协程被取消），
      * 成功回调与 finally 只结算一次，成功回调先扣减再触发，保证内部 finish() 不被守卫拦下。
      */
-    private fun saveSource(source: RssSource, onSuccess: ((RssSource) -> Unit)? = null) {
+    private fun performSave(source: RssSource, onSuccess: ((RssSource) -> Unit)? = null) {
         pendingSaveCount++
         var settled = false
         fun settle(savedSource: RssSource?) {
@@ -439,6 +485,7 @@ class RssSourceEditActivity :
             )
 
             R.id.menu_log -> showDialogFragment<AppLogDialog>()
+            R.id.menu_source_info -> showSourceInfo()
             R.id.menu_help -> showHelp("rssRuleHelp")
             R.id.menu_view_cookie -> showDialogFragment(CookieViewerDialog(getRssSource().sourceUrl))
         }
@@ -812,6 +859,24 @@ class RssSourceEditActivity :
                 }
             }
         }
+    }
+
+    /**
+     * 展示源信息：排序编号、最后更新时间、代码行数、整个源所占的文件大小。
+     * 代码行数取各规则字段内容的实际行数之和，文件大小取序列化 JSON 的字节数。
+     */
+    private fun showSourceInfo() {
+        val source = getRssSource()
+        val raw = GSON.toJson(source)
+        showDialogFragment(
+            SourceInfoDialog().apply {
+                sourceName = source.sourceName
+                customOrder = source.customOrder
+                lastUpdateTime = source.lastUpdateTime
+                codeLines = SourceInfoDialog.countSourceCodeLines(raw)
+                fileSize = raw.toByteArray(Charsets.UTF_8).size.toLong()
+            }
+        )
     }
 
     private fun showSourceJsonEdit() {
