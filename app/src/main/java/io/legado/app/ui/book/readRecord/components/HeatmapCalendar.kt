@@ -609,11 +609,20 @@ fun HeatmapCalendarBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.surface,
+        // 只保留 Bottom 侧 insets：M3 默认的 safeDrawing(Top+Bottom) 中 Top 部分会因
+        // ModalBottomSheet 内部 consumeWindowInsets(top = sheetState.offset) 随 offset 变化，
+        // 导致内容顶 padding → 内容高度(fillMaxHeight) → Expanded 锚点 联动，滚动时整个弹窗抖动；
+        // 去掉 Top 侧即可切断该反馈回路。
+        contentWindowInsets = { WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom) }
     ) {
+        // 顶部用不受消耗链影响的静态状态栏高度补偿（asPaddingValues 不扣除
+        // consumeWindowInsets 传入的 offset），满屏时标题不会顶到状态栏下
+        val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = statusBarTop)
                 .fillMaxHeight(0.88f)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
