@@ -444,7 +444,8 @@ private fun ModernExploreHeader(
         if (hasSettings) {
             IconButton(onClick = onOpenSettings) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_settings),
+                    // 发现页管理=筛选/调节参数表单：用调节滑杆，比通用齿轮更贴语义
+                    painter = painterResource(R.drawable.ic_tune),
                     contentDescription = stringResource(R.string.setting),
                     tint = topBarColors.contentColor
                 )
