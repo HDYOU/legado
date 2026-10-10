@@ -1,5 +1,7 @@
 package io.legado.app.ui.widget.components.modalBottomSheet
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -45,7 +47,8 @@ fun AppModalBottomSheet(
         ModalBottomSheet(
             onDismissRequest = onDismissRequest,
             sheetState = sheetState,
-            modifier = modifier,
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = modifier.eInkGrayscale(),
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
             // 只保留 Bottom 侧 insets：M3 默认的 safeDrawing(Top+Bottom) 中 Top 部分会因

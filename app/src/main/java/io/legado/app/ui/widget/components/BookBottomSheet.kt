@@ -1,5 +1,7 @@
 package io.legado.app.ui.widget.components
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -96,7 +98,8 @@ fun BookBottomSheet(
         ModalBottomSheet(
             onDismissRequest = onDismiss,
             sheetState = sheetState,
-            modifier = Modifier.fillMaxWidth(),
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = Modifier.fillMaxWidth().eInkGrayscale(),
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
             // 只保留 Bottom 侧 insets：M3 默认的 safeDrawing(Top+Bottom) 中 Top 部分会因

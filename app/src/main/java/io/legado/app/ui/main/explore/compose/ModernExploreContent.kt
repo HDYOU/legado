@@ -1,5 +1,7 @@
 package io.legado.app.ui.main.explore.compose
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -452,6 +454,7 @@ private fun ModernExploreHeader(
                 )
             }
             DropdownMenu(
+                modifier = Modifier.eInkGrayscale(),
                 expanded = showMoreMenu,
                 onDismissRequest = { showMoreMenu = false },
             ) {
@@ -574,6 +577,7 @@ private fun ModernExploreSettingsSheet(
     }
 
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = { dismissWithRefresh() },
         title = { Text(text = stringResource(R.string.setting)) },
         text = {

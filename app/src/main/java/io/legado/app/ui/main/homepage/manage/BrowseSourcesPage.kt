@@ -1,5 +1,7 @@
 package io.legado.app.ui.main.homepage.manage
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -115,7 +117,7 @@ fun BrowseSourcesPage(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             // 搜索输入框
             OutlinedTextField(
@@ -125,7 +127,7 @@ fun BrowseSourcesPage(
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
-                textStyle = MaterialTheme.typography.bodyMedium
+                textStyle = MaterialTheme.typography.bodyMedium,
             )
             Spacer(modifier = Modifier.size(8.dp))
             // 分组筛选按钮
@@ -133,12 +135,13 @@ fun BrowseSourcesPage(
                 IconButton(onClick = { showGroupMenu = true }) {
                     Icon(
                         imageVector = Icons.Default.FilterList,
-                        contentDescription = stringResource(R.string.homepage_group_filter)
+                        contentDescription = stringResource(R.string.homepage_group_filter),
                     )
                 }
                 DropdownMenu(
+                    modifier = Modifier.eInkGrayscale(),
                     expanded = showGroupMenu,
-                    onDismissRequest = { showGroupMenu = false }
+                    onDismissRequest = { showGroupMenu = false },
                 ) {
                     // 全部分组选项
                     DropdownMenuItem(
@@ -149,7 +152,7 @@ fun BrowseSourcesPage(
                         },
                         leadingIcon = {
                             if (groupFilter == null) Icon(Icons.Default.Check, null)
-                        }
+                        },
                     )
                     // 各分组选项
                     allGroups.forEach { group ->
@@ -161,7 +164,7 @@ fun BrowseSourcesPage(
                             },
                             leadingIcon = {
                                 if (groupFilter == group) Icon(Icons.Default.Check, null)
-                            }
+                            },
                         )
                     }
                 }
@@ -178,7 +181,7 @@ fun BrowseSourcesPage(
                 },
                 style = MaterialTheme.typography.labelSmall,
                 color = pageSecondaryTextColor(),
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = Modifier.padding(bottom = 4.dp),
             )
         }
 
@@ -187,18 +190,18 @@ fun BrowseSourcesPage(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(filteredSources) { source ->
                     GlassCard(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { onSourceClick(source.sourceUrl) }
+                        onClick = { onSourceClick(source.sourceUrl) },
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 12.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             // 书源名称和模块数量
                             Column(modifier = Modifier.weight(1f)) {
@@ -208,19 +211,19 @@ fun BrowseSourcesPage(
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    overflow = TextOverflow.Ellipsis,
                                 )
                                 Text(
                                     text = stringResource(R.string.homepage_module_count, source.moduleCount),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = pageSecondaryTextColor()
+                                    color = pageSecondaryTextColor(),
                                 )
                             }
                             // 右侧箭头图标
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = stringResource(R.string.homepage_view),
-                                tint = pageSecondaryTextColor()
+                                tint = pageSecondaryTextColor(),
                             )
                         }
                     }
@@ -228,7 +231,7 @@ fun BrowseSourcesPage(
             }
             VerticalScrollbar(
                 state = listState,
-                modifier = Modifier.align(Alignment.CenterEnd)
+                modifier = Modifier.align(Alignment.CenterEnd),
             )
         }
     }

@@ -1,5 +1,7 @@
 package io.legado.app.ui.config.covergallery
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -12,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -93,7 +94,7 @@ import io.legado.app.utils.toastOnUi
 @Composable
 fun CoverGalleryScreen(
     viewModel: CoverGalleryViewModel = viewModel(),
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     val groups by viewModel.groups.collectAsStateWithLifecycle()
     val messageDialog by viewModel.messageDialog.collectAsStateWithLifecycle()
@@ -139,7 +140,7 @@ fun CoverGalleryScreen(
             viewModel.importZip(
                 context,
                 uri,
-                onNoImage = { message -> context.toastOnUi(message) }
+                onNoImage = { message -> context.toastOnUi(message) },
             )
         }
     }
@@ -155,6 +156,7 @@ fun CoverGalleryScreen(
 
     messageDialog?.let { dialog ->
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { viewModel.dismissMessageDialog() },
             containerColor = elevatedContainerColor,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -166,7 +168,7 @@ fun CoverGalleryScreen(
                 TextButton(onClick = { viewModel.dismissMessageDialog() }) {
                     Text("确定")
                 }
-            }
+            },
         )
     }
 
@@ -182,12 +184,13 @@ fun CoverGalleryScreen(
                     viewModel.renameGroup(groupWithImages.group.id, name)
                 }
                 editGroup = null
-            }
+            },
         )
     }
 
     deleteGroup?.let { groupWithImages ->
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { deleteGroup = null },
             containerColor = elevatedContainerColor,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -200,7 +203,7 @@ fun CoverGalleryScreen(
                     onClick = {
                         viewModel.deleteGroup(groupWithImages.group.id)
                         deleteGroup = null
-                    }
+                    },
                 ) {
                     Text("删除", color = MaterialTheme.colorScheme.error)
                 }
@@ -209,12 +212,13 @@ fun CoverGalleryScreen(
                 TextButton(onClick = { deleteGroup = null }) {
                     Text("取消")
                 }
-            }
+            },
         )
     }
 
     deleteImage?.let { image ->
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { deleteImage = null },
             containerColor = elevatedContainerColor,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -227,7 +231,7 @@ fun CoverGalleryScreen(
                     onClick = {
                         viewModel.deleteImage(image.id)
                         deleteImage = null
-                    }
+                    },
                 ) {
                     Text("删除", color = MaterialTheme.colorScheme.error)
                 }
@@ -236,7 +240,7 @@ fun CoverGalleryScreen(
                 TextButton(onClick = { deleteImage = null }) {
                     Text("取消")
                 }
-            }
+            },
         )
     }
 
@@ -254,7 +258,7 @@ fun CoverGalleryScreen(
                                 title = "导入zip"
                                 allowExtensions = arrayOf("zip")
                             }
-                        }
+                        },
                     ) {
                         Icon(Icons.Default.FileDownload, contentDescription = stringResource(R.string.import_zip))
                     }
@@ -265,9 +269,9 @@ fun CoverGalleryScreen(
                         onClick = {
                             editGroup = CoverGalleryGroupWithImages(
                                 group = CoverGalleryGroup(),
-                                images = emptyList()
+                                images = emptyList(),
                             )
-                        }
+                        },
                     ) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_group))
                     }
@@ -280,24 +284,24 @@ fun CoverGalleryScreen(
                                         "- 支持图片类型：jpg、jpeg、png、webp、gif、bmp、heic、heif\n" +
                                         "- 导入文件类型：zip，zip 中的图片会导入为一个分组。\n" +
                                         "- 导出文件类型：zip，导出内容为当前分组中的图片。",
-                                    TextDialog.Mode.MD
-                                )
+                                    TextDialog.Mode.MD,
+                                ),
                             )
-                        }
+                        },
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_help),
-                            contentDescription = stringResource(R.string.help)
+                            contentDescription = stringResource(R.string.help),
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
             AnimatedVisibility(visible = showSearch) {
                 OutlinedTextField(
@@ -317,7 +321,7 @@ fun CoverGalleryScreen(
                                 onClick = {
                                     searchQuery = ""
                                     viewModel.setSearchQuery("")
-                                }
+                                },
                             ) {
                                 Icon(Icons.Default.Clear, contentDescription = "清除")
                             }
@@ -331,9 +335,9 @@ fun CoverGalleryScreen(
                         focusedLeadingIconColor = pageAccentColor(),
                         unfocusedLeadingIconColor = pageMutedIconTint(),
                         focusedTrailingIconColor = pageAccentColor(),
-                        unfocusedTrailingIconColor = pageMutedIconTint()
+                        unfocusedTrailingIconColor = pageMutedIconTint(),
                     ),
-                    singleLine = true
+                    singleLine = true,
                 )
             }
 
@@ -343,15 +347,15 @@ fun CoverGalleryScreen(
                     onAddGroup = {
                         editGroup = CoverGalleryGroupWithImages(
                             group = CoverGalleryGroup(),
-                            images = emptyList()
+                            images = emptyList(),
                         )
-                    }
+                    },
                 )
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(top = 12.dp, bottom = 12.dp + navigationBarBottomInset),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     items(groups, key = { it.group.id }) { groupWithImages ->
                         CoverGalleryGroupCard(
@@ -383,18 +387,18 @@ fun CoverGalleryScreen(
                                             onlyOtherActions = true
                                             otherActions = arrayListOf(
                                                 SelectItem("系统文件选择器", HandleFileContract.DIR),
-                                                SelectItem("自带文件选择器", 10)
+                                                SelectItem("自带文件选择器", 10),
                                             )
                                             fileData = HandleFileContract.FileData(
                                                 zipFile.name,
                                                 zipFile,
-                                                "application/zip"
+                                                "application/zip",
                                             )
                                         }
                                     },
                                     onFailure = { message ->
                                         context.toastOnUi("导出失败\n$message")
-                                    }
+                                    },
                                 )
                             },
                             onUploadZip = {
@@ -410,12 +414,12 @@ fun CoverGalleryScreen(
                                     },
                                     onFailure = { message ->
                                         context.toastOnUi("上传 WebDav 失败\n$message")
-                                    }
+                                    },
                                 )
                             },
                             onRename = { editGroup = groupWithImages },
                             onDeleteGroup = { deleteGroup = groupWithImages },
-                            onDeleteImage = { deleteImage = it }
+                            onDeleteImage = { deleteImage = it },
                         )
                     }
                 }
@@ -427,7 +431,7 @@ fun CoverGalleryScreen(
 @Composable
 private fun EmptyGallery(
     modifier: Modifier = Modifier,
-    onAddGroup: () -> Unit
+    onAddGroup: () -> Unit,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -435,13 +439,13 @@ private fun EmptyGallery(
                 imageVector = Icons.Default.Image,
                 contentDescription = null,
                 modifier = Modifier.size(56.dp),
-                tint = pageMutedIconTint()
+                tint = pageMutedIconTint(),
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "暂无封面分组",
                 style = MaterialTheme.typography.titleMedium,
-                color = pageSecondaryTextColor()
+                color = pageSecondaryTextColor(),
             )
             Spacer(modifier = Modifier.height(12.dp))
             FilledTonalButton(onClick = onAddGroup) {
@@ -464,7 +468,7 @@ private fun CoverGalleryGroupCard(
     onUploadZip: () -> Unit,
     onRename: () -> Unit,
     onDeleteGroup: () -> Unit,
-    onDeleteImage: (CoverGalleryImage) -> Unit
+    onDeleteImage: (CoverGalleryImage) -> Unit,
 ) {
     val group = groupWithImages.group
     val images = groupWithImages.images.sortedWith(compareBy({ it.order }, { it.id }))
@@ -474,19 +478,19 @@ private fun CoverGalleryGroupCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = pageCardContainerColor(),
-            contentColor = MaterialTheme.colorScheme.onSurface
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     imageVector = if (group.isDefault) Icons.Default.Star else Icons.Outlined.StarBorder,
                     contentDescription = null,
-                    tint = if (group.isDefault) pageAccentColor() else pageMutedIconTint()
+                    tint = if (group.isDefault) pageAccentColor() else pageMutedIconTint(),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f)) {
@@ -496,28 +500,28 @@ private fun CoverGalleryGroupCard(
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                         if (group.isDefault) {
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "默认 · 随机",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = pageAccentColor()
+                                color = pageAccentColor(),
                             )
                         }
                     }
                     Text(
                         text = "${images.size} 张图片",
                         style = MaterialTheme.typography.bodySmall,
-                        color = pageSecondaryTextColor()
+                        color = pageSecondaryTextColor(),
                     )
                 }
                 IconButton(onClick = onAddImage) {
                     Icon(
                         Icons.Default.AddPhotoAlternate,
                         contentDescription = "添加图片",
-                        tint = pageAccentColor()
+                        tint = pageAccentColor(),
                     )
                 }
                 Box {
@@ -525,13 +529,14 @@ private fun CoverGalleryGroupCard(
                         Icon(
                             Icons.Default.MoreVert,
                             contentDescription = "更多",
-                            tint = pageMutedIconTint()
+                            tint = pageMutedIconTint(),
                         )
                     }
                     DropdownMenu(
+                        modifier = Modifier.eInkGrayscale(),
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false },
-                        containerColor = pageCardElevatedContainerColor()
+                        containerColor = pageCardElevatedContainerColor(),
                     ) {
                         DropdownMenuItem(
                             text = { Text(if (group.isDefault) "取消默认" else "设为默认") },
@@ -542,9 +547,9 @@ private fun CoverGalleryGroupCard(
                             leadingIcon = {
                                 Icon(
                                     if (group.isDefault) Icons.Default.Clear else Icons.Default.Check,
-                                    contentDescription = null
+                                    contentDescription = null,
                                 )
-                            }
+                            },
                         )
                         if (group.isDefault) {
                             DropdownMenuItem(
@@ -553,7 +558,7 @@ private fun CoverGalleryGroupCard(
                                     onRerandomize()
                                     showMenu = false
                                 },
-                                leadingIcon = { Icon(Icons.Default.Casino, contentDescription = null) }
+                                leadingIcon = { Icon(Icons.Default.Casino, contentDescription = null) },
                             )
                         }
                         DropdownMenuItem(
@@ -562,7 +567,7 @@ private fun CoverGalleryGroupCard(
                                 onExportZip()
                                 showMenu = false
                             },
-                            leadingIcon = { Icon(Icons.Default.FileUpload, contentDescription = null) }
+                            leadingIcon = { Icon(Icons.Default.FileUpload, contentDescription = null) },
                         )
                         DropdownMenuItem(
                             text = { Text("上传 WebDav") },
@@ -570,7 +575,7 @@ private fun CoverGalleryGroupCard(
                                 onUploadZip()
                                 showMenu = false
                             },
-                            leadingIcon = { Icon(Icons.Default.FileUpload, contentDescription = null) }
+                            leadingIcon = { Icon(Icons.Default.FileUpload, contentDescription = null) },
                         )
                         DropdownMenuItem(
                             text = { Text("重命名") },
@@ -578,7 +583,7 @@ private fun CoverGalleryGroupCard(
                                 onRename()
                                 showMenu = false
                             },
-                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
+                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
                         )
                         DropdownMenuItem(
                             text = { Text("删除分组", color = MaterialTheme.colorScheme.error) },
@@ -590,9 +595,9 @@ private fun CoverGalleryGroupCard(
                                 Icon(
                                     Icons.Default.Delete,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error
+                                    tint = MaterialTheme.colorScheme.error,
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -611,7 +616,7 @@ private fun CoverGalleryGroupCard(
                     items(images, key = { it.id }) { image ->
                         CoverImageThumb(
                             image = image,
-                            onDelete = { onDeleteImage(image) }
+                            onDelete = { onDeleteImage(image) },
                         )
                     }
                 }
@@ -624,23 +629,23 @@ private fun CoverGalleryGroupCard(
 @Composable
 private fun CoverImageThumb(
     image: CoverGalleryImage,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     Box(
         modifier = Modifier
             .width(72.dp)
             .height(104.dp)
-            .clip(RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(6.dp)),
     ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = pageSurfaceVariantColor()
+            color = pageSurfaceVariantColor(),
         ) {}
         GlideImage(
             model = image.path,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
         )
         Surface(
             modifier = Modifier
@@ -648,17 +653,17 @@ private fun CoverImageThumb(
                 .padding(4.dp)
                 .size(24.dp),
             shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.82f)
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.82f),
         ) {
             IconButton(
                 onClick = onDelete,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             ) {
                 Icon(
                     imageVector = Icons.Default.Clear,
                     contentDescription = "删除图片",
                     tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp),
                 )
             }
         }
@@ -670,10 +675,11 @@ private fun GroupNameDialog(
     initialName: String,
     title: String,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     var name by remember(initialName) { mutableStateOf(initialName) }
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         containerColor = pageCardElevatedContainerColor(),
         titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -691,14 +697,14 @@ private fun GroupNameDialog(
                     focusedContainerColor = pageCardElevatedContainerColor(),
                     unfocusedContainerColor = pageCardElevatedContainerColor(),
                     focusedBorderColor = pageAccentColor(),
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                )
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                ),
             )
         },
         confirmButton = {
             TextButton(
                 enabled = name.isNotBlank(),
-                onClick = { onConfirm(name) }
+                onClick = { onConfirm(name) },
             ) {
                 Text("确定")
             }
@@ -707,6 +713,6 @@ private fun GroupNameDialog(
             TextButton(onClick = onDismiss) {
                 Text("取消")
             }
-        }
+        },
     )
 }

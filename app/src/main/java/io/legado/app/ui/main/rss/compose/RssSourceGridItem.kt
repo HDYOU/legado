@@ -1,5 +1,7 @@
 package io.legado.app.ui.main.rss.compose
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DropdownMenu
@@ -45,6 +47,7 @@ internal fun RssSourceGridItem(
             },
         )
         DropdownMenu(
+            modifier = Modifier.eInkGrayscale(),
             expanded = menuExpanded,
             onDismissRequest = { menuExpanded = false },
         ) {
@@ -70,12 +73,10 @@ internal fun RssSourceGridItem(
 }
 
 /** 菜单文案复用 View 版菜单（[R.menu.rss_main_item]）的同一批字符串资源 */
-private fun RssSourceMenuAction.titleRes(): Int {
-    return when (this) {
-        RssSourceMenuAction.Edit -> R.string.edit
-        RssSourceMenuAction.ToTop -> R.string.to_top
-        RssSourceMenuAction.Login -> R.string.login
-        RssSourceMenuAction.Disable -> R.string.disable_source
-        RssSourceMenuAction.Delete -> R.string.delete
-    }
+private fun RssSourceMenuAction.titleRes(): Int = when (this) {
+    RssSourceMenuAction.Edit -> R.string.edit
+    RssSourceMenuAction.ToTop -> R.string.to_top
+    RssSourceMenuAction.Login -> R.string.login
+    RssSourceMenuAction.Disable -> R.string.disable_source
+    RssSourceMenuAction.Delete -> R.string.delete
 }

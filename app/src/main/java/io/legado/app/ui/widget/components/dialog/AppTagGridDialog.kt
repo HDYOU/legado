@@ -1,5 +1,7 @@
 package io.legado.app.ui.widget.components.dialog
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -68,14 +70,15 @@ fun AppTagGridDialog(
 ) {
     BasicAlertDialog(onDismissRequest = onDismissRequest) {
         Surface(
-            modifier = modifier.fillMaxWidth(),
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = modifier.fillMaxWidth().eInkGrayscale(),
             shape = MaterialTheme.shapes.large,
             // 半透明：透出底层内容（对齐参考分支 tag picker 的磨砂观感），
             // 取 surfaceContainerHigh 保证深浅色主题下都与背景有对比
             color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(
-                alpha = AppDimens.TAG_DIALOG_CONTAINER_ALPHA
+                alpha = AppDimens.TAG_DIALOG_CONTAINER_ALPHA,
             ),
-            tonalElevation = 6.dp
+            tonalElevation = 6.dp,
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -87,12 +90,12 @@ fun AppTagGridDialog(
                         start = AppDimens.panelRowHorizontalPadding,
                         top = AppDimens.panelRowHorizontalPadding,
                         end = AppDimens.panelRowHorizontalPadding,
-                        bottom = AppDimens.panelTitleBottomPadding
-                    )
+                        bottom = AppDimens.panelTitleBottomPadding,
+                    ),
                 )
                 if (options.isNotEmpty()) {
                     Box(
-                        Modifier.fillMaxWidth().heightIn(max = AppDimens.dialogOptionsMaxHeight)
+                        Modifier.fillMaxWidth().heightIn(max = AppDimens.dialogOptionsMaxHeight),
                     ) {
                         // 带宽度声明时（新版发现的分组/分类弹窗）按书源 style 换行排布：
                         // 声明整行的分组标题独占一行、声明 0.4 的分类一行 2-3 个，
@@ -106,22 +109,22 @@ fun AppTagGridDialog(
                                         start = AppDimens.panelRowHorizontalPadding,
                                         end = AppDimens.panelRowHorizontalPadding +
                                             AppDimens.scrollbarRailWidth / 2,
-                                        bottom = AppDimens.panelRowTitleSpacing
+                                        bottom = AppDimens.panelRowTitleSpacing,
                                     )
                                     .verticalScroll(scrollState),
                                 items = itemSpecs,
                                 horizontalSpacing = AppDimens.exploreShowTabSpacing,
-                                verticalSpacing = AppDimens.exploreShowTabSpacing
+                                verticalSpacing = AppDimens.exploreShowTabSpacing,
                             ) { index ->
                                 TagGridOptionChip(
                                     label = options[index],
                                     selected = index == selectedIndex,
-                                    onClick = { onSelect(index) }
+                                    onClick = { onSelect(index) },
                                 )
                             }
                             VerticalScrollbar(
                                 state = scrollState,
-                                modifier = Modifier.align(Alignment.CenterEnd)
+                                modifier = Modifier.align(Alignment.CenterEnd),
                             )
                         } else {
                             val gridState = rememberLazyGridState()
@@ -133,26 +136,26 @@ fun AppTagGridDialog(
                                     .fillMaxWidth()
                                     .padding(end = AppDimens.scrollbarRailWidth / 2),
                                 horizontalArrangement =
-                                    Arrangement.spacedBy(AppDimens.exploreShowTabSpacing),
+                                Arrangement.spacedBy(AppDimens.exploreShowTabSpacing),
                                 verticalArrangement =
-                                    Arrangement.spacedBy(AppDimens.exploreShowTabSpacing),
+                                Arrangement.spacedBy(AppDimens.exploreShowTabSpacing),
                                 contentPadding = PaddingValues(
                                     start = AppDimens.panelRowHorizontalPadding,
                                     end = AppDimens.panelRowHorizontalPadding,
-                                    bottom = AppDimens.panelRowTitleSpacing
-                                )
+                                    bottom = AppDimens.panelRowTitleSpacing,
+                                ),
                             ) {
                                 itemsIndexed(options) { index, label ->
                                     TagGridOptionChip(
                                         label = label,
                                         selected = index == selectedIndex,
-                                        onClick = { onSelect(index) }
+                                        onClick = { onSelect(index) },
                                     )
                                 }
                             }
                             VerticalScrollbar(
                                 state = gridState,
-                                modifier = Modifier.align(Alignment.CenterEnd)
+                                modifier = Modifier.align(Alignment.CenterEnd),
                             )
                         }
                     }
@@ -163,8 +166,8 @@ fun AppTagGridDialog(
                         .fillMaxWidth()
                         .padding(
                             end = AppDimens.panelRowTitleSpacing,
-                            bottom = AppDimens.panelRowTitleSpacing
-                        )
+                            bottom = AppDimens.panelRowTitleSpacing,
+                        ),
                 ) {
                     TextButton(onClick = onDismissRequest) {
                         Text(text = stringResource(R.string.cancel))
@@ -195,16 +198,16 @@ private fun TagGridOptionChip(
         } else {
             BorderStroke(
                 AppDimens.exploreShowTabBorderWidth,
-                MaterialTheme.colorScheme.outlineVariant
+                MaterialTheme.colorScheme.outlineVariant,
             )
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
             text = label,
             modifier = Modifier.padding(
                 horizontal = AppDimens.exploreShowTabHorizontalPadding,
-                vertical = AppDimens.exploreShowTabVerticalPadding * 1.5f
+                vertical = AppDimens.exploreShowTabVerticalPadding * 1.5f,
             ),
             color = if (selected) {
                 MaterialTheme.colorScheme.onPrimary
@@ -214,7 +217,7 @@ private fun TagGridOptionChip(
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

@@ -1,5 +1,7 @@
 package io.legado.app.ui.download.components
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -61,7 +63,7 @@ fun DownloadTaskCard(
     onRetryClick: () -> Unit,
     onOpenFileClick: () -> Unit = {},
     onOpenFolderClick: () -> Unit = {},
-    onCopyPathClick: () -> Unit = {}
+    onCopyPathClick: () -> Unit = {},
 ) {
     val containerColor = pageCardContainerColor()
     var showMenu by remember { mutableStateOf(false) }
@@ -76,19 +78,19 @@ fun DownloadTaskCard(
                     Modifier.clickable { showMenu = true }
                 } else {
                     Modifier
-                }
+                },
             ),
         colors = CardDefaults.cardColors(containerColor = containerColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 // 状态图标
                 StatusIcon(task.status, modifier = Modifier.size(24.dp))
@@ -102,7 +104,7 @@ fun DownloadTaskCard(
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -110,7 +112,7 @@ fun DownloadTaskCard(
                         Text(
                             text = getStatusText(task.status),
                             style = MaterialTheme.typography.bodySmall,
-                            color = getStatusColor(task.status)
+                            color = getStatusColor(task.status),
                         )
                         // 下载中显示进度百分比
                         if (task.status == DownloadStatus.RUNNING) {
@@ -119,7 +121,7 @@ fun DownloadTaskCard(
                                 text = "${task.progress}%",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
                             )
                         }
                         // 显示文件总大小
@@ -128,7 +130,7 @@ fun DownloadTaskCard(
                             Text(
                                 text = ConvertUtils.formatFileSize(task.totalSize.toLong()),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
@@ -142,7 +144,7 @@ fun DownloadTaskCard(
                             Icon(
                                 Icons.Default.Pause,
                                 contentDescription = stringResource(R.string.cancel),
-                                tint = MaterialTheme.colorScheme.error
+                                tint = MaterialTheme.colorScheme.error,
                             )
                         }
                     }
@@ -152,7 +154,7 @@ fun DownloadTaskCard(
                             Icon(
                                 Icons.Default.PlayArrow,
                                 contentDescription = stringResource(R.string.download_resume),
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -162,7 +164,7 @@ fun DownloadTaskCard(
                             Icon(
                                 Icons.Default.Refresh,
                                 contentDescription = stringResource(R.string.retry),
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -179,7 +181,7 @@ fun DownloadTaskCard(
                     progress = { task.progress / 100f },
                     modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 )
             }
 
@@ -188,19 +190,19 @@ fun DownloadTaskCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
                         text = "${ConvertUtils.formatFileSize(task.downloadedSize.toLong())} / ${ConvertUtils.formatFileSize(task.totalSize.toLong())}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     if (task.speed > 0) {
                         Text(
                             text = "${formatSpeed(task.speed)}/s",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
                         )
                     }
                 }
@@ -216,7 +218,7 @@ fun DownloadTaskCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 if (task.downloadUrl.isNotEmpty()) {
@@ -226,36 +228,49 @@ fun DownloadTaskCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
 
             // 操作菜单（仅已完成状态）
             DropdownMenu(
+                modifier = Modifier.eInkGrayscale(),
                 expanded = showMenu,
-                onDismissRequest = { showMenu = false }
+                onDismissRequest = { showMenu = false },
             ) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.download_open_file)) },
-                    onClick = { showMenu = false; onOpenFileClick() },
-                    leadingIcon = { Icon(Icons.Default.OpenInNew, contentDescription = null) }
+                    onClick = {
+                        showMenu = false
+                        onOpenFileClick()
+                    },
+                    leadingIcon = { Icon(Icons.Default.OpenInNew, contentDescription = null) },
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.download_open_folder)) },
-                    onClick = { showMenu = false; onOpenFolderClick() },
-                    leadingIcon = { Icon(Icons.Default.Folder, contentDescription = null) }
+                    onClick = {
+                        showMenu = false
+                        onOpenFolderClick()
+                    },
+                    leadingIcon = { Icon(Icons.Default.Folder, contentDescription = null) },
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.download_copy_path)) },
-                    onClick = { showMenu = false; onCopyPathClick() },
-                    leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null) }
+                    onClick = {
+                        showMenu = false
+                        onCopyPathClick()
+                    },
+                    leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
                 )
                 HorizontalDivider()
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
-                    onClick = { showMenu = false; onCancelClick() },
-                    leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) }
+                    onClick = {
+                        showMenu = false
+                        onCancelClick()
+                    },
+                    leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
                 )
             }
         }
@@ -280,7 +295,7 @@ fun StatusIcon(status: DownloadStatus, modifier: Modifier = Modifier) {
         imageVector = icon,
         contentDescription = null,
         modifier = modifier,
-        tint = color
+        tint = color,
     )
 }
 
@@ -288,37 +303,31 @@ fun StatusIcon(status: DownloadStatus, modifier: Modifier = Modifier) {
  * 获取状态文本
  */
 @Composable
-fun getStatusText(status: DownloadStatus): String {
-    return when (status) {
-        DownloadStatus.RUNNING -> stringResource(R.string.download_status_running)
-        DownloadStatus.PENDING -> stringResource(R.string.download_status_pending)
-        DownloadStatus.PAUSED -> stringResource(R.string.download_status_paused)
-        DownloadStatus.SUCCESSFUL -> stringResource(R.string.download_status_completed)
-        DownloadStatus.FAILED -> stringResource(R.string.download_status_failed)
-    }
+fun getStatusText(status: DownloadStatus): String = when (status) {
+    DownloadStatus.RUNNING -> stringResource(R.string.download_status_running)
+    DownloadStatus.PENDING -> stringResource(R.string.download_status_pending)
+    DownloadStatus.PAUSED -> stringResource(R.string.download_status_paused)
+    DownloadStatus.SUCCESSFUL -> stringResource(R.string.download_status_completed)
+    DownloadStatus.FAILED -> stringResource(R.string.download_status_failed)
 }
 
 /**
  * 获取状态颜色
  */
 @Composable
-fun getStatusColor(status: DownloadStatus): Color {
-    return when (status) {
-        DownloadStatus.RUNNING -> MaterialTheme.colorScheme.primary
-        DownloadStatus.PENDING -> MaterialTheme.colorScheme.onSurfaceVariant
-        DownloadStatus.PAUSED -> MaterialTheme.colorScheme.onSurfaceVariant
-        DownloadStatus.SUCCESSFUL -> MaterialTheme.colorScheme.tertiary
-        DownloadStatus.FAILED -> MaterialTheme.colorScheme.error
-    }
+fun getStatusColor(status: DownloadStatus): Color = when (status) {
+    DownloadStatus.RUNNING -> MaterialTheme.colorScheme.primary
+    DownloadStatus.PENDING -> MaterialTheme.colorScheme.onSurfaceVariant
+    DownloadStatus.PAUSED -> MaterialTheme.colorScheme.onSurfaceVariant
+    DownloadStatus.SUCCESSFUL -> MaterialTheme.colorScheme.tertiary
+    DownloadStatus.FAILED -> MaterialTheme.colorScheme.error
 }
 
 /**
  * 格式化下载速度
  */
-private fun formatSpeed(bytesPerSec: Long): String {
-    return when {
-        bytesPerSec >= 1_048_576 -> String.format("%.1f MB", bytesPerSec / 1_048_576.0)
-        bytesPerSec >= 1024 -> String.format("%.1f KB", bytesPerSec / 1024.0)
-        else -> "$bytesPerSec B"
-    }
+private fun formatSpeed(bytesPerSec: Long): String = when {
+    bytesPerSec >= 1_048_576 -> String.format("%.1f MB", bytesPerSec / 1_048_576.0)
+    bytesPerSec >= 1024 -> String.format("%.1f KB", bytesPerSec / 1024.0)
+    else -> "$bytesPerSec B"
 }

@@ -1,5 +1,7 @@
 package io.legado.app.ui.config.theme.manage
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -28,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -63,7 +64,7 @@ fun ThemeManageScreen(
     onToast: (Int) -> Unit = {},
     onToastMsg: (String) -> Unit = {},
     onColorClick: (colorKey: String, currentColor: String) -> Unit = { _, _ -> },
-    onBlurClick: (currentBlur: Int) -> Unit = {}
+    onBlurClick: (currentBlur: Int) -> Unit = {},
 ) {
     val initialTab = if (AppConfig.isNightTheme) ConfigTab.NIGHT else ConfigTab.DAY
     val state = rememberConfigManageState(initialTab)
@@ -111,7 +112,7 @@ fun ThemeManageScreen(
             if (state.isMultiSelectMode) {
                 SelectAllAction(
                     isAllSelected = state.isAllSelected(visibleKeys),
-                    onSelectAll = { state.selectAllVisible(visibleKeys) }
+                    onSelectAll = { state.selectAllVisible(visibleKeys) },
                 )
             } else {
                 ImportFromClipboardAction(viewModel::importFromClipboard)
@@ -128,7 +129,7 @@ fun ThemeManageScreen(
                             onClick = {
                                 viewModel.toTopSelected(state.multiSelect.selectedKeys.toSet())
                                 state.exitMultiSelect()
-                            }
+                            },
                         ),
                         MultiSelectAction(
                             icon = Icons.Default.Share,
@@ -136,7 +137,7 @@ fun ThemeManageScreen(
                             onClick = {
                                 viewModel.exportSelected(state.multiSelect.selectedKeys.toSet())
                                 state.exitMultiSelect()
-                            }
+                            },
                         ),
                         MultiSelectAction(
                             icon = Icons.Default.Delete,
@@ -144,29 +145,29 @@ fun ThemeManageScreen(
                             tint = MaterialTheme.colorScheme.error,
                             onClick = {
                                 viewModel.requestDeleteSelected(state.multiSelect.selectedKeys.toSet())
-                            }
-                        )
-                    )
+                            },
+                        ),
+                    ),
                 )
             } else {
                 ThemeAddBottomBar(
                     onClick = {
                         val draft = viewModel.startNew(state.tab.isNight)
                         state.openEditDialog(isNew = true, editingKey = draft.editingKey)
-                    }
+                    },
                 )
             }
-        }
+        },
     ) { contentPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding)
+                .padding(contentPadding),
         ) {
             AppSearchBar(
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },
-                hint = stringResource(R.string.search)
+                hint = stringResource(R.string.search),
             )
             DayNightPager(
                 state = state,
@@ -174,40 +175,40 @@ fun ThemeManageScreen(
                 summaryText = themeSummary,
                 scrollEnabled = !state.isMultiSelectMode,
                 dayContent = {
-                ThemeList(
-                    items = dayItems,
-                    state = state,
-                    currentConfig = currentConfig,
-                    onApply = viewModel::applyConfig,
-                    onEdit = { item ->
-                        val draft = viewModel.startEdit(item)
-                        state.openEditDialog(draft.isNew, draft.editingKey)
-                    },
-                    onShare = viewModel::shareItem,
-                    onDelete = { item -> pendingDeleteItem = item },
-                    onCopy = viewModel::copyItem,
-                    onLongClick = { item -> state.enterMultiSelect(item.key) },
-                    onToggleSelect = { item -> state.toggleSelection(item.key) }
-                )
-            },
-            nightContent = {
-                ThemeList(
-                    items = nightItems,
-                    state = state,
-                    currentConfig = currentConfig,
-                    onApply = viewModel::applyConfig,
-                    onEdit = { item ->
-                        val draft = viewModel.startEdit(item)
-                        state.openEditDialog(draft.isNew, draft.editingKey)
-                    },
-                    onShare = viewModel::shareItem,
-                    onDelete = { item -> pendingDeleteItem = item },
-                    onCopy = viewModel::copyItem,
-                    onLongClick = { item -> state.enterMultiSelect(item.key) },
-                    onToggleSelect = { item -> state.toggleSelection(item.key) }
-                )
-            }
-        )
+                    ThemeList(
+                        items = dayItems,
+                        state = state,
+                        currentConfig = currentConfig,
+                        onApply = viewModel::applyConfig,
+                        onEdit = { item ->
+                            val draft = viewModel.startEdit(item)
+                            state.openEditDialog(draft.isNew, draft.editingKey)
+                        },
+                        onShare = viewModel::shareItem,
+                        onDelete = { item -> pendingDeleteItem = item },
+                        onCopy = viewModel::copyItem,
+                        onLongClick = { item -> state.enterMultiSelect(item.key) },
+                        onToggleSelect = { item -> state.toggleSelection(item.key) },
+                    )
+                },
+                nightContent = {
+                    ThemeList(
+                        items = nightItems,
+                        state = state,
+                        currentConfig = currentConfig,
+                        onApply = viewModel::applyConfig,
+                        onEdit = { item ->
+                            val draft = viewModel.startEdit(item)
+                            state.openEditDialog(draft.isNew, draft.editingKey)
+                        },
+                        onShare = viewModel::shareItem,
+                        onDelete = { item -> pendingDeleteItem = item },
+                        onCopy = viewModel::copyItem,
+                        onLongClick = { item -> state.enterMultiSelect(item.key) },
+                        onToggleSelect = { item -> state.toggleSelection(item.key) },
+                    )
+                },
+            )
         }
     }
 
@@ -226,12 +227,13 @@ fun ThemeManageScreen(
             onSelectImage = onSelectImage,
             onUpdateDraft = viewModel::updateDraftConfig,
             onColorClick = onColorClick,
-            onBlurClick = onBlurClick
+            onBlurClick = onBlurClick,
         )
     }
 
     pendingDeleteItem?.let { item ->
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { pendingDeleteItem = null },
             title = { Text(stringResource(R.string.delete)) },
             text = {
@@ -249,7 +251,7 @@ fun ThemeManageScreen(
                 TextButton(onClick = { pendingDeleteItem = null }) {
                     Text(stringResource(R.string.cancel))
                 }
-            }
+            },
         )
     }
 }
@@ -264,7 +266,7 @@ private fun ThemeAddBottomBar(onClick: () -> Unit) {
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
         color = colorResource(R.color.background_add_button),
-        border = BorderStroke(1.dp, colorResource(R.color.border_add_button))
+        border = BorderStroke(1.dp, colorResource(R.color.border_add_button)),
     ) {
         Text(
             text = stringResource(R.string.add_theme),
@@ -273,7 +275,7 @@ private fun ThemeAddBottomBar(onClick: () -> Unit) {
                 .padding(vertical = 13.dp),
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
         )
     }
 }
@@ -289,7 +291,7 @@ private fun ThemeList(
     onDelete: (ThemeItem) -> Unit,
     onCopy: (ThemeItem) -> Unit,
     onLongClick: (ThemeItem) -> Unit,
-    onToggleSelect: (ThemeItem) -> Unit
+    onToggleSelect: (ThemeItem) -> Unit,
 ) {
     val listState = rememberLazyListState()
     Box(modifier = Modifier.fillMaxSize()) {
@@ -310,13 +312,13 @@ private fun ThemeList(
                     onDelete = { onDelete(item) },
                     onCopy = { onCopy(item) },
                     onLongClick = { onLongClick(item) },
-                    onToggleSelect = { onToggleSelect(item) }
+                    onToggleSelect = { onToggleSelect(item) },
                 )
-            }
+            },
         )
         VerticalScrollbar(
             state = listState,
-            modifier = Modifier.align(Alignment.CenterEnd)
+            modifier = Modifier.align(Alignment.CenterEnd),
         )
     }
 }

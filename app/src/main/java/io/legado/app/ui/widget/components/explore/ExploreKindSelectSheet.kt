@@ -21,6 +21,8 @@
  */
 package io.legado.app.ui.widget.components.explore
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -135,6 +137,8 @@ fun ExploreKindSelectSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
+        // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+        modifier = Modifier.eInkGrayscale(),
         // 只保留 Bottom 侧 insets：M3 默认的 safeDrawing(Top+Bottom) 中 Top 部分会因
         // ModalBottomSheet 内部 consumeWindowInsets(top = sheetState.offset) 随 offset 变化，
         // 导致内容顶 padding → sheet 高度 → Expanded 锚点(fullHeight-sheetHeight) 联动。

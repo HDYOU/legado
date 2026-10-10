@@ -1,5 +1,7 @@
 package io.legado.app.ui.main.explore.compose
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -89,7 +91,7 @@ internal fun ExploreKindSelectField(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = AppDimens.exploreSelectValueSpacing)
+                    .padding(start = AppDimens.exploreSelectValueSpacing),
             ) {
                 Column {
                     Text(
@@ -105,7 +107,7 @@ internal fun ExploreKindSelectField(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(AppDimens.dividerThickness)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
                     )
                 }
             }
@@ -118,6 +120,7 @@ internal fun ExploreKindSelectField(
             )
         }
         DropdownMenu(
+            modifier = Modifier.eInkGrayscale(),
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {

@@ -1,5 +1,7 @@
 package io.legado.app.ui.debuglog
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -49,17 +51,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import io.legado.app.R
 import io.legado.app.constant.PreferKey
-import io.legado.app.help.config.AppConfig
 import io.legado.app.model.debug.DebugCategory
 import io.legado.app.model.debug.DebugEvent
-import io.legado.app.model.debug.FlowStage
 import io.legado.app.model.debug.SourceSubCategory
 import io.legado.app.ui.config.ConfigActivity
 import io.legado.app.ui.config.ConfigTag
@@ -108,7 +107,7 @@ import io.legado.app.utils.share
 fun DebugLogScreen(
     viewModel: DebugLogViewModel = viewModel(),
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     // 收集 ViewModel 中的状态
@@ -134,7 +133,7 @@ fun DebugLogScreen(
     val mutedIconTint = pageMutedIconTint()
     val menuItemColors = MenuDefaults.itemColors(
         textColor = MaterialTheme.colorScheme.onSurface,
-        leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+        leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 
     // 搜索框显示状态
@@ -169,21 +168,21 @@ fun DebugLogScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = stringResource(R.string.refresh)
+                                contentDescription = stringResource(R.string.refresh),
                             )
                         }
                         // 搜索按钮：切换搜索框显示
                         IconButton(onClick = { showSearch = !showSearch }) {
                             Icon(
                                 imageVector = Icons.Default.Search,
-                                contentDescription = stringResource(R.string.search)
+                                contentDescription = stringResource(R.string.search),
                             )
                         }
                         // 暂停/继续按钮：控制日志采集
                         IconButton(onClick = { viewModel.togglePause() }) {
                             Icon(
                                 imageVector = if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                                contentDescription = if (isPaused) stringResource(R.string.resume) else stringResource(R.string.pause)
+                                contentDescription = if (isPaused) stringResource(R.string.resume) else stringResource(R.string.pause),
                             )
                         }
 
@@ -192,7 +191,7 @@ fun DebugLogScreen(
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = stringResource(R.string.clear),
-                                tint = MaterialTheme.colorScheme.error
+                                tint = MaterialTheme.colorScheme.error,
                             )
                         }
 
@@ -202,13 +201,14 @@ fun DebugLogScreen(
                             IconButton(onClick = { showOverflowMenu = true }) {
                                 Icon(
                                     imageVector = Icons.Default.MoreVert,
-                                    contentDescription = stringResource(R.string.more)
+                                    contentDescription = stringResource(R.string.more),
                                 )
                             }
                             DropdownMenu(
+                                modifier = Modifier.eInkGrayscale(),
                                 expanded = showOverflowMenu,
                                 onDismissRequest = { showOverflowMenu = false },
-                                containerColor = cardColor
+                                containerColor = cardColor,
                             ) {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.export_log)) },
@@ -220,7 +220,7 @@ fun DebugLogScreen(
                                     leadingIcon = {
                                         Icon(Icons.Default.Save, contentDescription = null)
                                     },
-                                    colors = menuItemColors
+                                    colors = menuItemColors,
                                 )
 
                                 DropdownMenuItem(
@@ -228,13 +228,13 @@ fun DebugLogScreen(
                                     onClick = {
                                         showOverflowMenu = false
                                         context.startActivity(
-                                            Intent(context, DebugToolsActivity::class.java)
+                                            Intent(context, DebugToolsActivity::class.java),
                                         )
                                     },
                                     leadingIcon = {
                                         Icon(Icons.Default.BugReport, contentDescription = null)
                                     },
-                                    colors = menuItemColors
+                                    colors = menuItemColors,
                                 )
 
                                 DropdownMenuItem(
@@ -248,7 +248,7 @@ fun DebugLogScreen(
                                     leadingIcon = {
                                         Icon(Icons.Default.Settings, contentDescription = null)
                                     },
-                                    colors = menuItemColors
+                                    colors = menuItemColors,
                                 )
 
                                 DropdownMenuItem(
@@ -262,7 +262,7 @@ fun DebugLogScreen(
                                     leadingIcon = {
                                         Icon(Icons.Default.Tune, contentDescription = null)
                                     },
-                                    colors = menuItemColors
+                                    colors = menuItemColors,
                                 )
 
                                 DropdownMenuItem(
@@ -274,7 +274,7 @@ fun DebugLogScreen(
                                     leadingIcon = {
                                         Icon(Icons.Default.Visibility, contentDescription = null)
                                     },
-                                    colors = menuItemColors
+                                    colors = menuItemColors,
                                 )
 
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -290,18 +290,18 @@ fun DebugLogScreen(
                                     leadingIcon = {
                                         Icon(Icons.Default.Cancel, contentDescription = null)
                                     },
-                                    colors = menuItemColors
+                                    colors = menuItemColors,
                                 )
                             }
                         }
-                    }
+                    },
                 )
 
                 // 搜索框（可展开/收起）
                 AnimatedVisibility(
                     visible = showSearch,
                     enter = fadeIn(),
-                    exit = fadeOut()
+                    exit = fadeOut(),
                 ) {
                     OutlinedTextField(
                         value = searchQuery ?: "",
@@ -322,12 +322,12 @@ fun DebugLogScreen(
                         },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Search
+                            imeAction = ImeAction.Search,
                         ),
                         keyboardActions = KeyboardActions(
                             onSearch = {
                                 viewModel.setSearchQuery(searchQuery)
-                            }
+                            },
                         ),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = cardColor,
@@ -340,23 +340,23 @@ fun DebugLogScreen(
                             focusedLeadingIconColor = mutedIconTint,
                             unfocusedLeadingIconColor = mutedIconTint,
                             focusedTrailingIconColor = mutedIconTint,
-                            unfocusedTrailingIconColor = mutedIconTint
-                        )
+                            unfocusedTrailingIconColor = mutedIconTint,
+                        ),
                     )
                 }
             }
-        }
+        },
     ) { paddingValues ->
         if (showCategoryVisibilityDialog) {
             DebugCategoryVisibilityDialog(
-                onDismiss = { showCategoryVisibilityDialog = false }
+                onDismiss = { showCategoryVisibilityDialog = false },
             )
         }
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
             // 分类标签页（排除 RULE，因为它作为 SOURCE 的子分类显示）
             DebugCategoryTabs(
@@ -365,14 +365,14 @@ fun DebugLogScreen(
                     it != DebugCategory.RULE
                 },
                 categoryCounts = categoryCounts,
-                onCategorySelected = viewModel::selectCategory
+                onCategorySelected = viewModel::selectCategory,
             )
 
             // 书源/订阅源分类的子分类选择器
             if (selectedCategory == DebugCategory.SOURCE || selectedCategory == DebugCategory.RSS) {
                 SourceSubCategoryTabs(
                     selectedSubCategory = selectedSubCategory,
-                    onSubCategorySelected = viewModel::selectSubCategory
+                    onSubCategorySelected = viewModel::selectSubCategory,
                 )
 
                 // 当切换到 FLOW 子分类时自动刷新流程日志
@@ -390,7 +390,9 @@ fun DebugLogScreen(
                         showExecutionStatus = if (selectedCategory == DebugCategory.RSS) showExecutionStatus else false,
                         onToggleExecutionStatus = if (selectedCategory == DebugCategory.RSS) {
                             { showExecutionStatus = !showExecutionStatus }
-                        } else null
+                        } else {
+                            null
+                        },
                     )
                 }
             }
@@ -410,21 +412,24 @@ fun DebugLogScreen(
                             bookSources = bookSources,
                             selectedBookSource = selectedBookSource,
                             selectedBookSourceUrl = selectedBookSourceUrl,
-                            onBookSourceSelected = viewModel::selectBookSource
+                            onBookSourceSelected = viewModel::selectBookSource,
                         )
                     }
                     // 书源流程日志视图
                     selectedCategory == DebugCategory.SOURCE && selectedSubCategory == SourceSubCategory.FLOW -> {
                         if (filteredFlowLogs.isEmpty()) {
                             EmptyState(
-                                message = if (searchQuery.isNullOrBlank()) "暂无流程日志"
-                                         else "未找到匹配的日志"
+                                message = if (searchQuery.isNullOrBlank()) {
+                                    "暂无流程日志"
+                                } else {
+                                    "未找到匹配的日志"
+                                },
                             )
                         } else {
                             FlowLogList(
                                 logs = filteredFlowLogs,
                                 onLogClick = viewModel::selectFlowLog,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize(),
                             )
                         }
                     }
@@ -434,7 +439,7 @@ fun DebugLogScreen(
                             rssSources = rssSources,
                             selectedRssSource = selectedRssSource,
                             selectedRssSourceUrl = selectedRssSourceUrl,
-                            onRssSourceSelected = viewModel::selectRssSource
+                            onRssSourceSelected = viewModel::selectRssSource,
                         )
                     }
                     // 订阅源流程日志视图
@@ -443,26 +448,32 @@ fun DebugLogScreen(
                             RssExecutionStatus(
                                 records = rssExecutionRecords,
                                 ruleRecords = rssRuleRecords,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize(),
                             )
                         } else if (filteredFlowLogs.isEmpty()) {
                             EmptyState(
-                                message = if (searchQuery.isNullOrBlank()) "暂无流程日志"
-                                         else "未找到匹配的日志"
+                                message = if (searchQuery.isNullOrBlank()) {
+                                    "暂无流程日志"
+                                } else {
+                                    "未找到匹配的日志"
+                                },
                             )
                         } else {
                             FlowLogList(
                                 logs = filteredFlowLogs,
                                 onLogClick = viewModel::selectFlowLog,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize(),
                             )
                         }
                     }
                     // 空状态
                     uiState.isEmpty || filteredLogs.isEmpty() -> {
                         EmptyState(
-                            message = if (searchQuery.isNullOrBlank()) "暂无调试日志"
-                                     else "未找到匹配的日志"
+                            message = if (searchQuery.isNullOrBlank()) {
+                                "暂无调试日志"
+                            } else {
+                                "未找到匹配的日志"
+                            },
                         )
                     }
                     // 普通日志列表
@@ -470,7 +481,7 @@ fun DebugLogScreen(
                         DebugLogList(
                             logs = filteredLogs,
                             onLogClick = viewModel::selectLog,
-                            onCopyLog = viewModel::copyLogDetail
+                            onCopyLog = viewModel::copyLogDetail,
                         )
                     }
                 }
@@ -480,7 +491,7 @@ fun DebugLogScreen(
                     DebugLogDetailDialog(
                         log = log,
                         onDismiss = { viewModel.clearSelection() },
-                        onCopy = { viewModel.copyLogDetail(log) }
+                        onCopy = { viewModel.copyLogDetail(log) },
                     )
                 }
 
@@ -489,7 +500,7 @@ fun DebugLogScreen(
                     FlowLogDetailDialog(
                         log = flowLog,
                         onDismiss = { viewModel.clearSelection() },
-                        onCopy = { viewModel.copyFlowLogDetail(flowLog) }
+                        onCopy = { viewModel.copyFlowLogDetail(flowLog) },
                     )
                 }
             }
@@ -504,10 +515,10 @@ fun DebugLogScreen(
 private fun LoadingIndicator() {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         androidx.compose.material3.CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
     }
 }
@@ -521,13 +532,13 @@ private fun LoadingIndicator() {
 private fun EmptyState(message: String) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -546,7 +557,7 @@ private fun EmptyState(message: String) {
 private fun DebugLogList(
     logs: List<DebugEvent>,
     onLogClick: (DebugEvent) -> Unit,
-    onCopyLog: (DebugEvent) -> Unit
+    onCopyLog: (DebugEvent) -> Unit,
 ) {
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     // Box 包裹 LazyColumn + 可拖拽滚动条，滚动条对齐右侧
@@ -554,11 +565,11 @@ private fun DebugLogList(
         androidx.compose.foundation.lazy.LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp)
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp),
         ) {
             items(
                 count = logs.size,
-                key = { index -> logs[index].id }
+                key = { index -> logs[index].id },
             ) { index ->
                 val log = logs[index]
                 DebugLogItem(
@@ -567,13 +578,13 @@ private fun DebugLogList(
                     onLongClick = onCopyLog,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
                 )
             }
         }
         io.legado.app.ui.widget.components.VerticalScrollbar(
             state = listState,
-            modifier = Modifier.align(Alignment.CenterEnd)
+            modifier = Modifier.align(Alignment.CenterEnd),
         )
     }
 }
@@ -595,32 +606,32 @@ private fun DebugLogList(
 @Composable
 private fun SourceSubCategoryTabs(
     selectedSubCategory: SourceSubCategory?,
-    onSubCategorySelected: (SourceSubCategory?) -> Unit
+    onSubCategorySelected: (SourceSubCategory?) -> Unit,
 ) {
     androidx.compose.material3.Surface(
         modifier = Modifier.fillMaxWidth(),
         color = pageHeaderContainerColor(),
-        tonalElevation = 2.dp
+        tonalElevation = 2.dp,
     ) {
         androidx.compose.foundation.layout.Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
         ) {
             // "全部"选项
             androidx.compose.material3.FilterChip(
                 selected = selectedSubCategory == null,
                 onClick = { onSubCategorySelected(null) },
-                label = { Text("全部") }
+                label = { Text("全部") },
             )
             // 各子分类选项
             SourceSubCategory.entries.forEach { subCategory ->
                 androidx.compose.material3.FilterChip(
                     selected = selectedSubCategory == subCategory,
                     onClick = { onSubCategorySelected(subCategory) },
-                    label = { Text(subCategory.displayName) }
+                    label = { Text(subCategory.displayName) },
                 )
             }
         }

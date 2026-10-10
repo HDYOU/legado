@@ -1,11 +1,11 @@
 /**
  * 直链上传配置界面
- * 
+ *
  * 该文件实现了直链上传功能的配置界面,包括:
  * - 上传规则的管理(添加、编辑、删除、测试)
  * - 上传历史的查看和管理
  * - 规则的导入导出功能
- * 
+ *
  * 主要组件:
  * - DirectLinkUploadScreen: 主界面,包含规则管理和上传历史两个标签页
  * - RuleListTab: 规则列表标签页
@@ -15,6 +15,8 @@
  * - RuleEditDialog: 规则编辑对话框
  */
 package io.legado.app.ui.upload
+
+import io.legado.app.lib.theme.eInkGrayscale
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -33,7 +35,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -41,11 +42,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.legado.app.R
 import io.legado.app.data.entities.DirectLinkUploadRule
-import io.legado.app.data.entities.UploadHistory
 import io.legado.app.data.entities.UploadHistoryWithRule
 import io.legado.app.ui.upload.DirectLinkUploadViewModel.*
 import io.legado.app.ui.widget.components.AppPageTopBar
@@ -57,12 +56,12 @@ import java.util.*
 
 /**
  * 直链上传配置主界面
- * 
+ *
  * 该 Composable 是直链上传功能的入口界面,提供:
  * - 顶部应用栏,包含返回按钮、添加规则按钮和更多操作菜单
  * - 标签页布局,切换规则管理和上传历史
  * - 各种对话框(添加/编辑规则、清除历史、导入默认规则、测试结果)
- * 
+ *
  * @param viewModel 直链上传的 ViewModel,负责业务逻辑和状态管理
  * @param onBackClick 返回按钮点击回调
  */
@@ -70,7 +69,7 @@ import java.util.*
 @Composable
 fun DirectLinkUploadScreen(
     viewModel: DirectLinkUploadViewModel = viewModel(),
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     // 获取上下文和剪贴板管理器
     val context = LocalContext.current
@@ -79,19 +78,19 @@ fun DirectLinkUploadScreen(
     }
 
     // 从 ViewModel 收集状态
-    val rules by viewModel.rules.collectAsState(initial = emptyList())  // 上传规则列表
-    val histories by viewModel.histories.collectAsState(initial = emptyList())  // 上传历史列表
-    val uiState by viewModel.uiState.collectAsState()  // UI 状态
-    val uploadState by viewModel.uploadState.collectAsState()  // 上传/测试状态
+    val rules by viewModel.rules.collectAsState(initial = emptyList()) // 上传规则列表
+    val histories by viewModel.histories.collectAsState(initial = emptyList()) // 上传历史列表
+    val uiState by viewModel.uiState.collectAsState() // UI 状态
+    val uploadState by viewModel.uploadState.collectAsState() // 上传/测试状态
 
     // 本地 UI 状态
-    var selectedTab by remember { mutableStateOf(0) }  // 当前选中的标签页索引
-    var showAddDialog by remember { mutableStateOf(false) }  // 是否显示添加规则对话框
-    var editingRule by remember { mutableStateOf<DirectLinkUploadRule?>(null) }  // 正在编辑的规则
-    var showClearDialog by remember { mutableStateOf(false) }  // 是否显示清除历史确认对话框
-    var showImportDialog by remember { mutableStateOf(false) }  // 是否显示导入默认规则对话框
-    var testingRule by remember { mutableStateOf<DirectLinkUploadRule?>(null) }  // 正在测试的规则
-    var testResult by remember { mutableStateOf<String?>(null) }  // 测试结果
+    var selectedTab by remember { mutableStateOf(0) } // 当前选中的标签页索引
+    var showAddDialog by remember { mutableStateOf(false) } // 是否显示添加规则对话框
+    var editingRule by remember { mutableStateOf<DirectLinkUploadRule?>(null) } // 正在编辑的规则
+    var showClearDialog by remember { mutableStateOf(false) } // 是否显示清除历史确认对话框
+    var showImportDialog by remember { mutableStateOf(false) } // 是否显示导入默认规则对话框
+    var testingRule by remember { mutableStateOf<DirectLinkUploadRule?>(null) } // 正在测试的规则
+    var testResult by remember { mutableStateOf<String?>(null) } // 测试结果
 
     // 标签页标题
     val tabs = listOf("规则管理", "上传历史")
@@ -117,9 +116,10 @@ fun DirectLinkUploadScreen(
                         }
                         // 下拉菜单
                         DropdownMenu(
+                            modifier = Modifier.eInkGrayscale(),
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false },
-                            containerColor = MaterialTheme.colorScheme.surface
+                            containerColor = MaterialTheme.colorScheme.surface,
                         ) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.paste_rule)) },
@@ -133,24 +133,30 @@ fun DirectLinkUploadScreen(
                                         }
                                     }
                                 },
-                                leadingIcon = { Icon(Icons.Default.ContentPaste, null) }
+                                leadingIcon = { Icon(Icons.Default.ContentPaste, null) },
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.import_default_rule)) },
-                                onClick = { showImportDialog = true; showMenu = false },
-                                leadingIcon = { Icon(Icons.Default.CloudDownload, null) }
+                                onClick = {
+                                    showImportDialog = true
+                                    showMenu = false
+                                },
+                                leadingIcon = { Icon(Icons.Default.CloudDownload, null) },
                             )
                             HorizontalDivider()
                             DropdownMenuItem(
                                 text = { Text("清除历史", color = MaterialTheme.colorScheme.error) },
-                                onClick = { showClearDialog = true; showMenu = false },
-                                leadingIcon = { Icon(Icons.Default.DeleteSweep, null, tint = MaterialTheme.colorScheme.error) }
+                                onClick = {
+                                    showClearDialog = true
+                                    showMenu = false
+                                },
+                                leadingIcon = { Icon(Icons.Default.DeleteSweep, null, tint = MaterialTheme.colorScheme.error) },
                             )
                         }
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         // 主内容区域
         Column(modifier = Modifier.padding(paddingValues)) {
@@ -158,19 +164,22 @@ fun DirectLinkUploadScreen(
             TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                contentColor = MaterialTheme.colorScheme.onSurface,
             ) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTab == index,
                         onClick = { selectedTab = index },
-                        text = { 
+                        text = {
                             Text(
                                 title,
-                                color = if (selectedTab == index) MaterialTheme.colorScheme.primary 
-                                        else MaterialTheme.colorScheme.onSurfaceVariant
-                            ) 
-                        }
+                                color = if (selectedTab == index) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                            )
+                        },
                     )
                 }
             }
@@ -191,7 +200,7 @@ fun DirectLinkUploadScreen(
                         val json = viewModel.copyRule(rule)
                         val clip = ClipData.newPlainText("上传规则", json)
                         clipboardManager.setPrimaryClip(clip)
-                    }
+                    },
                 )
                 // 上传历史标签页
                 1 -> HistoryListTab(
@@ -206,7 +215,7 @@ fun DirectLinkUploadScreen(
                             clipboardManager.setPrimaryClip(clip)
                             Toast.makeText(context, "已复制下载链接", Toast.LENGTH_SHORT).show()
                         }
-                    }
+                    },
                 )
             }
         }
@@ -215,10 +224,10 @@ fun DirectLinkUploadScreen(
         if (showAddDialog) {
             RuleEditDialog(
                 onDismiss = { showAddDialog = false },
-                onSave = { 
+                onSave = {
                     viewModel.addRule(it)
                     showAddDialog = false
-                }
+                },
             )
         }
 
@@ -227,10 +236,10 @@ fun DirectLinkUploadScreen(
             RuleEditDialog(
                 rule = rule,
                 onDismiss = { editingRule = null },
-                onSave = { 
+                onSave = {
                     viewModel.updateRule(it)
                     editingRule = null
-                }
+                },
             )
         }
 
@@ -245,7 +254,7 @@ fun DirectLinkUploadScreen(
                     viewModel.clearAllHistories()
                     showClearDialog = false
                 },
-                onDismissRequest = { showClearDialog = false }
+                onDismissRequest = { showClearDialog = false },
             )
         }
 
@@ -259,7 +268,7 @@ fun DirectLinkUploadScreen(
                     viewModel.importDefaultRules()
                     showImportDialog = false
                 },
-                onDismissRequest = { showImportDialog = false }
+                onDismissRequest = { showImportDialog = false },
             )
         }
 
@@ -269,66 +278,69 @@ fun DirectLinkUploadScreen(
                 // 测试中状态
                 is UploadState.Testing -> {
                     AlertDialog(
+                        modifier = Modifier.eInkGrayscale(),
                         onDismissRequest = { },
                         containerColor = MaterialTheme.colorScheme.surface,
                         title = { Text("测试中") },
-                        text = { 
+                        text = {
                             Row(
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(24.dp),
                                     strokeWidth = 2.dp,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Text("正在测试上传规则...")
                             }
                         },
-                        confirmButton = {}
+                        confirmButton = {},
                     )
                 }
                 // 测试成功状态
                 is UploadState.TestSuccess -> {
                     AlertDialog(
-                        onDismissRequest = { 
+                        modifier = Modifier.eInkGrayscale(),
+                        onDismissRequest = {
                             testingRule = null
                             viewModel.resetUploadState()
                         },
                         containerColor = MaterialTheme.colorScheme.surface,
                         title = { Text("测试成功") },
-                        text = { 
+                        text = {
                             Column {
                                 Text("下载链接:")
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Surface(
                                     color = MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = MaterialTheme.shapes.small
+                                    shape = MaterialTheme.shapes.small,
                                 ) {
                                     Text(
                                         text = state.downloadUrl,
                                         style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier.padding(8.dp)
+                                        modifier = Modifier.padding(8.dp),
                                     )
                                 }
                             }
                         },
                         confirmButton = {
                             TextButton(
-                                onClick = { 
+                                onClick = {
                                     testingRule = null
                                     viewModel.resetUploadState()
-                                }
+                                },
                             ) {
                                 Text("确定", color = MaterialTheme.colorScheme.primary)
                             }
-                        }
+                        },
                     )
                 }
                 // 测试失败状态
                 is UploadState.TestError -> {
                     AlertDialog(
-                        onDismissRequest = { 
+                        modifier = Modifier.eInkGrayscale(),
+                        onDismissRequest = {
                             testingRule = null
                             viewModel.resetUploadState()
                         },
@@ -337,14 +349,14 @@ fun DirectLinkUploadScreen(
                         text = { Text(state.message) },
                         confirmButton = {
                             TextButton(
-                                onClick = { 
+                                onClick = {
                                     testingRule = null
                                     viewModel.resetUploadState()
-                                }
+                                },
                             ) {
                                 Text("确定", color = MaterialTheme.colorScheme.primary)
                             }
-                        }
+                        },
                     )
                 }
                 // 其他状态(空闲等)
@@ -356,9 +368,9 @@ fun DirectLinkUploadScreen(
 
 /**
  * 规则列表标签页
- * 
+ *
  * 显示所有上传规则的列表,支持编辑、删除、设为默认、测试和拷贝操作
- * 
+ *
  * @param rules 上传规则列表
  * @param onEdit 编辑规则回调
  * @param onDelete 删除规则回调
@@ -373,32 +385,32 @@ fun RuleListTab(
     onDelete: (DirectLinkUploadRule) -> Unit,
     onSetDefault: (DirectLinkUploadRule) -> Unit,
     onTest: (DirectLinkUploadRule) -> Unit,
-    onCopy: (DirectLinkUploadRule) -> Unit
+    onCopy: (DirectLinkUploadRule) -> Unit,
 ) {
     // 空状态显示
     if (rules.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     imageVector = Icons.Default.CloudOff,
                     contentDescription = null,
                     modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "暂无上传规则",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "点击右上角 + 添加规则",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -406,7 +418,7 @@ fun RuleListTab(
         // 规则列表
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset)
+            contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset),
         ) {
             items(rules) { rule ->
                 RuleCard(
@@ -415,7 +427,7 @@ fun RuleListTab(
                     onDelete = { onDelete(rule) },
                     onSetDefault = { onSetDefault(rule) },
                     onTest = { onTest(rule) },
-                    onCopy = { onCopy(rule) }
+                    onCopy = { onCopy(rule) },
                 )
             }
         }
@@ -424,10 +436,10 @@ fun RuleListTab(
 
 /**
  * 规则卡片
- * 
+ *
  * 动态高度，最小约 40dp（无统计信息），有统计信息时约 64dp。
  * 上下内边距 8dp，左右 12dp，紧凑但统计信息完整保留。
- * 
+ *
  * @param rule 上传规则数据
  * @param onEdit 编辑回调
  * @param onDelete 删除回调
@@ -442,7 +454,7 @@ fun RuleCard(
     onDelete: () -> Unit,
     onSetDefault: () -> Unit,
     onTest: () -> Unit,
-    onCopy: () -> Unit
+    onCopy: () -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -452,15 +464,15 @@ fun RuleCard(
             .padding(horizontal = 12.dp, vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
     ) {
         Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             // 第一行:规则名称和操作按钮
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 // 规则名称（默认规则使用强调色+加粗，截断显示）
                 Text(
@@ -469,50 +481,69 @@ fun RuleCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = if (rule.isDefault) FontWeight.Bold else FontWeight.Normal,
-                    color = if (rule.isDefault) MaterialTheme.colorScheme.primary 
-                            else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
+                    color = if (rule.isDefault) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    modifier = Modifier.weight(1f),
                 )
 
                 // 操作菜单（Box 包裹确保 DropdownMenu 锚点正确对齐按钮）
                 Box {
                     IconButton(
                         onClick = { showMenu = true },
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(40.dp),
                     ) {
                         Icon(Icons.Default.MoreVert, "更多")
                     }
 
                     DropdownMenu(
+                        modifier = Modifier.eInkGrayscale(),
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false },
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = MaterialTheme.colorScheme.surface,
                     ) {
                         DropdownMenuItem(
                             text = { Text("设为默认") },
-                            onClick = { onSetDefault(); showMenu = false },
-                            leadingIcon = { Icon(Icons.Default.Star, null) }
+                            onClick = {
+                                onSetDefault()
+                                showMenu = false
+                            },
+                            leadingIcon = { Icon(Icons.Default.Star, null) },
                         )
                         DropdownMenuItem(
                             text = { Text("编辑") },
-                            onClick = { onEdit(); showMenu = false },
-                            leadingIcon = { Icon(Icons.Default.Edit, null) }
+                            onClick = {
+                                onEdit()
+                                showMenu = false
+                            },
+                            leadingIcon = { Icon(Icons.Default.Edit, null) },
                         )
                         DropdownMenuItem(
                             text = { Text("测试") },
-                            onClick = { onTest(); showMenu = false },
-                            leadingIcon = { Icon(Icons.Default.PlayArrow, null) }
+                            onClick = {
+                                onTest()
+                                showMenu = false
+                            },
+                            leadingIcon = { Icon(Icons.Default.PlayArrow, null) },
                         )
                         DropdownMenuItem(
                             text = { Text("拷贝规则") },
-                            onClick = { onCopy(); showMenu = false },
-                            leadingIcon = { Icon(Icons.Default.ContentCopy, null) }
+                            onClick = {
+                                onCopy()
+                                showMenu = false
+                            },
+                            leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
                         )
                         HorizontalDivider()
                         DropdownMenuItem(
                             text = { Text("删除", color = MaterialTheme.colorScheme.error) },
-                            onClick = { onDelete(); showMenu = false },
-                            leadingIcon = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error) }
+                            onClick = {
+                                onDelete()
+                                showMenu = false
+                            },
+                            leadingIcon = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error) },
                         )
                     }
                 }
@@ -522,18 +553,18 @@ fun RuleCard(
             if (rule.uploadCount > 0) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Text(
                         text = "上传 ${rule.uploadCount} 次",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     if (rule.lastUsedTime > 0) {
                         Text(
                             text = formatTime(rule.lastUsedTime),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -544,9 +575,9 @@ fun RuleCard(
 
 /**
  * 上传历史列表标签页
- * 
+ *
  * 显示所有上传历史记录,支持删除和复制下载链接操作
- * 
+ *
  * @param histories 上传历史列表(包含规则信息)
  * @param onDelete 删除历史记录回调
  * @param onCopy 复制下载链接回调
@@ -555,26 +586,26 @@ fun RuleCard(
 fun HistoryListTab(
     histories: List<UploadHistoryWithRule>,
     onDelete: (UploadHistoryWithRule) -> Unit,
-    onCopy: (UploadHistoryWithRule) -> Unit
+    onCopy: (UploadHistoryWithRule) -> Unit,
 ) {
     // 空状态显示
     if (histories.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     imageVector = Icons.Default.History,
                     contentDescription = null,
                     modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "暂无上传历史",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -582,13 +613,13 @@ fun HistoryListTab(
         // 历史记录列表
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset)
+            contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset),
         ) {
             items(histories) { historyWithRule ->
                 HistoryCard(
                     historyWithRule = historyWithRule,
                     onDelete = { onDelete(historyWithRule) },
-                    onCopy = { onCopy(historyWithRule) }
+                    onCopy = { onCopy(historyWithRule) },
                 )
             }
         }
@@ -597,7 +628,7 @@ fun HistoryListTab(
 
 /**
  * 历史记录卡片
- * 
+ *
  * 显示单条上传历史记录的详细信息,包括:
  * - 文件名(长按可查看完整名称)
  * - 规则名称(长按可查看完整规则名)
@@ -606,7 +637,7 @@ fun HistoryListTab(
  * - 下载链接(成功时显示)
  * - 错误信息(失败时显示)
  * - 操作按钮(复制链接、删除)
- * 
+ *
  * @param historyWithRule 历史记录数据(包含规则信息)
  * @param onDelete 删除回调
  * @param onCopy 复制链接回调
@@ -615,16 +646,17 @@ fun HistoryListTab(
 fun HistoryCard(
     historyWithRule: UploadHistoryWithRule,
     onDelete: () -> Unit,
-    onCopy: () -> Unit
+    onCopy: () -> Unit,
 ) {
     val history = historyWithRule.toUploadHistory()
     // 对话框状态
-    var showFullFileNameDialog by remember { mutableStateOf(false) }  // 显示完整文件名对话框
-    var showFullRuleSummaryDialog by remember { mutableStateOf(false) }  // 显示完整规则名对话框
+    var showFullFileNameDialog by remember { mutableStateOf(false) } // 显示完整文件名对话框
+    var showFullRuleSummaryDialog by remember { mutableStateOf(false) } // 显示完整规则名对话框
 
     // 完整文件名对话框
     if (showFullFileNameDialog) {
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { showFullFileNameDialog = false },
             shape = RectangleShape,
             containerColor = MaterialTheme.colorScheme.surface,
@@ -635,7 +667,7 @@ fun HistoryCard(
                 SelectionContainer {
                     Text(
                         text = history.fileName,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             },
@@ -643,13 +675,14 @@ fun HistoryCard(
                 TextButton(onClick = { showFullFileNameDialog = false }) {
                     Text("确定")
                 }
-            }
+            },
         )
     }
 
     // 完整规则名对话框
     if (showFullRuleSummaryDialog) {
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { showFullRuleSummaryDialog = false },
             shape = RectangleShape,
             containerColor = MaterialTheme.colorScheme.surface,
@@ -660,7 +693,7 @@ fun HistoryCard(
                 SelectionContainer {
                     Text(
                         text = history.ruleSummary,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             },
@@ -668,7 +701,7 @@ fun HistoryCard(
                 TextButton(onClick = { showFullRuleSummaryDialog = false }) {
                     Text("确定")
                 }
-            }
+            },
         )
     }
 
@@ -678,15 +711,15 @@ fun HistoryCard(
             .padding(horizontal = 12.dp, vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // 第一行:文件名、规则名、状态标记
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 // 文件名(长按查看完整名称)
                 Row(
@@ -695,18 +728,24 @@ fun HistoryCard(
                         .weight(1f)
                         .pointerInput(history.fileName) {
                             detectTapGestures(
-                                onLongPress = { showFullFileNameDialog = true }
+                                onLongPress = { showFullFileNameDialog = true },
                             )
-                        }
+                        },
                 ) {
                     // 成功/失败图标
                     Icon(
-                        imageVector = if (history.success) Icons.Default.CheckCircle 
-                                      else Icons.Default.Error,
+                        imageVector = if (history.success) {
+                            Icons.Default.CheckCircle
+                        } else {
+                            Icons.Default.Error
+                        },
                         contentDescription = null,
-                        tint = if (history.success) MaterialTheme.colorScheme.primary
-                               else MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp)
+                        tint = if (history.success) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        },
+                        modifier = Modifier.size(20.dp),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -715,7 +754,7 @@ fun HistoryCard(
                         fontWeight = FontWeight.Medium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                 }
 
@@ -729,15 +768,15 @@ fun HistoryCard(
                             shape = MaterialTheme.shapes.small,
                             modifier = Modifier.pointerInput(history.ruleSummary) {
                                 detectTapGestures(
-                                    onLongPress = { showFullRuleSummaryDialog = true }
+                                    onLongPress = { showFullRuleSummaryDialog = true },
                                 )
-                            }
+                            },
                         ) {
                             Text(
                                 text = displayRuleSummary,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             )
                         }
                         Spacer(modifier = Modifier.width(8.dp))
@@ -747,13 +786,13 @@ fun HistoryCard(
                     if (!history.success) {
                         Surface(
                             color = MaterialTheme.colorScheme.errorContainer,
-                            shape = MaterialTheme.shapes.small
+                            shape = MaterialTheme.shapes.small,
                         ) {
                             Text(
                                 text = "失败",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             )
                         }
                     }
@@ -767,13 +806,13 @@ fun HistoryCard(
                 Text(
                     text = formatFileSize(history.fileSize),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (history.success) {
                     Text(
                         text = "耗时 ${history.duration}ms",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -786,13 +825,13 @@ fun HistoryCard(
                     imageVector = Icons.Default.Schedule,
                     contentDescription = null,
                     modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = formatDateTime(history.uploadTime),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -801,19 +840,19 @@ fun HistoryCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = MaterialTheme.shapes.small
+                    shape = MaterialTheme.shapes.small,
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             imageVector = Icons.Default.Link,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -821,7 +860,7 @@ fun HistoryCard(
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         )
                     }
                 }
@@ -832,26 +871,26 @@ fun HistoryCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 Surface(
                     color = MaterialTheme.colorScheme.errorContainer,
-                    shape = MaterialTheme.shapes.small
+                    shape = MaterialTheme.shapes.small,
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             imageVector = Icons.Default.Warning,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.error
+                            tint = MaterialTheme.colorScheme.error,
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = history.errorMsg,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         )
                     }
                 }
@@ -862,7 +901,7 @@ fun HistoryCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.End,
             ) {
                 // 复制链接按钮(成功时显示)
                 if (history.success && history.downloadUrl.isNotBlank()) {
@@ -885,13 +924,13 @@ fun HistoryCard(
 
 /**
  * 规则编辑对话框
- * 
+ *
  * 用于添加或编辑上传规则,包含以下字段:
  * - 上传URL: 文件上传的目标地址
  * - 下载URL规则: 从上传响应中提取下载链接的规则
  * - 注释说明: 规则的描述信息
  * - 自动压缩: 是否在上传前自动压缩文件
- * 
+ *
  * @param rule 要编辑的规则(null 表示添加新规则)
  * @param onDismiss 取消回调
  * @param onSave 保存回调
@@ -901,7 +940,7 @@ fun HistoryCard(
 fun RuleEditDialog(
     rule: DirectLinkUploadRule? = null,
     onDismiss: () -> Unit,
-    onSave: (DirectLinkUploadRule) -> Unit
+    onSave: (DirectLinkUploadRule) -> Unit,
 ) {
     // 表单字段状态
     var uploadUrl by remember { mutableStateOf(rule?.uploadUrl ?: "") }
@@ -910,13 +949,14 @@ fun RuleEditDialog(
     var compress by remember { mutableStateOf(rule?.compress ?: false) }
 
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
         title = { Text(if (rule == null) "添加上传规则" else "编辑上传规则") },
         text = {
             // 表单内容
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
+                modifier = Modifier.verticalScroll(rememberScrollState()),
             ) {
                 // 上传URL输入框
                 OutlinedTextField(
@@ -925,7 +965,7 @@ fun RuleEditDialog(
                     label = { Text("上传URL *") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
-                    maxLines = 6
+                    maxLines = 6,
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -937,7 +977,7 @@ fun RuleEditDialog(
                     label = { Text("下载URL规则 *") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
-                    maxLines = 6
+                    maxLines = 6,
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -949,18 +989,18 @@ fun RuleEditDialog(
                     label = { Text("注释说明 *") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
-                    maxLines = 6
+                    maxLines = 6,
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // 自动压缩选项
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Checkbox(
                         checked = compress,
-                        onCheckedChange = { compress = it }
+                        onCheckedChange = { compress = it },
                     )
                     Text("自动压缩文件")
                 }
@@ -977,14 +1017,14 @@ fun RuleEditDialog(
                         summary = summary,
                         compress = compress,
                         isDefault = rule?.isDefault ?: false,
-                        sortOrder = rule?.sortOrder ?: 0
+                        sortOrder = rule?.sortOrder ?: 0,
                     )
                     onSave(newRule)
                 },
                 // 只有必填字段都填写后才能保存
-                enabled = uploadUrl.isNotBlank() && 
-                          downloadUrlRule.isNotBlank() && 
-                          summary.isNotBlank()
+                enabled = uploadUrl.isNotBlank() &&
+                    downloadUrlRule.isNotBlank() &&
+                    summary.isNotBlank(),
             ) {
                 Text("保存", color = MaterialTheme.colorScheme.primary)
             }
@@ -993,15 +1033,15 @@ fun RuleEditDialog(
             TextButton(onClick = onDismiss) {
                 Text("取消", color = MaterialTheme.colorScheme.primary)
             }
-        }
+        },
     )
 }
 
 /**
  * 格式化相对时间
- * 
+ *
  * 将时间戳转换为相对时间描述,如"刚刚"、"5分钟前"、"2小时前"等
- * 
+ *
  * @param timestamp 时间戳(毫秒)
  * @return 格式化后的时间字符串
  */
@@ -1010,39 +1050,35 @@ private fun formatTime(timestamp: Long): String {
     val diff = now - timestamp
 
     return when {
-        diff < 60_000 -> "刚刚"  // 小于1分钟
-        diff < 3600_000 -> "${diff / 60_000}分钟前"  // 小于1小时
-        diff < 86400_000 -> "${diff / 3600_000}小时前"  // 小于1天
-        diff < 2592000_000 -> "${diff / 86400_000}天前"  // 小于30天
-        else -> SimpleDateFormat("MM-dd", Locale.getDefault()).format(Date(timestamp))  // 超过30天显示日期
+        diff < 60_000 -> "刚刚" // 小于1分钟
+        diff < 3600_000 -> "${diff / 60_000}分钟前" // 小于1小时
+        diff < 86400_000 -> "${diff / 3600_000}小时前" // 小于1天
+        diff < 2592000_000 -> "${diff / 86400_000}天前" // 小于30天
+        else -> SimpleDateFormat("MM-dd", Locale.getDefault()).format(Date(timestamp)) // 超过30天显示日期
     }
 }
 
 /**
  * 格式化日期时间
- * 
+ *
  * 将时间戳转换为"yyyy-MM-dd HH:mm"格式的字符串
- * 
+ *
  * @param timestamp 时间戳(毫秒)
  * @return 格式化后的日期时间字符串
  */
-private fun formatDateTime(timestamp: Long): String {
-    return SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(timestamp))
-}
+private fun formatDateTime(timestamp: Long): String = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(timestamp))
 
 /**
  * 格式化文件大小
- * 
+ *
  * 将字节数转换为人类可读的文件大小格式,如"1.5 KB"、"2.3 MB"等
- * 
+ *
  * @param size 文件大小(字节)
  * @return 格式化后的文件大小字符串
  */
-private fun formatFileSize(size: Long): String {
-    return when {
-        size < 1024 -> "$size B"  // 小于1KB
-        size < 1024 * 1024 -> String.format("%.1f KB", size / 1024.0)  // 小于1MB
-        size < 1024 * 1024 * 1024 -> String.format("%.1f MB", size / (1024.0 * 1024))  // 小于1GB
-        else -> String.format("%.1f GB", size / (1024.0 * 1024 * 1024))  // 大于等于1GB
-    }
+private fun formatFileSize(size: Long): String = when {
+    size < 1024 -> "$size B" // 小于1KB
+    size < 1024 * 1024 -> String.format("%.1f KB", size / 1024.0) // 小于1MB
+    size < 1024 * 1024 * 1024 -> String.format("%.1f MB", size / (1024.0 * 1024)) // 小于1GB
+    else -> String.format("%.1f GB", size / (1024.0 * 1024 * 1024)) // 大于等于1GB
 }

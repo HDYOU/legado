@@ -13,13 +13,12 @@
  */
 package io.legado.app.ui.main.homepage.manage
 
-import androidx.compose.foundation.layout.Arrangement
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -93,20 +92,21 @@ fun AddCustomModuleDialog(
     }
 
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         title = {
             // 根据模式显示不同标题
             Text(
                 text = if (isEditMode) stringResource(R.string.homepage_edit_module) else stringResource(R.string.homepage_add_module),
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         },
         text = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
             ) {
                 // 标题输入框
                 OutlinedTextField(
@@ -114,7 +114,7 @@ fun AddCustomModuleDialog(
                     onValueChange = { title = it },
                     label = { Text(stringResource(R.string.homepage_title_label)) },
                     maxLines = 3,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 // URL 输入框
@@ -123,14 +123,14 @@ fun AddCustomModuleDialog(
                     onValueChange = { url = it },
                     label = { Text(stringResource(R.string.homepage_url)) },
                     maxLines = 5,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 // 模块类型选择：使用 MD3 ExposedDropdownMenuBox
                 ExposedDropdownMenuBox(
                     expanded = typeMenuExpanded,
                     onExpandedChange = { typeMenuExpanded = it },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     OutlinedTextField(
                         value = stringResource(HomepageModuleType.fromKey(type).titleRes),
@@ -143,11 +143,11 @@ fun AddCustomModuleDialog(
                         },
                         modifier = Modifier
                             .menuAnchor()
-                            .fillMaxWidth()
+                            .fillMaxWidth(),
                     )
                     ExposedDropdownMenu(
                         expanded = typeMenuExpanded,
-                        onDismissRequest = { typeMenuExpanded = false }
+                        onDismissRequest = { typeMenuExpanded = false },
                     ) {
                         HomepageModuleType.entries.forEach { moduleType ->
                             // 跳过未知类型，仅显示有效的模块类型
@@ -160,7 +160,7 @@ fun AddCustomModuleDialog(
                                 onClick = {
                                     type = moduleType.key
                                     typeMenuExpanded = false
-                                }
+                                },
                             )
                         }
                     }
@@ -172,7 +172,7 @@ fun AddCustomModuleDialog(
                     onValueChange = { args = it },
                     label = { Text(stringResource(R.string.homepage_args)) },
                     maxLines = 8,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 // 布局配置输入框
@@ -181,7 +181,7 @@ fun AddCustomModuleDialog(
                     onValueChange = { layoutConfig = it },
                     label = { Text(stringResource(R.string.homepage_layout_config)) },
                     maxLines = 3,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         },
@@ -197,10 +197,10 @@ fun AddCustomModuleDialog(
                             args = args.ifBlank { null },
                             layoutConfig = layoutConfig.ifBlank { null },
                             url = url.ifBlank { null },
-                            sourceUrl = prefill?.sourceUrl ?: ""
-                        )
+                            sourceUrl = prefill?.sourceUrl ?: "",
+                        ),
                     )
-                }
+                },
             ) {
                 Text(stringResource(R.string.homepage_confirm))
             }
@@ -210,6 +210,6 @@ fun AddCustomModuleDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.homepage_cancel))
             }
-        }
+        },
     )
 }

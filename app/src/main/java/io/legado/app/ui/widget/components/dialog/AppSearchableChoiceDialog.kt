@@ -1,5 +1,7 @@
 package io.legado.app.ui.widget.components.dialog
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.material3.BasicAlertDialog
 import io.legado.app.R
 import io.legado.app.ui.theme.AppDimens
@@ -80,9 +81,10 @@ fun AppSearchableChoiceDialog(
 
     BasicAlertDialog(onDismissRequest = onDismissRequest) {
         Surface(
-            modifier = modifier.fillMaxWidth(),
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = modifier.fillMaxWidth().eInkGrayscale(),
             shape = MaterialTheme.shapes.large,
-            color = MaterialTheme.colorScheme.surfaceContainerHigh
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -94,8 +96,8 @@ fun AppSearchableChoiceDialog(
                         start = AppDimens.panelRowHorizontalPadding,
                         top = AppDimens.panelRowHorizontalPadding,
                         end = AppDimens.panelRowHorizontalPadding,
-                        bottom = AppDimens.panelTitleBottomPadding
-                    )
+                        bottom = AppDimens.panelTitleBottomPadding,
+                    ),
                 )
                 OutlinedTextField(
                     value = query,
@@ -105,28 +107,28 @@ fun AppSearchableChoiceDialog(
                         .padding(horizontal = AppDimens.panelRowHorizontalPadding),
                     singleLine = true,
                     placeholder = {
-                        Text(text = stringResource(R.string.search)) 
+                        Text(text = stringResource(R.string.search))
                     },
                     trailingIcon = {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = { query = "" }) {
                                 Icon(
                                     imageVector = Icons.Rounded.Close,
-                                    contentDescription = stringResource(R.string.clear)
+                                    contentDescription = stringResource(R.string.clear),
                                 )
                             }
                         }
                     },
                     shape = RoundedCornerShape(composeActionRadius()),
                     textStyle = TextStyle.Default.copy(
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
                 )
                 Box(
                     Modifier
                         .fillMaxWidth()
                         .heightIn(max = AppDimens.dialogOptionsMaxHeight)
-                        .padding(top = AppDimens.panelRowTitleSpacing)
+                        .padding(top = AppDimens.panelRowTitleSpacing),
                 ) {
                     val listState = rememberLazyListState()
                     LazyColumn(
@@ -134,13 +136,13 @@ fun AppSearchableChoiceDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(end = AppDimens.scrollbarRailWidth / 2),
-                        contentPadding = PaddingValues(bottom = AppDimens.panelRowTitleSpacing)
+                        contentPadding = PaddingValues(bottom = AppDimens.panelRowTitleSpacing),
                     ) {
                         itemsIndexed(filtered, key = { _, index -> index }) { _, originalIndex ->
                             DialogOptionRow(
                                 label = options[originalIndex],
                                 selected = originalIndex == selectedIndex,
-                                onClick = { onSelect(originalIndex) }
+                                onClick = { onSelect(originalIndex) },
                             )
                         }
                         if (filtered.isEmpty()) {
@@ -149,16 +151,16 @@ fun AppSearchableChoiceDialog(
                                     text = stringResource(R.string.search_empty_title),
                                     modifier = Modifier.padding(
                                         horizontal = AppDimens.panelRowTitleSpacing,
-                                        vertical = AppDimens.panelRowTitleSpacing
+                                        vertical = AppDimens.panelRowTitleSpacing,
                                     ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
                     }
                     VerticalScrollbar(
                         state = listState,
-                        modifier = Modifier.align(Alignment.CenterEnd)
+                        modifier = Modifier.align(Alignment.CenterEnd),
                     )
                 }
                 Row(
@@ -167,8 +169,8 @@ fun AppSearchableChoiceDialog(
                         .fillMaxWidth()
                         .padding(
                             end = AppDimens.panelRowTitleSpacing,
-                            bottom = AppDimens.panelRowTitleSpacing
-                        )
+                            bottom = AppDimens.panelRowTitleSpacing,
+                        ),
                 ) {
                     TextButton(onClick = onDismissRequest) {
                         Text(text = stringResource(R.string.cancel))
@@ -192,8 +194,8 @@ private fun DialogOptionRow(
             .clickable(onClick = onClick)
             .padding(
                 start = AppDimens.panelRowTitleSpacing,
-                end = AppDimens.panelRowHorizontalPadding
-            )
+                end = AppDimens.panelRowHorizontalPadding,
+            ),
     ) {
         RadioButton(selected = selected, onClick = onClick)
         Spacer(modifier = Modifier.width(AppDimens.panelRowTitleSpacing))
@@ -206,7 +208,7 @@ private fun DialogOptionRow(
                 MaterialTheme.colorScheme.onSurface
             },
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

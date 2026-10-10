@@ -1,5 +1,8 @@
 package io.legado.app.ui.config
 
+import androidx.compose.ui.Modifier
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,7 +24,7 @@ import io.legado.app.help.storage.ValidationResult
 @Composable
 fun ValidationErrorDetailDialog(
     result: ValidationResult,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val message = buildAnnotatedString {
         append(result.message)
@@ -47,6 +50,7 @@ fun ValidationErrorDetailDialog(
     }
 
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.medium,
@@ -60,6 +64,6 @@ fun ValidationErrorDetailDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.ok), color = MaterialTheme.colorScheme.primary)
             }
-        }
+        },
     )
 }

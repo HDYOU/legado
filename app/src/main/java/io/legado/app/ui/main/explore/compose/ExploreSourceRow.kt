@@ -1,5 +1,7 @@
 package io.legado.app.ui.main.explore.compose
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -83,7 +85,7 @@ internal fun ExploreSourceRow(
                     .fillMaxWidth()
                     .clip(composePanelShape())
                     .background(
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = AppDimens.EXPLORE_TITLE_BG_ALPHA)
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = AppDimens.EXPLORE_TITLE_BG_ALPHA),
                     )
                     .combinedClickable(
                         onClick = { actions.onToggleExpand(sourceItem) },
@@ -115,7 +117,7 @@ internal fun ExploreSourceRow(
                 // 展开状态是整行的语义，箭头只是它的视觉表达（装饰图标，不单独播报）
                 Image(
                     painter = painterResource(
-                        if (expanded) R.drawable.ic_arrow_down else R.drawable.ic_arrow_right
+                        if (expanded) R.drawable.ic_arrow_down else R.drawable.ic_arrow_right,
                     ),
                     contentDescription = null,
                     colorFilter = ColorFilter.tint(pageSecondaryTextColor()),
@@ -123,6 +125,7 @@ internal fun ExploreSourceRow(
                 )
             }
             DropdownMenu(
+                modifier = Modifier.eInkGrayscale(),
                 expanded = menuExpanded,
                 onDismissRequest = { menuExpanded = false },
             ) {
@@ -157,14 +160,12 @@ internal fun ExploreSourceRow(
 }
 
 /** 菜单文案复用 View 版菜单（[R.menu.explore_item]）的同一批字符串资源 */
-private fun ExploreSourceMenuAction.titleRes(): Int {
-    return when (this) {
-        ExploreSourceMenuAction.Edit -> R.string.edit
-        ExploreSourceMenuAction.ToTop -> R.string.to_top
-        ExploreSourceMenuAction.Query -> R.string.query
-        ExploreSourceMenuAction.Login -> R.string.login
-        ExploreSourceMenuAction.Search -> R.string.search
-        ExploreSourceMenuAction.Refresh -> R.string.refresh
-        ExploreSourceMenuAction.Delete -> R.string.delete
-    }
+private fun ExploreSourceMenuAction.titleRes(): Int = when (this) {
+    ExploreSourceMenuAction.Edit -> R.string.edit
+    ExploreSourceMenuAction.ToTop -> R.string.to_top
+    ExploreSourceMenuAction.Query -> R.string.query
+    ExploreSourceMenuAction.Login -> R.string.login
+    ExploreSourceMenuAction.Search -> R.string.search
+    ExploreSourceMenuAction.Refresh -> R.string.refresh
+    ExploreSourceMenuAction.Delete -> R.string.delete
 }

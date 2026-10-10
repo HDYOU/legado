@@ -1,5 +1,7 @@
 package io.legado.app.ui.blockrule
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -200,6 +202,7 @@ private fun BlockRuleConfigContent(
     // Delete confirm dialog
     deletingRule?.let { rule ->
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { deletingRule = null },
             title = { Text(stringResource(R.string.explore_block_rule_delete_confirm, rule.name.ifBlank { rule.pattern })) },
             confirmButton = {
@@ -268,6 +271,7 @@ private fun BlockRuleConfigContent(
     }
 
     ModalBottomSheet(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = pageCardContainerColor(),
@@ -314,6 +318,7 @@ private fun BlockRuleConfigContent(
                         Icon(Icons.Filled.MoreVert, contentDescription = "更多")
                     }
                     DropdownMenu(
+                        modifier = Modifier.eInkGrayscale(),
                         expanded = showMoreMenu,
                         onDismissRequest = { showMoreMenu = false },
                     ) {
@@ -488,6 +493,7 @@ private fun BlockRuleConfigContent(
             BlockRuleStore.getMatchedRules(context, allBooks, sourceUrl)
         }
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { showActiveRules = false },
             title = { Text(stringResource(R.string.explore_block_rule_active_rules)) },
             text = {
@@ -782,6 +788,7 @@ private fun BlockRuleEditContent(
     }
 
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         title = {
             Text(
@@ -1168,6 +1175,7 @@ private fun BlockRuleGroupManageContent(
     inputDialog?.let { dialog ->
         var inputName by remember { mutableStateOf(dialog.initialName) }
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { inputDialog = null },
             title = { Text(dialog.title) },
             text = {
@@ -1210,6 +1218,7 @@ private fun BlockRuleGroupManageContent(
     }
 
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.explore_block_rule_group_manage)) },
         text = {
@@ -1323,6 +1332,7 @@ private fun BookSourceSelectorDialog(
     }
 
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
@@ -1514,6 +1524,7 @@ private fun RssSourceSelectorDialog(
     }
 
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {

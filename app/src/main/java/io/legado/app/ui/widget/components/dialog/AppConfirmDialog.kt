@@ -1,5 +1,8 @@
 package io.legado.app.ui.widget.components.dialog
 
+import androidx.compose.ui.Modifier
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,10 +22,12 @@ fun AppConfirmDialog(
     onDismissRequest: () -> Unit,
     destructive: Boolean = false,
     dismissText: String = stringResource(R.string.cancel),
-    containerColor: Color = MaterialTheme.colorScheme.surface
+    containerColor: Color = MaterialTheme.colorScheme.surface,
 ) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
+        // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+        modifier = Modifier.eInkGrayscale(),
         containerColor = containerColor,
         shape = RectangleShape,
         titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -37,7 +42,7 @@ fun AppConfirmDialog(
                         MaterialTheme.colorScheme.error
                     } else {
                         MaterialTheme.colorScheme.primary
-                    }
+                    },
                 )
             }
         },
@@ -45,6 +50,6 @@ fun AppConfirmDialog(
             TextButton(onClick = onDismissRequest) {
                 Text(dismissText)
             }
-        }
+        },
     )
 }

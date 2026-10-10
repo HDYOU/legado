@@ -1,5 +1,7 @@
 package io.legado.app.ui.source.recycle.components
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material.icons.Icons
@@ -25,17 +27,17 @@ fun SourceRecycleDropdownMenu(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     offset: DpOffset = DpOffset.Zero,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
-        modifier = modifier,
+        modifier = modifier.eInkGrayscale(),
         offset = offset,
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
         shadowElevation = 8.dp,
-        content = content
+        content = content,
     )
 }
 
@@ -50,7 +52,7 @@ fun SourceRecycleDropdownMenuItem(
     enabled: Boolean = true,
     selected: Boolean = false,
     destructive: Boolean = false,
-    leadingIcon: @Composable (() -> Unit)? = null
+    leadingIcon: @Composable (() -> Unit)? = null,
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
     val textColor = when {
@@ -64,13 +66,16 @@ fun SourceRecycleDropdownMenuItem(
             Text(
                 text = text,
                 color = textColor,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
         },
         onClick = onClick,
         modifier = modifier.background(
-            if (selected) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            else Color.Transparent
+            if (selected) {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            } else {
+                Color.Transparent
+            },
         ),
         enabled = enabled,
         leadingIcon = leadingIcon,
@@ -79,7 +84,7 @@ fun SourceRecycleDropdownMenuItem(
                 Icon(
                     Icons.Default.Check,
                     contentDescription = null,
-                    tint = primaryColor
+                    tint = primaryColor,
                 )
             }
         },
@@ -88,7 +93,7 @@ fun SourceRecycleDropdownMenuItem(
             leadingIconColor = textColor,
             trailingIconColor = primaryColor,
             disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledLeadingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-        )
+            disabledLeadingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+        ),
     )
 }

@@ -1,5 +1,7 @@
 package io.legado.app.ui.main.bookshelf
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -126,6 +128,7 @@ internal fun BookshelfTagManageScreen(
                             )
                         }
                         DropdownMenu(
+                            modifier = Modifier.eInkGrayscale(),
                             expanded = menuExpanded,
                             onDismissRequest = { menuExpanded = false },
                         ) {
@@ -211,6 +214,7 @@ internal fun BookshelfTagManageScreen(
         }
         is BookshelfTagDialogState.DeleteConfirm -> {
             AlertDialog(
+                modifier = Modifier.eInkGrayscale(),
                 onDismissRequest = callbacks.onDismissDialog,
                 title = { Text(stringResource(R.string.bookshelf_tag_delete_title)) },
                 text = {

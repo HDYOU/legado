@@ -1,5 +1,7 @@
 package io.legado.app.ui.widget.components
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -48,7 +50,7 @@ fun LoadMoreFooter(
 
     Box(
         modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         when {
             isLoading -> CircularProgressIndicator(
@@ -56,7 +58,7 @@ fun LoadMoreFooter(
                     .padding(AppDimens.exploreShowLoadMoreSpacing)
                     .size(AppDimens.exploreShowLoadMoreSize),
                 strokeWidth = AppDimens.exploreShowLoadMoreStrokeWidth,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
 
             isError -> Text(
@@ -65,14 +67,14 @@ fun LoadMoreFooter(
                     .fillMaxWidth()
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = null
+                        indication = null,
                     ) { showErrorDialog = true }
                     .padding(AppDimens.exploreShowLoadMorePadding),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
 
             !hasMore -> Text(
@@ -83,18 +85,18 @@ fun LoadMoreFooter(
                         if (onClick != null) {
                             Modifier.clickable(
                                 interactionSource = remember { MutableInteractionSource() },
-                                indication = null
+                                indication = null,
                             ) { onClick() }
                         } else {
                             Modifier
-                        }
+                        },
                     )
                     .padding(AppDimens.exploreShowLoadMorePadding),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
@@ -102,6 +104,8 @@ fun LoadMoreFooter(
     if (showErrorDialog) {
         AlertDialog(
             onDismissRequest = { showErrorDialog = false },
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = Modifier.eInkGrayscale(),
             title = { Text(stringResource(R.string.error)) },
             text = { Text(message.orEmpty()) },
             confirmButton = {
@@ -118,7 +122,7 @@ fun LoadMoreFooter(
                 TextButton(onClick = { showErrorDialog = false }) {
                     Text(stringResource(R.string.cancel))
                 }
-            }
+            },
         )
     }
 }

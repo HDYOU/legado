@@ -15,6 +15,8 @@
  */
 package io.legado.app.ui.book.source.check
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -31,9 +33,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -48,7 +47,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.legado.app.R
-import kotlinx.coroutines.delay
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.data.entities.BookSource
 import io.legado.app.ui.theme.pageAccentColor
@@ -76,13 +74,13 @@ fun CheckSourceScreen(
     onSelectSources: () -> Unit = {},
     onOpenConfig: () -> Unit = {},
     onEditSource: (String) -> Unit = {},
-    onDebugSource: (String) -> Unit = {}
+    onDebugSource: (String) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var detailResult by remember { mutableStateOf<CheckResult?>(null) }
     var showSourcePicker by remember { mutableStateOf(false) }
-    
+
     AppScaffold(
         topBar = {
             CheckSourceTopBar(
@@ -90,14 +88,14 @@ fun CheckSourceScreen(
                 onBackClick = onBackClick,
                 onStopClick = { viewModel.stopCheck() },
                 onClearClick = { viewModel.clearResults() },
-                onConfigClick = onOpenConfig
+                onConfigClick = onOpenConfig,
             )
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
             when (val state = uiState) {
                 is CheckSourceUIState.Idle -> {
@@ -114,7 +112,7 @@ fun CheckSourceScreen(
                         onResultClick = { detailResult = it },
                         onReCheckSource = { viewModel.reCheck(it.sourceUrl) },
                         onEditSource = { onEditSource(it.sourceUrl) },
-                        onDebugSource = { onDebugSource(it.sourceUrl) }
+                        onDebugSource = { onDebugSource(it.sourceUrl) },
                     )
                 }
                 is CheckSourceUIState.Checking -> {
@@ -129,7 +127,7 @@ fun CheckSourceScreen(
                         onResultClick = { detailResult = it },
                         onReCheckSource = { viewModel.reCheck(it.sourceUrl) },
                         onEditSource = { onEditSource(it.sourceUrl) },
-                        onDebugSource = { onDebugSource(it.sourceUrl) }
+                        onDebugSource = { onDebugSource(it.sourceUrl) },
                     )
                 }
                 is CheckSourceUIState.Paused -> {
@@ -143,7 +141,7 @@ fun CheckSourceScreen(
                         onResultClick = { detailResult = it },
                         onReCheckSource = { viewModel.reCheck(it.sourceUrl) },
                         onEditSource = { onEditSource(it.sourceUrl) },
-                        onDebugSource = { onDebugSource(it.sourceUrl) }
+                        onDebugSource = { onDebugSource(it.sourceUrl) },
                     )
                 }
                 is CheckSourceUIState.Completed -> {
@@ -157,7 +155,7 @@ fun CheckSourceScreen(
                         onResultClick = { detailResult = it },
                         onReCheckSource = { viewModel.reCheck(it.sourceUrl) },
                         onEditSource = { onEditSource(it.sourceUrl) },
-                        onDebugSource = { onDebugSource(it.sourceUrl) }
+                        onDebugSource = { onDebugSource(it.sourceUrl) },
                     )
                 }
             }
@@ -180,7 +178,7 @@ fun CheckSourceScreen(
             onDebug = {
                 detailResult = null
                 onDebugSource(result.sourceUrl)
-            }
+            },
         )
     }
 
@@ -195,7 +193,7 @@ fun CheckSourceScreen(
             onStart = {
                 showSourcePicker = false
                 viewModel.startCheckSelectedSources()
-            }
+            },
         )
     }
 }
@@ -211,7 +209,7 @@ private fun ColumnScope.IdleContent(
     onResultClick: (CheckResult) -> Unit,
     onReCheckSource: (CheckResult) -> Unit,
     onEditSource: (CheckResult) -> Unit,
-    onDebugSource: (CheckResult) -> Unit
+    onDebugSource: (CheckResult) -> Unit,
 ) {
     ProgressCard(
         checkState = CheckState.IDLE,
@@ -221,7 +219,7 @@ private fun ColumnScope.IdleContent(
         onPauseCheck = {},
         onResumeCheck = {},
         onSelectSources = onSelectSources,
-        onReCheck = {}
+        onReCheck = {},
     )
 
     if (statistics.totalCount > 0) {
@@ -232,7 +230,7 @@ private fun ColumnScope.IdleContent(
     if (filteredResults.isNotEmpty()) {
         ResultFilterChips(
             currentFilter = resultFilter,
-            onFilterChange = onFilterChange
+            onFilterChange = onFilterChange,
         )
     }
 
@@ -243,7 +241,7 @@ private fun ColumnScope.IdleContent(
         onReCheckSource = onReCheckSource,
         onEditSource = onEditSource,
         onDebugSource = onDebugSource,
-        modifier = Modifier.weight(1f)
+        modifier = Modifier.weight(1f),
     )
 }
 
@@ -259,7 +257,7 @@ private fun ColumnScope.CheckingContent(
     onResultClick: (CheckResult) -> Unit,
     onReCheckSource: (CheckResult) -> Unit,
     onEditSource: (CheckResult) -> Unit,
-    onDebugSource: (CheckResult) -> Unit
+    onDebugSource: (CheckResult) -> Unit,
 ) {
     ProgressCard(
         checkState = CheckState.CHECKING,
@@ -269,7 +267,7 @@ private fun ColumnScope.CheckingContent(
         onPauseCheck = onPauseCheck,
         onResumeCheck = {},
         onSelectSources = {},
-        onReCheck = {}
+        onReCheck = {},
     )
 
     if (statistics.totalCount > 0) {
@@ -280,7 +278,7 @@ private fun ColumnScope.CheckingContent(
     if (filteredResults.isNotEmpty()) {
         ResultFilterChips(
             currentFilter = resultFilter,
-            onFilterChange = onFilterChange
+            onFilterChange = onFilterChange,
         )
     }
 
@@ -291,7 +289,7 @@ private fun ColumnScope.CheckingContent(
         onReCheckSource = onReCheckSource,
         onEditSource = onEditSource,
         onDebugSource = onDebugSource,
-        modifier = Modifier.weight(1f)
+        modifier = Modifier.weight(1f),
     )
 }
 
@@ -306,7 +304,7 @@ private fun ColumnScope.PausedContent(
     onResultClick: (CheckResult) -> Unit,
     onReCheckSource: (CheckResult) -> Unit,
     onEditSource: (CheckResult) -> Unit,
-    onDebugSource: (CheckResult) -> Unit
+    onDebugSource: (CheckResult) -> Unit,
 ) {
     ProgressCard(
         checkState = CheckState.PAUSED,
@@ -316,7 +314,7 @@ private fun ColumnScope.PausedContent(
         onPauseCheck = {},
         onResumeCheck = onResumeCheck,
         onSelectSources = {},
-        onReCheck = {}
+        onReCheck = {},
     )
 
     if (statistics.totalCount > 0) {
@@ -327,7 +325,7 @@ private fun ColumnScope.PausedContent(
     if (filteredResults.isNotEmpty()) {
         ResultFilterChips(
             currentFilter = resultFilter,
-            onFilterChange = onFilterChange
+            onFilterChange = onFilterChange,
         )
     }
 
@@ -338,7 +336,7 @@ private fun ColumnScope.PausedContent(
         onReCheckSource = onReCheckSource,
         onEditSource = onEditSource,
         onDebugSource = onDebugSource,
-        modifier = Modifier.weight(1f)
+        modifier = Modifier.weight(1f),
     )
 }
 
@@ -353,7 +351,7 @@ private fun ColumnScope.CompletedContent(
     onResultClick: (CheckResult) -> Unit,
     onReCheckSource: (CheckResult) -> Unit,
     onEditSource: (CheckResult) -> Unit,
-    onDebugSource: (CheckResult) -> Unit
+    onDebugSource: (CheckResult) -> Unit,
 ) {
     ProgressCard(
         checkState = CheckState.COMPLETED,
@@ -363,7 +361,7 @@ private fun ColumnScope.CompletedContent(
         onPauseCheck = {},
         onResumeCheck = {},
         onSelectSources = {},
-        onReCheck = onReCheck
+        onReCheck = onReCheck,
     )
 
     if (statistics.totalCount > 0) {
@@ -374,7 +372,7 @@ private fun ColumnScope.CompletedContent(
     if (filteredResults.isNotEmpty()) {
         ResultFilterChips(
             currentFilter = resultFilter,
-            onFilterChange = onFilterChange
+            onFilterChange = onFilterChange,
         )
     }
 
@@ -385,7 +383,7 @@ private fun ColumnScope.CompletedContent(
         onReCheckSource = onReCheckSource,
         onEditSource = onEditSource,
         onDebugSource = onDebugSource,
-        modifier = Modifier.weight(1f)
+        modifier = Modifier.weight(1f),
     )
 }
 
@@ -405,7 +403,7 @@ fun CheckSourceTopBar(
     onBackClick: () -> Unit,
     onStopClick: () -> Unit,
     onClearClick: () -> Unit,
-    onConfigClick: () -> Unit
+    onConfigClick: () -> Unit,
 ) {
     val subtitleText = when (uiState) {
         is CheckSourceUIState.Idle -> "准备就绪"
@@ -422,14 +420,14 @@ fun CheckSourceTopBar(
             IconButton(onClick = onConfigClick) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = stringResource(R.string.setting)
+                    contentDescription = stringResource(R.string.setting),
                 )
             }
             if (uiState is CheckSourceUIState.Checking) {
                 IconButton(onClick = onStopClick) {
                     Icon(
                         imageVector = Icons.Default.Stop,
-                        contentDescription = stringResource(R.string.cancel)
+                        contentDescription = stringResource(R.string.cancel),
                     )
                 }
             }
@@ -437,11 +435,11 @@ fun CheckSourceTopBar(
                 IconButton(onClick = onClearClick) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = stringResource(R.string.clear)
+                        contentDescription = stringResource(R.string.clear),
                     )
                 }
             }
-        }
+        },
     )
 }
 
@@ -466,7 +464,7 @@ fun ProgressCard(
     onPauseCheck: () -> Unit,
     onResumeCheck: () -> Unit,
     onSelectSources: () -> Unit,
-    onReCheck: () -> Unit
+    onReCheck: () -> Unit,
 ) {
     val containerColor = checkSourceCardContainerColor()
     val border = checkSourceCardBorder()
@@ -482,7 +480,7 @@ fun ProgressCard(
         } else {
             Color.Transparent
         },
-        contentColor = MaterialTheme.colorScheme.onSurface
+        contentColor = MaterialTheme.colorScheme.onSurface,
     )
 
     Surface(
@@ -492,28 +490,28 @@ fun ProgressCard(
         color = containerColor,
         shape = RoundedCornerShape(16.dp),
         border = border,
-        shadowElevation = if (isDarkBackground) 0.dp else 4.dp
+        shadowElevation = if (isDarkBackground) 0.dp else 4.dp,
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(20.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         StatusIcon(
                             checkState = checkState,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(32.dp),
                         )
 
                         Spacer(modifier = Modifier.width(12.dp))
@@ -527,9 +525,9 @@ fun ProgressCard(
                             },
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
                             ),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
 
@@ -538,7 +536,7 @@ fun ProgressCard(
                             text = progress.progressText,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
                         )
                     }
                 }
@@ -550,20 +548,20 @@ fun ProgressCard(
                         progress = progress.progress,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(8.dp)
+                            .height(8.dp),
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
                     if (progress.currentSourceName.isNotEmpty()) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Source,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
-                                tint = pageMutedIconTint()
+                                tint = pageMutedIconTint(),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
@@ -572,7 +570,7 @@ fun ProgressCard(
                                 color = pageSecondaryTextColor(),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             )
                         }
                     }
@@ -585,7 +583,7 @@ fun ProgressCard(
                             style = MaterialTheme.typography.bodySmall,
                             color = pageSecondaryTextColor(),
                             maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -594,7 +592,7 @@ fun ProgressCard(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     when (checkState) {
                         CheckState.IDLE -> {
@@ -602,12 +600,12 @@ fun ProgressCard(
                                 onClick = onSelectSources,
                                 modifier = Modifier.weight(1f),
                                 border = BorderStroke(1.dp, outlinedButtonBorderColor),
-                                colors = outlinedButtonColors
+                                colors = outlinedButtonColors,
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.List,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(18.dp),
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("选择书源")
@@ -615,12 +613,12 @@ fun ProgressCard(
 
                             Button(
                                 onClick = onStartCheck,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.PlayArrow,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(18.dp),
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("开始检测")
@@ -631,12 +629,12 @@ fun ProgressCard(
                                 onClick = onPauseCheck,
                                 modifier = Modifier.weight(1f),
                                 border = BorderStroke(1.dp, outlinedButtonBorderColor),
-                                colors = outlinedButtonColors
+                                colors = outlinedButtonColors,
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Pause,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(18.dp),
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("暂停")
@@ -645,12 +643,12 @@ fun ProgressCard(
                         CheckState.PAUSED -> {
                             Button(
                                 onClick = onResumeCheck,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.PlayArrow,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(18.dp),
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("继续")
@@ -661,12 +659,12 @@ fun ProgressCard(
                                 onClick = onReCheck,
                                 modifier = Modifier.weight(1f),
                                 border = BorderStroke(1.dp, outlinedButtonBorderColor),
-                                colors = outlinedButtonColors
+                                colors = outlinedButtonColors,
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Refresh,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(18.dp),
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("重新检测")
@@ -674,12 +672,12 @@ fun ProgressCard(
 
                             Button(
                                 onClick = onStartCheck,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.PlayArrow,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(18.dp),
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("新检测")
@@ -701,7 +699,7 @@ fun ProgressCard(
 @Composable
 fun StatusIcon(
     checkState: CheckState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "status")
 
@@ -710,9 +708,9 @@ fun StatusIcon(
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
             animation = tween(1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+            repeatMode = RepeatMode.Restart,
         ),
-        label = "rotation"
+        label = "rotation",
     )
 
     val scale by infiniteTransition.animateFloat(
@@ -720,9 +718,9 @@ fun StatusIcon(
         targetValue = 1.1f,
         animationSpec = infiniteRepeatable(
             animation = tween(600, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+            repeatMode = RepeatMode.Reverse,
         ),
-        label = "scale"
+        label = "scale",
     )
 
     val (icon, tint) = when (checkState) {
@@ -735,10 +733,10 @@ fun StatusIcon(
     Surface(
         modifier = modifier,
         shape = CircleShape,
-        color = tint.copy(alpha = 0.15f)
+        color = tint.copy(alpha = 0.15f),
     ) {
         Box(
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = icon,
@@ -751,8 +749,8 @@ fun StatusIcon(
                             Modifier.graphicsLayer { rotationZ = rotation }
                         } else {
                             Modifier
-                        }
-                    )
+                        },
+                    ),
             )
         }
     }
@@ -767,12 +765,12 @@ fun StatusIcon(
 @Composable
 fun AnimatedProgressIndicator(
     progress: Float,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(300, easing = FastOutSlowInEasing),
-        label = "progress"
+        label = "progress",
     )
 
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -781,10 +779,10 @@ fun AnimatedProgressIndicator(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(4.dp),
-        color = pageSurfaceVariantColor()
+        color = pageSurfaceVariantColor(),
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             Box(
                 modifier = Modifier
@@ -792,9 +790,9 @@ fun AnimatedProgressIndicator(
                     .fillMaxWidth(animatedProgress)
                     .background(
                         Brush.horizontalGradient(
-                            listOf(primaryColor, secondaryColor)
-                        )
-                    )
+                            listOf(primaryColor, secondaryColor),
+                        ),
+                    ),
             )
         }
     }
@@ -807,7 +805,7 @@ fun AnimatedProgressIndicator(
  */
 @Composable
 fun StatisticsCard(
-    statistics: CheckStatistics
+    statistics: CheckStatistics,
 ) {
     val containerColor = checkSourceCardContainerColor()
     val border = checkSourceCardBorder()
@@ -819,40 +817,40 @@ fun StatisticsCard(
         color = containerColor,
         shape = RoundedCornerShape(12.dp),
         border = border,
-        shadowElevation = 2.dp
+        shadowElevation = 2.dp,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             StatisticItem(
                 icon = Icons.Default.Assignment,
                 label = "总数",
                 value = statistics.totalCount.toString(),
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
 
             StatisticItem(
                 icon = Icons.Default.CheckCircle,
                 label = "成功",
                 value = statistics.successCount.toString(),
-                color = pageAccentColor()
+                color = pageAccentColor(),
             )
 
             StatisticItem(
                 icon = Icons.Default.Error,
                 label = "失败",
                 value = statistics.failedCount.toString(),
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
             )
 
             StatisticItem(
                 icon = Icons.Default.TrendingUp,
                 label = "成功率",
                 value = statistics.successRateText,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.secondary,
             )
         }
     }
@@ -871,24 +869,24 @@ fun StatisticItem(
     icon: ImageVector,
     label: String,
     value: String,
-    color: Color
+    color: Color,
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Surface(
             shape = CircleShape,
             color = color.copy(alpha = 0.15f),
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(40.dp),
         ) {
             Box(
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = color,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
             }
         }
@@ -899,7 +897,7 @@ fun StatisticItem(
             text = value,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
-            color = color
+            color = color,
         )
 
         Spacer(modifier = Modifier.height(2.dp))
@@ -907,7 +905,7 @@ fun StatisticItem(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = pageSecondaryTextColor()
+            color = pageSecondaryTextColor(),
         )
     }
 }
@@ -921,13 +919,13 @@ fun StatisticItem(
 @Composable
 fun ResultFilterChips(
     currentFilter: ResultFilter,
-    onFilterChange: (ResultFilter) -> Unit
+    onFilterChange: (ResultFilter) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ResultFilter.entries.forEach { filter ->
             FilterChip(
@@ -939,7 +937,7 @@ fun ResultFilterChips(
                             ResultFilter.ALL -> "全部"
                             ResultFilter.SUCCESS -> "成功"
                             ResultFilter.FAILED -> "失败"
-                        }
+                        },
                     )
                 },
                 leadingIcon = {
@@ -951,10 +949,10 @@ fun ResultFilterChips(
                                 ResultFilter.FAILED -> Icons.Default.Close
                             },
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
                     }
-                }
+                },
             )
         }
     }
@@ -975,28 +973,28 @@ fun ResultList(
     onReCheckSource: (CheckResult) -> Unit,
     onEditSource: (CheckResult) -> Unit,
     onDebugSource: (CheckResult) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val containerColor = checkSourceCardContainerColor()
 
     AnimatedVisibility(
         visible = results.isNotEmpty(),
         enter = fadeIn() + slideInVertically(),
-        exit = fadeOut() + slideOutVertically()
+        exit = fadeOut() + slideOutVertically(),
     ) {
         LazyColumn(
             modifier = modifier,
             contentPadding = PaddingValues(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp + navigationBarBottomInset),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(
                 items = results,
-                key = { "${it.sourceUrl}_${it.sourceName}" }
+                key = { "${it.sourceUrl}_${it.sourceName}" },
             ) { result ->
                 AnimatedVisibility(
                     visible = true,
                     enter = fadeIn() + slideInHorizontally(),
-                    exit = fadeOut() + slideOutHorizontally()
+                    exit = fadeOut() + slideOutHorizontally(),
                 ) {
                     ResultItem(
                         result = result,
@@ -1004,7 +1002,7 @@ fun ResultList(
                         onClick = { onResultClick(result) },
                         onReCheck = { onReCheckSource(result) },
                         onEdit = { onEditSource(result) },
-                        onDebug = { onDebugSource(result) }
+                        onDebug = { onDebugSource(result) },
                     )
                 }
             }
@@ -1014,11 +1012,11 @@ fun ResultList(
     AnimatedVisibility(
         visible = results.isEmpty() && checkState != CheckState.CHECKING,
         enter = fadeIn(),
-        exit = fadeOut()
+        exit = fadeOut(),
     ) {
         Box(
             modifier = modifier,
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             EmptyStateView()
         }
@@ -1033,7 +1031,7 @@ fun EmptyStateView() {
     val isDarkBackground = MaterialTheme.colorScheme.background.luminance() < 0.18f
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Surface(
             shape = CircleShape,
@@ -1042,10 +1040,10 @@ fun EmptyStateView() {
             } else {
                 MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
             },
-            modifier = Modifier.size(80.dp)
+            modifier = Modifier.size(80.dp),
         ) {
             Box(
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Default.Source,
@@ -1055,7 +1053,7 @@ fun EmptyStateView() {
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.82f)
                     } else {
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                    }
+                    },
                 )
             }
         }
@@ -1066,7 +1064,7 @@ fun EmptyStateView() {
             text = "暂无检测结果",
             style = MaterialTheme.typography.titleMedium,
             color = pageSecondaryTextColor(),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -1075,7 +1073,7 @@ fun EmptyStateView() {
             text = "点击\"开始检测\"按钮开始检测书源",
             style = MaterialTheme.typography.bodyMedium,
             color = pageSecondaryTextColor().copy(alpha = 0.82f),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -1093,7 +1091,7 @@ fun ResultItem(
     onClick: () -> Unit,
     onReCheck: () -> Unit,
     onEdit: () -> Unit,
-    onDebug: () -> Unit
+    onDebug: () -> Unit,
 ) {
     val successColor = pageAccentColor()
     val errorColor = MaterialTheme.colorScheme.error
@@ -1106,29 +1104,35 @@ fun ResultItem(
         color = containerColor,
         shape = RoundedCornerShape(12.dp),
         border = border,
-        shadowElevation = 1.dp
+        shadowElevation = 1.dp,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
                 modifier = Modifier.size(40.dp),
                 shape = CircleShape,
-                color = if (result.isSuccess) successColor.copy(alpha = 0.15f)
-                        else errorColor.copy(alpha = 0.15f)
+                color = if (result.isSuccess) {
+                    successColor.copy(alpha = 0.15f)
+                } else {
+                    errorColor.copy(alpha = 0.15f)
+                },
             ) {
                 Box(
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        imageVector = if (result.isSuccess) Icons.Default.Check
-                                     else Icons.Default.Close,
+                        imageVector = if (result.isSuccess) {
+                            Icons.Default.Check
+                        } else {
+                            Icons.Default.Close
+                        },
                         contentDescription = null,
                         tint = if (result.isSuccess) successColor else errorColor,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }
@@ -1136,14 +1140,14 @@ fun ResultItem(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 Text(
                     text = result.sourceName,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -1153,39 +1157,39 @@ fun ResultItem(
                     style = MaterialTheme.typography.bodySmall,
                     color = if (result.isSuccess) successColor else errorColor,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(
-                horizontalAlignment = Alignment.End
+                horizontalAlignment = Alignment.End,
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = pageSurfaceVariantColor()
+                        color = pageSurfaceVariantColor(),
                     ) {
                         Text(
                             text = result.getRespondTimeText(),
                             style = MaterialTheme.typography.labelMedium,
                             color = pageSecondaryTextColor(),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         )
                     }
 
                     IconButton(
                         onClick = onReCheck,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = "重新检测",
                             modifier = Modifier.size(18.dp),
-                            tint = pageMutedIconTint()
+                            tint = pageMutedIconTint(),
                         )
                     }
                 }
@@ -1195,31 +1199,31 @@ fun ResultItem(
                     Text(
                         text = getErrorTypeText(result.errorType),
                         style = MaterialTheme.typography.labelSmall,
-                        color = errorColor.copy(alpha = 0.8f)
+                        color = errorColor.copy(alpha = 0.8f),
                     )
                 }
 
                 Row {
                     IconButton(
                         onClick = onDebug,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     ) {
                         Icon(
                             imageVector = Icons.Default.BugReport,
                             contentDescription = "调试",
                             modifier = Modifier.size(18.dp),
-                            tint = pageMutedIconTint()
+                            tint = pageMutedIconTint(),
                         )
                     }
                     IconButton(
                         onClick = onEdit,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "编辑",
                             modifier = Modifier.size(18.dp),
-                            tint = pageMutedIconTint()
+                            tint = pageMutedIconTint(),
                         )
                     }
                 }
@@ -1235,11 +1239,12 @@ fun ResultDetailDialog(
     onCopy: () -> Unit,
     onReCheck: () -> Unit,
     onEdit: () -> Unit,
-    onDebug: () -> Unit
+    onDebug: () -> Unit,
 ) {
     val dialogContainerColor = checkSourceCardContainerColor()
     val dialogTextColor = MaterialTheme.colorScheme.onSurface
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         containerColor = dialogContainerColor,
         titleContentColor = dialogTextColor,
@@ -1248,7 +1253,7 @@ fun ResultDetailDialog(
             Text(
                 text = result.sourceName,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
         },
         text = {
@@ -1281,7 +1286,7 @@ fun ResultDetailDialog(
                     Text("关闭")
                 }
             }
-        }
+        },
     )
 }
 
@@ -1293,12 +1298,13 @@ fun SourcePickerDialog(
     onToggleSource: (String) -> Unit,
     onSelectAll: () -> Unit,
     onClear: () -> Unit,
-    onStart: () -> Unit
+    onStart: () -> Unit,
 ) {
     val sourceDialogContainerColor = checkSourceCardContainerColor()
     val sourceDialogTextColor = MaterialTheme.colorScheme.onSurface
     val sourceDialogSecondaryTextColor = pageSecondaryTextColor()
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         containerColor = sourceDialogContainerColor,
         titleContentColor = sourceDialogTextColor,
@@ -1310,17 +1316,17 @@ fun SourcePickerDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 420.dp)
+                    .heightIn(max = 420.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = "已选 ${selectedUrls.size} / ${sources.size}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = sourceDialogSecondaryTextColor
+                        color = sourceDialogSecondaryTextColor,
                     )
                     Row {
                         TextButton(onClick = onSelectAll) {
@@ -1335,14 +1341,14 @@ fun SourcePickerDialog(
                 LazyColumn {
                     items(
                         items = sources,
-                        key = { "${it.bookSourceUrl}_${it.bookSourceName}" }
+                        key = { "${it.bookSourceUrl}_${it.bookSourceName}" },
                     ) { source ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { onToggleSource(source.bookSourceUrl) }
                                 .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Checkbox(
                                 checked = selectedUrls.contains(source.bookSourceUrl),
@@ -1350,8 +1356,8 @@ fun SourcePickerDialog(
                                 colors = CheckboxDefaults.colors(
                                     checkedColor = pageAccentColor(),
                                     uncheckedColor = sourceDialogSecondaryTextColor,
-                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary
-                                )
+                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary,
+                                ),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Column(modifier = Modifier.weight(1f)) {
@@ -1360,14 +1366,14 @@ fun SourcePickerDialog(
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = sourceDialogTextColor,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    overflow = TextOverflow.Ellipsis,
                                 )
                                 Text(
                                     text = source.bookSourceUrl,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = sourceDialogSecondaryTextColor,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    overflow = TextOverflow.Ellipsis,
                                 )
                             }
                         }
@@ -1378,7 +1384,7 @@ fun SourcePickerDialog(
         confirmButton = {
             TextButton(
                 onClick = onStart,
-                enabled = selectedUrls.isNotEmpty()
+                enabled = selectedUrls.isNotEmpty(),
             ) {
                 Text("检测")
             }
@@ -1387,7 +1393,7 @@ fun SourcePickerDialog(
             TextButton(onClick = onDismiss) {
                 Text("取消")
             }
-        }
+        },
     )
 }
 
@@ -1397,24 +1403,22 @@ private fun DetailLine(label: String, value: String) {
     Text(
         text = label,
         style = MaterialTheme.typography.labelMedium,
-        color = pageSecondaryTextColor()
+        color = pageSecondaryTextColor(),
     )
     Text(
         text = value,
         style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurface
+        color = MaterialTheme.colorScheme.onSurface,
     )
 }
 
-private fun CheckResult.toDetailText(): String {
-    return buildString {
-        appendLine(sourceName)
-        appendLine(sourceUrl)
-        appendLine(getStatusText())
-        appendLine(getRespondTimeText())
-        if (errorType != ErrorType.NONE) {
-            appendLine(errorType.name)
-        }
+private fun CheckResult.toDetailText(): String = buildString {
+    appendLine(sourceName)
+    appendLine(sourceUrl)
+    appendLine(getStatusText())
+    appendLine(getRespondTimeText())
+    if (errorType != ErrorType.NONE) {
+        appendLine(errorType.name)
     }
 }
 
@@ -1425,20 +1429,18 @@ private fun CheckResult.toDetailText(): String {
  * @return 文本描述
  */
 @Composable
-fun getErrorTypeText(errorType: ErrorType): String {
-    return when (errorType) {
-        ErrorType.NONE -> ""
-        ErrorType.TIMEOUT -> "超时"
-        ErrorType.NETWORK_ERROR -> "网络错误"
-        ErrorType.PARSE_ERROR -> "解析错误"
-        ErrorType.SCRIPT_ERROR -> "脚本错误"
-        ErrorType.DOMAIN_ERROR -> "域名错误"
-        ErrorType.SEARCH_ERROR -> "搜索错误"
-        ErrorType.DISCOVERY_ERROR -> "发现错误"
-        ErrorType.INFO_ERROR -> "详情错误"
-        ErrorType.TOC_ERROR -> "目录错误"
-        ErrorType.CONTENT_ERROR -> "正文错误"
-    }
+fun getErrorTypeText(errorType: ErrorType): String = when (errorType) {
+    ErrorType.NONE -> ""
+    ErrorType.TIMEOUT -> "超时"
+    ErrorType.NETWORK_ERROR -> "网络错误"
+    ErrorType.PARSE_ERROR -> "解析错误"
+    ErrorType.SCRIPT_ERROR -> "脚本错误"
+    ErrorType.DOMAIN_ERROR -> "域名错误"
+    ErrorType.SEARCH_ERROR -> "搜索错误"
+    ErrorType.DISCOVERY_ERROR -> "发现错误"
+    ErrorType.INFO_ERROR -> "详情错误"
+    ErrorType.TOC_ERROR -> "目录错误"
+    ErrorType.CONTENT_ERROR -> "正文错误"
 }
 
 /**
@@ -1452,7 +1454,7 @@ fun checkSourceCardContainerColor(): Color {
         lerp(
             MaterialTheme.colorScheme.surface,
             MaterialTheme.colorScheme.surfaceVariant,
-            0.72f
+            0.72f,
         )
     } else {
         MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
@@ -1465,7 +1467,7 @@ fun checkSourceCardBorder(): BorderStroke? {
     return if (background.luminance() < 0.18f) {
         BorderStroke(
             width = 1.dp,
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.42f)
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.42f),
         )
     } else {
         null

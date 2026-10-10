@@ -1,5 +1,7 @@
 package io.legado.app.ui.config
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -49,7 +51,7 @@ private val noteTemplateDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale
 data class ShareNoteMenuAction(
     val label: String,
     val danger: Boolean = false,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
 )
 
 /**
@@ -65,7 +67,7 @@ internal fun ShareNoteTemplateItemCard(
     previewFile: File?,
     onApply: () -> Unit,
     onEdit: () -> Unit,
-    moreActions: List<ShareNoteMenuAction>
+    moreActions: List<ShareNoteMenuAction>,
 ) {
     val canEdit = entry.source == ShareNoteTemplateManager.Source.LOCAL
     var moreMenuExpanded by remember { mutableStateOf(false) }
@@ -73,18 +75,18 @@ internal fun ShareNoteTemplateItemCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 ShareNoteTemplatePreview(
                     modifier = Modifier
                         .width(60.dp)
                         .height(84.dp),
-                    previewFile = previewFile
+                    previewFile = previewFile,
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
@@ -96,7 +98,7 @@ internal fun ShareNoteTemplateItemCard(
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false)
+                            modifier = Modifier.weight(1f, fill = false),
                         )
                         if (isActive) {
                             Spacer(modifier = Modifier.width(8.dp))
@@ -104,7 +106,7 @@ internal fun ShareNoteTemplateItemCard(
                                 text = stringResource(R.string.share_note_applied),
                                 color = MaterialTheme.colorScheme.primary,
                                 fontSize = 12.sp,
-                                maxLines = 1
+                                maxLines = 1,
                             )
                         }
                     }
@@ -112,24 +114,25 @@ internal fun ShareNoteTemplateItemCard(
                         text = buildInfoText(
                             entry = entry,
                             builtinLabel = stringResource(R.string.share_note_source_builtin),
-                            localLabel = stringResource(R.string.share_note_source_local)
+                            localLabel = stringResource(R.string.share_note_source_local),
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )                }
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(6.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextButton(
                     onClick = onApply,
-                    contentPadding = PaddingValues(horizontal = 8.dp)
+                    contentPadding = PaddingValues(horizontal = 8.dp),
                 ) {
                     Text(
                         text = if (isActive) {
@@ -137,13 +140,13 @@ internal fun ShareNoteTemplateItemCard(
                         } else {
                             stringResource(R.string.apply)
                         },
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 TextButton(
                     onClick = onEdit,
                     enabled = canEdit,
-                    contentPadding = PaddingValues(horizontal = 8.dp)
+                    contentPadding = PaddingValues(horizontal = 8.dp),
                 ) {
                     Text(
                         text = stringResource(R.string.edit),
@@ -151,22 +154,23 @@ internal fun ShareNoteTemplateItemCard(
                             MaterialTheme.colorScheme.onSurfaceVariant
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
-                        }
+                        },
                     )
                 }
                 Box {
                     TextButton(
                         onClick = { moreMenuExpanded = true },
-                        contentPadding = PaddingValues(horizontal = 8.dp)
+                        contentPadding = PaddingValues(horizontal = 8.dp),
                     ) {
                         Text(
                             text = stringResource(R.string.more),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     DropdownMenu(
+                        modifier = Modifier.eInkGrayscale(),
                         expanded = moreMenuExpanded,
-                        onDismissRequest = { moreMenuExpanded = false }
+                        onDismissRequest = { moreMenuExpanded = false },
                     ) {
                         moreActions.forEach { action ->
                             DropdownMenuItem(
@@ -177,13 +181,13 @@ internal fun ShareNoteTemplateItemCard(
                                             MaterialTheme.colorScheme.error
                                         } else {
                                             MaterialTheme.colorScheme.onSurface
-                                        }
+                                        },
                                     )
                                 },
                                 onClick = {
                                     moreMenuExpanded = false
                                     action.onClick()
-                                }
+                                },
                             )
                         }
                     }
@@ -201,13 +205,13 @@ internal fun ShareNoteTemplateItemCard(
 @Composable
 internal fun ShareNoteStyleQuickCard(
     shareStyle: ShareNoteTemplateManager.ShareStyle,
-    onStyleChange: (ShareNoteTemplateManager.ShareStyle) -> Unit
+    onStyleChange: (ShareNoteTemplateManager.ShareStyle) -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     ) {
         Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
             Text(
@@ -216,14 +220,14 @@ internal fun ShareNoteStyleQuickCard(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = stringResource(R.string.share_note_style_summary),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 lineHeight = 17.sp,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
             )
             Spacer(modifier = Modifier.size(10.dp))
             Text(
@@ -232,19 +236,19 @@ internal fun ShareNoteStyleQuickCard(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 ShareNoteTemplateManager.stylePalettes.forEach { stylePalette ->
                     ShareNoteActionButton(
                         text = stylePalette.name,
                         selected = stylePalette.id == shareStyle.paletteId,
-                        onClick = { onStyleChange(shareStyle.copy(paletteId = stylePalette.id)) }
+                        onClick = { onStyleChange(shareStyle.copy(paletteId = stylePalette.id)) },
                     )
                 }
             }
@@ -255,19 +259,19 @@ internal fun ShareNoteStyleQuickCard(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 ShareNoteTemplateManager.fontFamilies.forEach { font ->
                     ShareNoteActionButton(
                         text = ShareNoteTemplateManager.fontLabel(font),
                         selected = font == shareStyle.fontFamily,
-                        onClick = { onStyleChange(shareStyle.copy(fontFamily = font)) }
+                        onClick = { onStyleChange(shareStyle.copy(fontFamily = font)) },
                     )
                 }
             }
@@ -279,7 +283,7 @@ internal fun ShareNoteStyleQuickCard(
 private fun ShareNoteActionButton(
     text: String,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -289,10 +293,10 @@ private fun ShareNoteActionButton(
                 } else {
                     MaterialTheme.colorScheme.surface
                 },
-                shape = RoundedCornerShape(20.dp)
+                shape = RoundedCornerShape(20.dp),
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .padding(horizontal = 14.dp, vertical = 6.dp),
     ) {
         Text(
             text = text,
@@ -304,7 +308,7 @@ private fun ShareNoteActionButton(
             fontSize = 13.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -312,7 +316,7 @@ private fun ShareNoteActionButton(
 private fun buildInfoText(
     entry: ShareNoteTemplateManager.Entry,
     builtinLabel: String,
-    localLabel: String
+    localLabel: String,
 ): String {
     val source = when (entry.source) {
         ShareNoteTemplateManager.Source.BUILTIN -> builtinLabel
@@ -325,6 +329,6 @@ private fun buildInfoText(
         entry.meta.canvasLabel(),
         entry.meta.sizeLabel(),
         source,
-        time
+        time,
     ).joinToString(" · ")
 }

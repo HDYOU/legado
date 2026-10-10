@@ -1,5 +1,7 @@
 package io.legado.app.ui.debuglog.components
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,35 +30,36 @@ import io.legado.app.model.debug.DebugCategory
 // 例如：用户可以选择只显示 `APP` 分类的日志，而忽略 `NETWORK` 分类的日志
 @Composable
 fun DebugCategoryVisibilityDialog(
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     var enabled by remember { mutableStateOf(AppConfig.debugLogOnlyEnabled) }
     var selectedCategories by remember { mutableStateOf(AppConfig.debugLogOnlyCategories) }
     val categories = DebugCategory.entries.filter { it != DebugCategory.ALL }
 
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         title = { Text("调试专属日志") },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = "启用调试专属模式",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
                     )
                     Switch(
                         checked = enabled,
                         onCheckedChange = {
                             enabled = it
                             AppConfig.debugLogOnlyEnabled = it
-                        }
+                        },
                     )
                 }
 
@@ -69,11 +72,11 @@ fun DebugCategoryVisibilityDialog(
                             .fillMaxWidth()
                             .padding(vertical = 2.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
                             text = category.displayName,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                         Switch(
                             checked = checked,
@@ -86,7 +89,7 @@ fun DebugCategoryVisibilityDialog(
                                 selectedCategories = next
                                 AppConfig.debugLogOnlyCategories = next
                             },
-                            enabled = enabled
+                            enabled = enabled,
                         )
                     }
                 }
@@ -96,6 +99,6 @@ fun DebugCategoryVisibilityDialog(
             TextButton(onClick = onDismiss) {
                 Text("完成")
             }
-        }
+        },
     )
 }

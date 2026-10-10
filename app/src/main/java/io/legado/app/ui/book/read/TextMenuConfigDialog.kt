@@ -1,8 +1,9 @@
 package io.legado.app.ui.book.read
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ResolveInfo
 import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -41,31 +42,31 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 
 /**
  * 文本菜单项配置对话框 - Compose实现
- * 
- * 功能说明�?
- * 提供一个界面让用户选择要显�?隐藏的文本菜单项
+ *
+ * 功能说明�?
+ * 提供一个界面让用户选择要显�?隐藏的文本菜单项
  */
 class TextMenuConfigDialog : BaseComposeDialogFragment() {
 
     @Composable
     override fun DialogContent() {
         TextMenuConfigDialogContent(
-            onDismiss = { dismiss() }
+            onDismiss = { dismiss() },
         )
     }
 }
 
 /**
- * 文本菜单配置对话框内�?
+ * 文本菜单配置对话框内�?
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextMenuConfigDialogContent(
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
     var menuItems by remember { mutableStateOf(TextMenuConfig.getAllMenuItems(context)) }
-    var hiddenIds by remember { 
+    var hiddenIds by remember {
         mutableStateOf(TextMenuConfig.getHiddenMenuItemIds(context))
     }
     var customTitles by remember {
@@ -82,7 +83,7 @@ fun TextMenuConfigDialogContent(
     val listState = rememberLazyListState()
     val hapticFeedback = LocalHapticFeedback.current
 
-    // 拖拽排序状�?
+    // 拖拽排序状�?
     val reorderableState = rememberReorderableLazyListState(listState) { from, to ->
         menuItems = menuItems.toMutableList().apply {
             if (isEmpty()) return@apply
@@ -104,7 +105,7 @@ fun TextMenuConfigDialogContent(
 
     if (showProcessTextConfig) {
         ProcessTextConfigContent(
-            onDismiss = { showProcessTextConfig = false }
+            onDismiss = { showProcessTextConfig = false },
         )
     } else {
         editingItem?.let { item ->
@@ -116,7 +117,7 @@ fun TextMenuConfigDialogContent(
                     TextMenuConfig.setCustomMenuTitle(context, item.id, newTitle)
                     customTitles = TextMenuConfig.getCustomMenuTitles(context)
                     editingItem = null
-                }
+                },
             )
         }
 
@@ -124,32 +125,32 @@ fun TextMenuConfigDialogContent(
             onDismissRequest = onDismiss,
             properties = DialogProperties(
                 dismissOnBackPress = true,
-                dismissOnClickOutside = true
-            )
+                dismissOnClickOutside = true,
+            ),
         ) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight(),
                 shape = MaterialTheme.shapes.large,
-                color = cardColor
+                color = cardColor,
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     TopAppBar(
                         title = {
                             Text(
                                 text = stringResource(R.string.text_menu_config),
                                 style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
                             )
                         },
                         navigationIcon = {
                             IconButton(onClick = onDismiss) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "关闭"
+                                    contentDescription = "关闭",
                                 )
                             }
                         },
@@ -158,22 +159,22 @@ fun TextMenuConfigDialogContent(
                                 IconButton(onClick = { showProcessTextConfig = true }) {
                                     Icon(
                                         imageVector = Icons.Filled.MoreVert,
-                                        contentDescription = "更多选项"
+                                        contentDescription = "更多选项",
                                     )
                                 }
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = topBarColor,
-                            titleContentColor = MaterialTheme.colorScheme.onSurface
-                        )
+                            titleContentColor = MaterialTheme.colorScheme.onSurface,
+                        ),
                     )
 
                     Text(
                         text = stringResource(R.string.text_menu_config_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     )
 
                     TextMenuVisibleCountRow(
@@ -181,14 +182,14 @@ fun TextMenuConfigDialogContent(
                         onCountChange = { count ->
                             TextMenuConfig.setTextMenuVisibleCount(context, count)
                             visibleCount = TextMenuConfig.getTextMenuVisibleCount(context)
-                        }
+                        },
                     )
 
                     LazyColumn(
                         state = listState,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f, fill = false)
+                            .weight(1f, fill = false),
                     ) {
                         items(menuItems, key = { it.id }) { item ->
                             ReorderableItem(reorderableState, key = item.id) { isDragging ->
@@ -216,8 +217,8 @@ fun TextMenuConfigDialogContent(
                                             },
                                             onDragStopped = {
                                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                            }
-                                        )
+                                            },
+                                        ),
                                 )
                             }
                         }
@@ -227,7 +228,7 @@ fun TextMenuConfigDialogContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         TextButton(
                             onClick = {
@@ -237,7 +238,7 @@ fun TextMenuConfigDialogContent(
                                 visibleCount = TextMenuConfig.DEFAULT_VISIBLE_COUNT
                                 menuItems = TextMenuConfig.getAllMenuItems(context)
                                 context.toastOnUi("已重置为默认配置")
-                            }
+                            },
                         ) {
                             Text(text = stringResource(R.string.reset_to_default))
                         }
@@ -258,62 +259,62 @@ fun TextMenuConfigDialogContent(
 @Composable
 fun TextMenuVisibleCountRow(
     count: Int,
-    onCountChange: (Int) -> Unit
+    onCountChange: (Int) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 16.dp)
+                .padding(end = 16.dp),
         ) {
             Text(
                 text = stringResource(R.string.text_menu_visible_count),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 text = stringResource(R.string.text_menu_visible_count_desc, count),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(
                 onClick = { onCountChange(count - 1) },
-                enabled = count > TextMenuConfig.MIN_VISIBLE_COUNT
+                enabled = count > TextMenuConfig.MIN_VISIBLE_COUNT,
             ) {
                 Icon(
                     imageVector = Icons.Filled.Remove,
-                    contentDescription = stringResource(R.string.reduce)
+                    contentDescription = stringResource(R.string.reduce),
                 )
             }
 
             Box(
                 modifier = Modifier.widthIn(min = 32.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = count.toString(),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
 
             IconButton(
                 onClick = { onCountChange(count + 1) },
-                enabled = count < TextMenuConfig.MAX_VISIBLE_COUNT
+                enabled = count < TextMenuConfig.MAX_VISIBLE_COUNT,
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.plus)
+                    contentDescription = stringResource(R.string.plus),
                 )
             }
         }
@@ -325,11 +326,12 @@ fun EditMenuTitleDialog(
     title: String,
     defaultTitle: String,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     var value by remember(title) { mutableStateOf(title) }
 
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         shape = RectangleShape,
         title = {
@@ -348,13 +350,13 @@ fun EditMenuTitleDialog(
                     },
                     placeholder = {
                         Text(text = defaultTitle)
-                    }
+                    },
                 )
                 Text(
                     text = stringResource(R.string.text_menu_edit_name_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp),
                 )
             }
         },
@@ -367,24 +369,24 @@ fun EditMenuTitleDialog(
             TextButton(onClick = onDismiss) {
                 Text(text = stringResource(android.R.string.cancel))
             }
-        }
+        },
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProcessTextConfigContent(
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
-    var hiddenItems by remember { 
+    var hiddenItems by remember {
         mutableStateOf(TextMenuConfig.getHiddenProcessTextItems(context))
     }
     var customTitles by remember {
         mutableStateOf(TextMenuConfig.getCustomProcessTextTitles(context))
     }
     var editingAppInfo by remember { mutableStateOf<ProcessTextAppInfo?>(null) }
-    
+
     val processTextApps = remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             getProcessTextApps(context)
@@ -392,7 +394,7 @@ fun ProcessTextConfigContent(
             emptyList()
         }
     }
-    
+
     val topBarColor = pageTopBarColors().containerColor
     val cardColor = pageCardContainerColor()
 
@@ -405,7 +407,7 @@ fun ProcessTextConfigContent(
                 TextMenuConfig.setCustomProcessTextTitle(context, appInfo.key, newTitle)
                 customTitles = TextMenuConfig.getCustomProcessTextTitles(context)
                 editingAppInfo = null
-            }
+            },
         )
     }
 
@@ -413,46 +415,46 @@ fun ProcessTextConfigContent(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             dismissOnBackPress = true,
-            dismissOnClickOutside = true
-        )
+            dismissOnClickOutside = true,
+        ),
     ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
             shape = MaterialTheme.shapes.large,
-            color = cardColor
+            color = cardColor,
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 TopAppBar(
                     title = {
                         Text(
                             text = stringResource(R.string.process_text_menu_config),
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = onDismiss) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "返回"
+                                contentDescription = "返回",
                             )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = topBarColor,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface
-                    )
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    ),
                 )
 
                 Text(
                     text = stringResource(R.string.process_text_menu_config_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
 
                 if (processTextApps.isEmpty()) {
@@ -460,19 +462,19 @@ fun ProcessTextConfigContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(32.dp),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             text = stringResource(R.string.no_process_text_apps),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 } else {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f, fill = false)
+                            .weight(1f, fill = false),
                     ) {
                         items(processTextApps) { appInfo ->
                             ProcessTextAppRow(
@@ -489,7 +491,7 @@ fun ProcessTextConfigContent(
                                     }
                                     TextMenuConfig.setHiddenProcessTextItems(context, newHiddenItems)
                                     hiddenItems = newHiddenItems
-                                }
+                                },
                             )
                         }
                     }
@@ -499,7 +501,7 @@ fun ProcessTextConfigContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     TextButton(
                         onClick = {
@@ -507,7 +509,7 @@ fun ProcessTextConfigContent(
                             hiddenItems = emptySet()
                             customTitles = emptyMap()
                             context.toastOnUi("已重置为默认配置")
-                        }
+                        },
                     ) {
                         Text(text = stringResource(R.string.reset_to_default))
                     }
@@ -528,22 +530,22 @@ data class ProcessTextAppInfo(
     val key: String,
     val label: String,
     val packageName: String,
-    val className: String
+    val className: String,
 )
 
 /**
- * 获取能处�?ACTION_PROCESS_TEXT 的应用列�?
+ * 获取能处�?ACTION_PROCESS_TEXT 的应用列�?
  */
 @Suppress("DEPRECATION")
 private fun getProcessTextApps(context: Context): List<ProcessTextAppInfo> {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
         return emptyList()
     }
-    
+
     val intent = Intent()
         .setAction(Intent.ACTION_PROCESS_TEXT)
         .setType("text/plain")
-    
+
     return try {
         val resolveInfoList = context.packageManager.queryIntentActivities(intent, 0)
         resolveInfoList.map { resolveInfo ->
@@ -553,7 +555,7 @@ private fun getProcessTextApps(context: Context): List<ProcessTextAppInfo> {
                 key = TextMenuConfig.getProcessTextItemKey(packageName, className),
                 label = resolveInfo.loadLabel(context.packageManager).toString(),
                 packageName = packageName,
-                className = className
+                className = className,
             )
         }.sortedBy { it.label }
     } catch (e: Exception) {
@@ -572,7 +574,7 @@ fun MenuItemRow(
     isChecked: Boolean,
     onEditClick: () -> Unit,
     onCheckedChange: (Boolean) -> Unit,
-    dragModifier: Modifier = Modifier
+    dragModifier: Modifier = Modifier,
 ) {
     Row(
         modifier = Modifier
@@ -580,43 +582,43 @@ fun MenuItemRow(
             .then(dragModifier)
             .clickable { onCheckedChange(!isChecked) }
             .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         // 拖拽手柄图标
         Icon(
             imageVector = Icons.Filled.DragHandle,
             contentDescription = stringResource(R.string.text_menu_drag_sort),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 16.dp)
+                .padding(end = 16.dp),
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 text = "ID: ${item.name}",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
         IconButton(onClick = onEditClick) {
             Icon(
                 imageVector = Icons.Filled.Edit,
-                contentDescription = stringResource(R.string.text_menu_edit_title)
+                contentDescription = stringResource(R.string.text_menu_edit_title),
             )
         }
 
         Checkbox(
             checked = isChecked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
         )
     }
 }
@@ -630,42 +632,42 @@ fun ProcessTextAppRow(
     title: String,
     isChecked: Boolean,
     onEditClick: () -> Unit,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!isChecked) }
             .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 16.dp)
+                .padding(end = 16.dp),
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 text = appInfo.packageName,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
         IconButton(onClick = onEditClick) {
             Icon(
                 imageVector = Icons.Filled.Edit,
-                contentDescription = stringResource(R.string.text_menu_edit_title)
+                contentDescription = stringResource(R.string.text_menu_edit_title),
             )
         }
 
         Checkbox(
             checked = isChecked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
         )
     }
 }

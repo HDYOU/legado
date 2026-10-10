@@ -1,5 +1,7 @@
 package io.legado.app.ui.main.homepage.manage
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -92,7 +94,7 @@ fun BrowseRssSourcesPage(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedTextField(
                 value = searchQuery,
@@ -101,19 +103,20 @@ fun BrowseRssSourcesPage(
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
-                textStyle = MaterialTheme.typography.bodyMedium
+                textStyle = MaterialTheme.typography.bodyMedium,
             )
             Spacer(modifier = Modifier.size(8.dp))
             Box {
                 IconButton(onClick = { showGroupMenu = true }) {
                     Icon(
                         imageVector = Icons.Default.FilterList,
-                        contentDescription = stringResource(R.string.homepage_group_filter)
+                        contentDescription = stringResource(R.string.homepage_group_filter),
                     )
                 }
                 DropdownMenu(
+                    modifier = Modifier.eInkGrayscale(),
                     expanded = showGroupMenu,
-                    onDismissRequest = { showGroupMenu = false }
+                    onDismissRequest = { showGroupMenu = false },
                 ) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.homepage_all_groups)) },
@@ -123,7 +126,7 @@ fun BrowseRssSourcesPage(
                         },
                         leadingIcon = {
                             if (groupFilter == null) Icon(Icons.Default.Check, null)
-                        }
+                        },
                     )
                     allGroups.forEach { group ->
                         DropdownMenuItem(
@@ -134,7 +137,7 @@ fun BrowseRssSourcesPage(
                             },
                             leadingIcon = {
                                 if (groupFilter == group) Icon(Icons.Default.Check, null)
-                            }
+                            },
                         )
                     }
                 }
@@ -150,7 +153,7 @@ fun BrowseRssSourcesPage(
                 },
                 style = MaterialTheme.typography.labelSmall,
                 color = pageSecondaryTextColor(),
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = Modifier.padding(bottom = 4.dp),
             )
         }
 
@@ -158,18 +161,18 @@ fun BrowseRssSourcesPage(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(filteredSources, key = { it.sourceUrl }) { source ->
                     GlassCard(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { onSourceClick(source.sourceUrl) }
+                        onClick = { onSourceClick(source.sourceUrl) },
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 12.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
@@ -178,7 +181,7 @@ fun BrowseRssSourcesPage(
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    overflow = TextOverflow.Ellipsis,
                                 )
                                 val subtitle = buildString {
                                     if (!source.rulePubDate.isNullOrBlank()) {
@@ -198,14 +201,14 @@ fun BrowseRssSourcesPage(
                                         style = MaterialTheme.typography.bodySmall,
                                         color = pageSecondaryTextColor(),
                                         maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        overflow = TextOverflow.Ellipsis,
                                     )
                                 }
                             }
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = stringResource(R.string.homepage_view),
-                                tint = pageSecondaryTextColor()
+                                tint = pageSecondaryTextColor(),
                             )
                         }
                     }
@@ -213,7 +216,7 @@ fun BrowseRssSourcesPage(
             }
             VerticalScrollbar(
                 state = listState,
-                modifier = Modifier.align(Alignment.CenterEnd)
+                modifier = Modifier.align(Alignment.CenterEnd),
             )
         }
     }

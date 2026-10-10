@@ -1,6 +1,6 @@
 /**
  * URL访问记录界面 - Jetpack Compose实现
- * 
+ *
  * 功能特性：
  * 1. 多条件筛选：域名、来源、方法、状态
  * 2. 日期分组显示：今天、昨天、本周、更早
@@ -10,12 +10,13 @@
  */
 package io.legado.app.ui.urlRecord
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 // ==================== 导入部分 ====================
 // 动画相关
 import androidx.compose.animation.AnimatedVisibility
 
 // 基础布局和交互
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
@@ -48,10 +49,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import io.legado.app.R
 import io.legado.app.data.entities.UrlRecord
 import io.legado.app.ui.theme.pageCardContainerColor
@@ -62,13 +59,12 @@ import io.legado.app.ui.widget.components.dialog.AppConfirmDialog
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UrlRecordScreen(
     viewModel: UrlRecordViewModel = viewModel(),
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val domains by viewModel.domains.collectAsState()
@@ -76,14 +72,14 @@ fun UrlRecordScreen(
     val methods by viewModel.methods.collectAsState()
     val recordCount by viewModel.recordCount.collectAsState()
     val isRecordEnabled by viewModel.isRecordEnabled.collectAsState()
-    
+
     var showSearch by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showFilterPanel by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf<Int?>(null) }
     var showMenu by remember { mutableStateOf(false) }
     var selectedRecord by remember { mutableStateOf<UrlRecord?>(null) }
-    
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val containerColor = pageCardContainerColor()
     val coroutineScope = rememberCoroutineScope()
@@ -110,14 +106,14 @@ fun UrlRecordScreen(
                 }
                 showClearDialog = null
             },
-            onDismissRequest = { showClearDialog = null }
+            onDismissRequest = { showClearDialog = null },
         )
     }
 
     selectedRecord?.let { record ->
         RecordDetailDialog(
             record = record,
-            onDismiss = { selectedRecord = null }
+            onDismiss = { selectedRecord = null },
         )
     }
 
@@ -138,10 +134,10 @@ fun UrlRecordScreen(
                             badge = {
                                 if (hasFilters) {
                                     Badge(
-                                        containerColor = MaterialTheme.colorScheme.error
+                                        containerColor = MaterialTheme.colorScheme.error,
                                     )
                                 }
-                            }
+                            },
                         ) {
                             Icon(Icons.Default.FilterList, contentDescription = stringResource(R.string.filter))
                         }
@@ -151,9 +147,10 @@ fun UrlRecordScreen(
                             Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more))
                         }
                         DropdownMenu(
+                            modifier = Modifier.eInkGrayscale(),
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false },
-                            containerColor = MaterialTheme.colorScheme.surface
+                            containerColor = MaterialTheme.colorScheme.surface,
                         ) {
                             DropdownMenuItem(
                                 text = {
@@ -164,7 +161,7 @@ fun UrlRecordScreen(
                                             Icon(
                                                 Icons.Default.Check,
                                                 contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.primary
+                                                tint = MaterialTheme.colorScheme.primary,
                                             )
                                         }
                                     }
@@ -175,17 +172,20 @@ fun UrlRecordScreen(
                                     Toast.makeText(
                                         context,
                                         if (newEnabled) "已开启URL记录" else "已关闭URL记录",
-                                        Toast.LENGTH_SHORT
+                                        Toast.LENGTH_SHORT,
                                     ).show()
                                     showMenu = false
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        if (isRecordEnabled) Icons.Default.ToggleOn 
-                                        else Icons.Default.ToggleOff,
-                                        contentDescription = null
+                                        if (isRecordEnabled) {
+                                            Icons.Default.ToggleOn
+                                        } else {
+                                            Icons.Default.ToggleOff
+                                        },
+                                        contentDescription = null,
                                     )
-                                }
+                                },
                             )
                             HorizontalDivider()
                             DropdownMenuItem(
@@ -196,7 +196,7 @@ fun UrlRecordScreen(
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Default.DeleteSweep, contentDescription = null)
-                                }
+                                },
                             )
                             DropdownMenuItem(
                                 text = { Text("清除30天前的记录") },
@@ -206,11 +206,11 @@ fun UrlRecordScreen(
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Default.DeleteSweep, contentDescription = null)
-                                }
+                                },
                             )
                             DropdownMenuItem(
-                                text = { 
-                                    Text("清除所有记录", color = MaterialTheme.colorScheme.error) 
+                                text = {
+                                    Text("清除所有记录", color = MaterialTheme.colorScheme.error)
                                 },
                                 onClick = {
                                     showClearDialog = 0
@@ -218,22 +218,22 @@ fun UrlRecordScreen(
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        Icons.Default.DeleteForever, 
+                                        Icons.Default.DeleteForever,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error
+                                        tint = MaterialTheme.colorScheme.error,
                                     )
-                                }
+                                },
                             )
                         }
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
             AnimatedVisibility(visible = showSearch) {
                 OutlinedTextField(
@@ -255,9 +255,9 @@ fun UrlRecordScreen(
                         focusedContainerColor = containerColor,
                         unfocusedContainerColor = containerColor,
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                     ),
-                    singleLine = true
+                    singleLine = true,
                 )
             }
 
@@ -267,7 +267,7 @@ fun UrlRecordScreen(
                     domains = domains,
                     sourceNames = sourceNames,
                     methods = methods,
-                    containerColor = containerColor
+                    containerColor = containerColor,
                 )
             }
 
@@ -277,7 +277,7 @@ fun UrlRecordScreen(
                 is UrlRecordUIState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator()
                     }
@@ -285,26 +285,26 @@ fun UrlRecordScreen(
                 is UrlRecordUIState.Empty -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
                                 imageVector = Icons.Default.Link,
                                 contentDescription = null,
                                 modifier = Modifier.size(64.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = "暂无URL访问记录",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "开启URL记录后，所有网络请求都会被记录",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
@@ -312,31 +312,31 @@ fun UrlRecordScreen(
                 is UrlRecordUIState.Error -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
                                 imageVector = Icons.Default.Error,
                                 contentDescription = null,
                                 modifier = Modifier.size(64.dp),
-                                tint = MaterialTheme.colorScheme.error
+                                tint = MaterialTheme.colorScheme.error,
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = state.message,
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.error
+                                color = MaterialTheme.colorScheme.error,
                             )
                         }
                     }
                 }
                 is UrlRecordUIState.Success -> {
-                    val groupedRecords = remember(state.records) { 
-                        groupRecordsByDate(state.records) 
+                    val groupedRecords = remember(state.records) {
+                        groupRecordsByDate(state.records)
                     }
                     GroupedRecordList(
                         groupedRecords = groupedRecords,
-                        onRecordClick = { selectedRecord = it }
+                        onRecordClick = { selectedRecord = it },
                     )
                 }
             }
@@ -354,13 +354,13 @@ private fun groupRecordsByDate(records: List<UrlRecord>): Map<String, List<UrlRe
     calendar.set(Calendar.SECOND, 0)
     calendar.set(Calendar.MILLISECOND, 0)
     val todayStart = calendar.timeInMillis
-    
+
     calendar.add(Calendar.DAY_OF_YEAR, -1)
     val yesterdayStart = calendar.timeInMillis
-    
+
     calendar.add(Calendar.DAY_OF_YEAR, -5)
     val weekStart = calendar.timeInMillis
-    
+
     return records.groupBy { record ->
         when {
             record.timestamp >= todayStart -> "今天"
@@ -380,7 +380,7 @@ private fun groupRecordsByDate(records: List<UrlRecord>): Map<String, List<UrlRe
 private fun getRelativeTime(timestamp: Long): String {
     val now = System.currentTimeMillis()
     val diff = now - timestamp
-    
+
     return when {
         diff < 60_000 -> "刚刚"
         diff < 3_600_000 -> "${diff / 60_000}分钟前"
@@ -402,62 +402,62 @@ private fun FilterPanel(
     domains: List<String>,
     sourceNames: List<String>,
     methods: List<String>,
-    containerColor: Color
+    containerColor: Color,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (domains.isNotEmpty()) {
                 FilterSection(
                     title = "域名",
                     items = domains,
                     selectedItem = viewModel.currentDomain,
-                    onSelect = { viewModel.filterByDomain(it) }
+                    onSelect = { viewModel.filterByDomain(it) },
                 )
             }
-            
+
             if (sourceNames.isNotEmpty()) {
                 FilterSection(
                     title = "来源",
                     items = sourceNames,
                     selectedItem = viewModel.currentSourceName,
-                    onSelect = { viewModel.filterBySourceName(it) }
+                    onSelect = { viewModel.filterBySourceName(it) },
                 )
             }
-            
+
             if (methods.isNotEmpty()) {
                 FilterSection(
                     title = "方法",
                     items = methods,
                     selectedItem = viewModel.currentMethod,
-                    onSelect = { viewModel.filterByMethod(it) }
+                    onSelect = { viewModel.filterByMethod(it) },
                 )
             }
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "状态",
                     style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.width(50.dp)
+                    modifier = Modifier.width(50.dp),
                 )
                 FilterChip(
                     selected = viewModel.currentSuccess == true,
                     onClick = { viewModel.filterByStatus(if (viewModel.currentSuccess == true) null else true) },
                     label = { Text("成功") },
-                    modifier = Modifier.padding(end = 4.dp)
+                    modifier = Modifier.padding(end = 4.dp),
                 )
                 FilterChip(
                     selected = viewModel.currentSuccess == false,
                     onClick = { viewModel.filterByStatus(if (viewModel.currentSuccess == false) null else false) },
-                    label = { Text("失败") }
+                    label = { Text("失败") },
                 )
             }
         }
@@ -472,46 +472,46 @@ private fun FilterSection(
     title: String,
     items: List<String>,
     selectedItem: String?,
-    onSelect: (String?) -> Unit
+    onSelect: (String?) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.width(50.dp)
+            modifier = Modifier.width(50.dp),
         )
         val scrollState = rememberScrollState()
         Row(
             modifier = Modifier
                 .weight(1f)
                 .horizontalScroll(scrollState),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             FilterChip(
                 selected = selectedItem == null,
                 onClick = { onSelect(null) },
-                label = { Text("全部") }
+                label = { Text("全部") },
             )
             items.take(10).forEach { item ->
                 FilterChip(
                     selected = selectedItem == item,
                     onClick = { onSelect(if (selectedItem == item) null else item) },
-                    label = { 
+                    label = {
                         Text(
                             text = item.take(15) + if (item.length > 15) "..." else "",
-                            maxLines = 1
-                        ) 
-                    }
+                            maxLines = 1,
+                        )
+                    },
                 )
             }
             if (items.size > 10) {
                 Text(
                     text = "+${items.size - 10}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -524,17 +524,17 @@ private fun FilterSection(
 @Composable
 private fun ActiveFilterChips(viewModel: UrlRecordViewModel) {
     val hasFilters = viewModel.hasActiveFilters()
-    
+
     if (hasFilters) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
         ) {
             Row(
                 modifier = Modifier
                     .horizontalScroll(rememberScrollState())
                     .padding(horizontal = 12.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 viewModel.currentDomain?.let { domain ->
                     FilterChip(
@@ -545,9 +545,9 @@ private fun ActiveFilterChips(viewModel: UrlRecordViewModel) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "清除",
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
                             )
-                        }
+                        },
                     )
                 }
                 viewModel.currentSourceName?.let { source ->
@@ -559,9 +559,9 @@ private fun ActiveFilterChips(viewModel: UrlRecordViewModel) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "清除",
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
                             )
-                        }
+                        },
                     )
                 }
                 viewModel.currentMethod?.let { method ->
@@ -573,9 +573,9 @@ private fun ActiveFilterChips(viewModel: UrlRecordViewModel) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "清除",
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
                             )
-                        }
+                        },
                     )
                 }
                 viewModel.currentSuccess?.let { success ->
@@ -587,9 +587,9 @@ private fun ActiveFilterChips(viewModel: UrlRecordViewModel) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "清除",
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
                             )
-                        }
+                        },
                     )
                 }
                 viewModel.searchViewQuery?.let { query ->
@@ -602,15 +602,15 @@ private fun ActiveFilterChips(viewModel: UrlRecordViewModel) {
                                 Icon(
                                     Icons.Default.Close,
                                     contentDescription = "清除",
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(16.dp),
                                 )
-                            }
+                            },
                         )
                     }
                 }
                 TextButton(
                     onClick = { viewModel.clearAllFilters() },
-                    contentPadding = PaddingValues(start = 8.dp, top = 0.dp, end = 8.dp, bottom = navigationBarBottomInset)
+                    contentPadding = PaddingValues(start = 8.dp, top = 0.dp, end = 8.dp, bottom = navigationBarBottomInset),
                 ) {
                     Text("清除全部", style = MaterialTheme.typography.labelSmall)
                 }
@@ -625,11 +625,11 @@ private fun ActiveFilterChips(viewModel: UrlRecordViewModel) {
 @Composable
 private fun GroupedRecordList(
     groupedRecords: Map<String, List<UrlRecord>>,
-    onRecordClick: (UrlRecord) -> Unit
+    onRecordClick: (UrlRecord) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset)
+        contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset),
     ) {
         groupedRecords.forEach { (dateGroup, records) ->
             item(key = "header_$dateGroup") {
@@ -638,13 +638,13 @@ private fun GroupedRecordList(
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
             items(records, key = { it.id }) { record ->
                 UrlRecordItem(
                     record = record,
-                    onClick = { onRecordClick(record) }
+                    onClick = { onRecordClick(record) },
                 )
             }
         }
@@ -657,7 +657,7 @@ private fun GroupedRecordList(
 @Composable
 private fun UrlRecordItem(
     record: UrlRecord,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val dateFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
 
@@ -668,35 +668,35 @@ private fun UrlRecordItem(
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(12.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 MethodBadge(method = record.method)
                 Spacer(modifier = Modifier.width(8.dp))
                 StatusBadge(
                     responseCode = record.responseCode,
-                    errorMsg = record.errorMsg
+                    errorMsg = record.errorMsg,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "${record.duration}ms",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = getRelativeTime(record.timestamp),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -706,7 +706,7 @@ private fun UrlRecordItem(
                 text = record.domain,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF009688)
+                color = Color(0xFF009688),
             )
 
             Spacer(modifier = Modifier.height(2.dp))
@@ -716,20 +716,20 @@ private fun UrlRecordItem(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
 
             record.sourceName?.let { source ->
                 Spacer(modifier = Modifier.height(6.dp))
                 Surface(
                     color = Color(0xFFFF9800).copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(4.dp),
                 ) {
                     Text(
                         text = source,
                         style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFFFF9800),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                     )
                 }
             }
@@ -743,18 +743,19 @@ private fun UrlRecordItem(
 @Composable
 private fun RecordDetailDialog(
     record: UrlRecord,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()) }
-    
+
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
         title = {
             Text(
                 text = "请求详情",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
             )
         },
         text = {
@@ -762,7 +763,7 @@ private fun RecordDetailDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 DetailSection(title = "基本信息") {
                     DetailRow("方法", record.method)
@@ -771,15 +772,15 @@ private fun RecordDetailDialog(
                     DetailRow("时间", dateFormat.format(Date(record.timestamp)))
                     DetailRow("相对时间", getRelativeTime(record.timestamp))
                 }
-                
+
                 DetailSection(title = "URL信息") {
                     DetailRow("域名", record.domain)
                     SelectableText(
                         text = record.url,
-                        label = "完整URL"
+                        label = "完整URL",
                     )
                 }
-                
+
                 record.sourceName?.let { source ->
                     DetailSection(title = "来源信息") {
                         DetailRow("来源名称", source)
@@ -788,25 +789,25 @@ private fun RecordDetailDialog(
                         }
                     }
                 }
-                
+
                 record.requestBody?.let { body ->
                     if (body.isNotBlank()) {
                         DetailSection(title = "请求体") {
                             SelectableText(
                                 text = body,
-                                label = "Body"
+                                label = "Body",
                             )
                         }
                     }
                 }
-                
+
                 record.errorMsg?.let { error ->
                     if (error.isNotBlank()) {
                         DetailSection(title = "错误信息", isError = true) {
                             Text(
                                 text = error,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error
+                                color = MaterialTheme.colorScheme.error,
                             )
                         }
                     }
@@ -821,16 +822,16 @@ private fun RecordDetailDialog(
         dismissButton = {
             TextButton(
                 onClick = {
-                    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) 
-                                    as android.content.ClipboardManager
+                    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                        as android.content.ClipboardManager
                     val clip = android.content.ClipData.newPlainText("URL", record.url)
                     clipboard.setPrimaryClip(clip)
                     Toast.makeText(context, "URL已复制", Toast.LENGTH_SHORT).show()
-                }
+                },
             ) {
                 Text("复制URL")
             }
-        }
+        },
     )
 }
 
@@ -841,22 +842,28 @@ private fun RecordDetailDialog(
 private fun DetailSection(
     title: String,
     isError: Boolean = false,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
-            color = if (isError) MaterialTheme.colorScheme.error 
-                    else MaterialTheme.colorScheme.primary
+            color = if (isError) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.primary
+            },
         )
         HorizontalDivider(
-            color = if (isError) MaterialTheme.colorScheme.error.copy(alpha = 0.3f)
-                   else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+            color = if (isError) {
+                MaterialTheme.colorScheme.error.copy(alpha = 0.3f)
+            } else {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+            },
         )
         content()
     }
@@ -869,19 +876,19 @@ private fun DetailSection(
 private fun DetailRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(80.dp)
+            modifier = Modifier.width(80.dp),
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.weight(1f),
-            textAlign = androidx.compose.ui.text.style.TextAlign.End
+            textAlign = androidx.compose.ui.text.style.TextAlign.End,
         )
     }
 }
@@ -895,20 +902,20 @@ private fun SelectableText(text: String, label: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 100.dp),
             shape = RoundedCornerShape(4.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         ) {
             androidx.compose.foundation.text.selection.SelectionContainer {
                 Text(
                     text = text,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp),
                 )
             }
         }
@@ -923,31 +930,31 @@ private fun MethodBadge(method: String) {
     val isPost = method.equals("POST", ignoreCase = true)
     val isPut = method.equals("PUT", ignoreCase = true)
     val isDelete = method.equals("DELETE", ignoreCase = true)
-    
+
     val bgColor = when {
         isPost -> Color(0xFF9C27B0).copy(alpha = 0.15f)
         isPut -> Color(0xFFFF9800).copy(alpha = 0.15f)
         isDelete -> Color(0xFFF44336).copy(alpha = 0.15f)
         else -> Color(0xFF2196F3).copy(alpha = 0.15f)
     }
-    
+
     val textColor = when {
         isPost -> Color(0xFF9C27B0)
         isPut -> Color(0xFFFF9800)
         isDelete -> Color(0xFFF44336)
         else -> Color(0xFF2196F3)
     }
-    
+
     Surface(
         color = bgColor,
-        shape = RoundedCornerShape(4.dp)
+        shape = RoundedCornerShape(4.dp),
     ) {
         Text(
             text = method.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = textColor,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
         )
     }
 }
@@ -968,6 +975,6 @@ private fun StatusBadge(responseCode: Int, errorMsg: String?) {
         text = text,
         style = MaterialTheme.typography.labelMedium,
         fontWeight = FontWeight.Medium,
-        color = color
+        color = color,
     )
 }

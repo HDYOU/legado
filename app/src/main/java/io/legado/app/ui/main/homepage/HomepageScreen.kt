@@ -1,5 +1,7 @@
 package io.legado.app.ui.main.homepage
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
@@ -84,7 +86,6 @@ import io.legado.app.data.entities.RssStar
 import io.legado.app.data.entities.SearchBook
 import io.legado.app.domain.model.BookShelfState
 import io.legado.app.domain.model.HomepageModuleType
-import io.legado.app.domain.model.ModuleDef
 import io.legado.app.ui.main.homepage.manage.HomepageModuleManageSheet
 import io.legado.app.ui.main.homepage.modules.BannerModule
 import io.legado.app.ui.main.homepage.modules.ButtonGroupModule
@@ -202,13 +203,13 @@ fun HomepageScreen(
             Box(
                 modifier = Modifier
                     .pageTopBarBackground(topBarColors)
-                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .windowInsetsPadding(WindowInsets.statusBars),
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = stringResource(R.string.homepage_title),
@@ -216,14 +217,14 @@ fun HomepageScreen(
                         color = topBarColors.contentColor,
                         modifier = Modifier
                             .weight(1f)
-                            .padding(start = 16.dp)
+                            .padding(start = 16.dp),
                     )
                     // 模块管理
                     IconButton(onClick = { showManageSheet = true }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = stringResource(R.string.homepage_module_manage),
-                            tint = topBarColors.contentColor
+                            tint = topBarColors.contentColor,
                         )
                     }
                     // 三点菜单（切换布局、帮助等）
@@ -232,27 +233,28 @@ fun HomepageScreen(
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
                                 contentDescription = stringResource(R.string.homepage_more),
-                                tint = topBarColors.contentColor
+                                tint = topBarColors.contentColor,
                             )
                         }
                         DropdownMenu(
+                            modifier = Modifier.eInkGrayscale(),
                             expanded = showOverflowMenu,
-                            onDismissRequest = { showOverflowMenu = false }
+                            onDismissRequest = { showOverflowMenu = false },
                         ) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.homepage_switch_layout)) },
                                 onClick = {
                                     showOverflowMenu = false
                                     showLayoutMenu = true
-                                }
+                                },
                             )
                             // 预加载开关（仅在分源Tab模式下显示）
                             if (layoutMode == 1) {
                                 DropdownMenuItem(
-                                    text = { 
+                                    text = {
                                         Text(
                                             text = stringResource(R.string.homepage_preload),
-                                            style = MaterialTheme.typography.bodyMedium
+                                            style = MaterialTheme.typography.bodyMedium,
                                         )
                                     },
                                     onClick = {
@@ -263,9 +265,9 @@ fun HomepageScreen(
                                         Icon(
                                             imageVector = if (preloadMode == 1) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank,
                                             contentDescription = null,
-                                            tint = if (preloadMode == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                                            tint = if (preloadMode == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                                         )
-                                    }
+                                    },
                                 )
                             }
                             DropdownMenuItem(
@@ -273,20 +275,21 @@ fun HomepageScreen(
                                 onClick = {
                                     showOverflowMenu = false
                                     (context as? AppCompatActivity)?.showDialogFragment<AppLogDialog>()
-                                }
+                                },
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.homepage_help)) },
                                 onClick = {
                                     showOverflowMenu = false
                                     (context as? AppCompatActivity)?.showHelp("homepageHelp")
-                                }
+                                },
                             )
                         }
                         // 布局选择子菜单
                         DropdownMenu(
+                            modifier = Modifier.eInkGrayscale(),
                             expanded = showLayoutMenu,
-                            onDismissRequest = { showLayoutMenu = false }
+                            onDismissRequest = { showLayoutMenu = false },
                         ) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.homepage_layout_mixed)) },
@@ -296,7 +299,7 @@ fun HomepageScreen(
                                 },
                                 leadingIcon = {
                                     if (layoutMode == 0) Icon(Icons.Default.Dashboard, null)
-                                }
+                                },
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.homepage_layout_source_tab)) },
@@ -306,32 +309,32 @@ fun HomepageScreen(
                                 },
                                 leadingIcon = {
                                     if (layoutMode == 1) Icon(Icons.Default.ViewModule, null)
-                                }
+                                },
                             )
                         }
                     }
                 }
             }
-        }
+        },
     ) { paddingValues ->
         if (uiState.modules.isEmpty() && !uiState.isRefreshing) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = stringResource(R.string.homepage_empty_title),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = pageSecondaryTextColor()
+                        color = pageSecondaryTextColor(),
                     )
                     Text(
                         text = stringResource(R.string.homepage_empty_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = pageSecondaryTextColor().copy(alpha = 0.6f),
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 4.dp),
                     )
                 }
             }
@@ -362,20 +365,20 @@ fun HomepageScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(paddingValues),
             ) {
                 PullToRefreshBox(
                     isRefreshing = uiState.isRefreshing,
                     onRefresh = { viewModel.onRefresh() },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) {
                     LazyColumn(
                         state = listState,
                         contentPadding = PaddingValues(
                             top = 8.dp,
-                            bottom = 8.dp + with(androidx.compose.ui.platform.LocalDensity.current) { bottomPaddingPx.toDp() }
+                            bottom = 8.dp + with(androidx.compose.ui.platform.LocalDensity.current) { bottomPaddingPx.toDp() },
                         ),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         items(sortedModules, key = { it.globalId }) { module ->
                             HomepageModuleItem(
@@ -391,7 +394,7 @@ fun HomepageScreen(
                                 },
                                 onModuleHeaderClick = { title, sourceUrl, exploreUrl ->
                                     viewModel.onModuleHeaderClick(sourceUrl, exploreUrl, title)
-                                }
+                                },
                             )
                         }
                     }
@@ -403,8 +406,8 @@ fun HomepageScreen(
                         .align(Alignment.BottomEnd)
                         .padding(
                             end = 16.dp,
-                            bottom = 16.dp + with(androidx.compose.ui.platform.LocalDensity.current) { bottomPaddingPx.toDp() }
-                        )
+                            bottom = 16.dp + with(androidx.compose.ui.platform.LocalDensity.current) { bottomPaddingPx.toDp() },
+                        ),
                 )
             }
         }
@@ -438,19 +441,23 @@ fun HomepageScreen(
             { book ->
                 kotlinx.coroutines.MainScope().launch {
                     withContext(kotlinx.coroutines.Dispatchers.IO) {
-                        appDb.rssStarDao.insert(RssStar(
-                            origin = book.origin,
-                            title = book.name,
-                            link = book.bookUrl,
-                            description = book.intro,
-                            image = book.coverUrl,
-                            pubDate = book.latestChapterTitle,
-                        ))
+                        appDb.rssStarDao.insert(
+                            RssStar(
+                                origin = book.origin,
+                                title = book.name,
+                                link = book.bookUrl,
+                                description = book.intro,
+                                image = book.coverUrl,
+                                pubDate = book.latestChapterTitle,
+                            ),
+                        )
                     }
                     Toast.makeText(context, R.string.added_to_favorites, Toast.LENGTH_SHORT).show()
                 }
             }
-        } else null,
+        } else {
+            null
+        },
         onViewContent = if (isRssArticle) {
             { book ->
                 ReadRssActivity.start(
@@ -458,10 +465,12 @@ fun HomepageScreen(
                     false,
                     book.origin,
                     book.name,
-                    book.bookUrl
+                    book.bookUrl,
                 )
             }
-        } else null,
+        } else {
+            null
+        },
     )
 }
 
@@ -527,120 +536,120 @@ private fun SourceTabLayout(
                 bottom = paddingValues.calculateBottomPadding(),
                 start = paddingValues.calculateLeftPadding(layoutDirection),
                 end = paddingValues.calculateRightPadding(layoutDirection),
-            )
+            ),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-        if (selectedSets.isEmpty()) return@Column
-        // 可滚动的 Tab 栏（自定义实现，高度36dp，底部下划线指示器）
-        val tabScrollState = rememberScrollState()
-        val accent = pageAccentColor()
-        val secondaryColor = pageSecondaryTextColor()
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(tabScrollState)
-                .height(36.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            selectedSets.forEachIndexed { index, set ->
-                val isSelected = safeTabIndex == index
-                Box(
-                    modifier = Modifier
-                        .height(36.dp)
-                        .clickable {
-                            selectedTabIndex = index
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(index)
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = set.sourceName,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                        color = if (isSelected) accent else secondaryColor
-                    )
-                    // 底部下划线指示器
+            if (selectedSets.isEmpty()) return@Column
+            // 可滚动的 Tab 栏（自定义实现，高度36dp，底部下划线指示器）
+            val tabScrollState = rememberScrollState()
+            val accent = pageAccentColor()
+            val secondaryColor = pageSecondaryTextColor()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(tabScrollState)
+                    .height(36.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                selectedSets.forEachIndexed { index, set ->
+                    val isSelected = safeTabIndex == index
                     Box(
                         modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .height(2.dp)
-                            .background(if (isSelected) accent else Color.Transparent)
-                    )
-                }
-            }
-        }
-        // 使用 HorizontalPager 实现左右滑动切换书源集
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize(),
-            key = { index -> selectedSets.getOrNull(index)?.sourceUrl ?: index }
-        ) { pageIndex ->
-            // 当前选中 Tab 对应的集
-            val currentSet = selectedSets.getOrNull(pageIndex)
-            // 根据集过滤模块：自定义集使用 customSetId 匹配，书源集使用 sourceUrl 匹配
-            val currentModules = remember(modules, currentSet) {
-                val filtered = modules.filter { module ->
-                    if (currentSet?.isCustomSet == true) {
-                        val setId = HomepageViewModel.customSetIdFromUrl(currentSet.sourceUrl)
-                        module.customSetId == setId
-                    } else {
-                        // 书源集：集 URL 格式为 src_<书源URL>，模块的 customSetId 也是 src_<书源URL>
-                        module.customSetId == currentSet?.sourceUrl
-                    }
-                }
-                // 无限类型模块排在底部
-                filtered.sortedBy { module ->
-                    if (HomepageViewModel.isInfinite(module.type.key, null)) 1 else 0
-                }
-            }
-            val currentSetName = currentSet?.sourceName
-            // 使用 rememberSaveable 保存每个页面的滚动位置
-            val listStateKey = "homepage_tab_${currentSet?.sourceUrl ?: pageIndex}"
-            val listState = rememberSaveable(saver = LazyListState.Saver) {
-                LazyListState()
-            }
-            // 更新当前页面的滚动状态引用，用于悬浮回到顶部按钮
-            // 直接在组合期间赋值，确保页面重组时引用始终同步
-            if (pagerState.settledPage == pageIndex) {
-                currentPageListState.value = listState
-            }
-            // 直接从 ViewModel 观察刷新状态，确保每页独立接收状态变更
-            // 绕过 HorizontalPager 页面缓存导致的状态传播延迟
-            val pageIsRefreshing by viewModel.uiState.map { it.isRefreshing }.collectAsStateWithLifecycle(false)
-            PullToRefreshBox(
-                isRefreshing = pageIsRefreshing,
-                onRefresh = { onRefresh(currentSetName) },
-                modifier = Modifier.fillMaxSize()
-            ) {
-                LazyColumn(
-                    state = listState,
-                    contentPadding = PaddingValues(
-                        top = 8.dp,
-                        bottom = 8.dp + with(androidx.compose.ui.platform.LocalDensity.current) { bottomPaddingPx.toDp() }
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(currentModules, key = { it.globalId }) { module ->
-                        HomepageModuleItem(
-                            module = module,
-                            viewModel = viewModel,
-                            onBookClick = { book ->
-                                viewModel.onBookClick(book)
+                            .height(36.dp)
+                            .clickable {
+                                selectedTabIndex = index
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
                             },
-                            onBookLongClick = onBookLongClick,
-                            onModuleHeaderClick = { title, sourceUrl, exploreUrl ->
-                                viewModel.onModuleHeaderClick(sourceUrl, exploreUrl, title)
-                            }
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = set.sourceName,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            color = if (isSelected) accent else secondaryColor,
+                        )
+                        // 底部下划线指示器
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .height(2.dp)
+                                .background(if (isSelected) accent else Color.Transparent),
                         )
                     }
                 }
             }
-        }
+            // 使用 HorizontalPager 实现左右滑动切换书源集
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                key = { index -> selectedSets.getOrNull(index)?.sourceUrl ?: index },
+            ) { pageIndex ->
+                // 当前选中 Tab 对应的集
+                val currentSet = selectedSets.getOrNull(pageIndex)
+                // 根据集过滤模块：自定义集使用 customSetId 匹配，书源集使用 sourceUrl 匹配
+                val currentModules = remember(modules, currentSet) {
+                    val filtered = modules.filter { module ->
+                        if (currentSet?.isCustomSet == true) {
+                            val setId = HomepageViewModel.customSetIdFromUrl(currentSet.sourceUrl)
+                            module.customSetId == setId
+                        } else {
+                            // 书源集：集 URL 格式为 src_<书源URL>，模块的 customSetId 也是 src_<书源URL>
+                            module.customSetId == currentSet?.sourceUrl
+                        }
+                    }
+                    // 无限类型模块排在底部
+                    filtered.sortedBy { module ->
+                        if (HomepageViewModel.isInfinite(module.type.key, null)) 1 else 0
+                    }
+                }
+                val currentSetName = currentSet?.sourceName
+                // 使用 rememberSaveable 保存每个页面的滚动位置
+                val listStateKey = "homepage_tab_${currentSet?.sourceUrl ?: pageIndex}"
+                val listState = rememberSaveable(saver = LazyListState.Saver) {
+                    LazyListState()
+                }
+                // 更新当前页面的滚动状态引用，用于悬浮回到顶部按钮
+                // 直接在组合期间赋值，确保页面重组时引用始终同步
+                if (pagerState.settledPage == pageIndex) {
+                    currentPageListState.value = listState
+                }
+                // 直接从 ViewModel 观察刷新状态，确保每页独立接收状态变更
+                // 绕过 HorizontalPager 页面缓存导致的状态传播延迟
+                val pageIsRefreshing by viewModel.uiState.map { it.isRefreshing }.collectAsStateWithLifecycle(false)
+                PullToRefreshBox(
+                    isRefreshing = pageIsRefreshing,
+                    onRefresh = { onRefresh(currentSetName) },
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    LazyColumn(
+                        state = listState,
+                        contentPadding = PaddingValues(
+                            top = 8.dp,
+                            bottom = 8.dp + with(androidx.compose.ui.platform.LocalDensity.current) { bottomPaddingPx.toDp() },
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        items(currentModules, key = { it.globalId }) { module ->
+                            HomepageModuleItem(
+                                module = module,
+                                viewModel = viewModel,
+                                onBookClick = { book ->
+                                    viewModel.onBookClick(book)
+                                },
+                                onBookLongClick = onBookLongClick,
+                                onModuleHeaderClick = { title, sourceUrl, exploreUrl ->
+                                    viewModel.onModuleHeaderClick(sourceUrl, exploreUrl, title)
+                                },
+                            )
+                        }
+                    }
+                }
+            }
         }
         // 悬浮回到顶部按钮
         currentPageListState.value?.let { state ->
@@ -650,8 +659,8 @@ private fun SourceTabLayout(
                     .align(Alignment.BottomEnd)
                     .padding(
                         end = 16.dp,
-                        bottom = 16.dp + with(androidx.compose.ui.platform.LocalDensity.current) { bottomPaddingPx.toDp() }
-                    )
+                        bottom = 16.dp + with(androidx.compose.ui.platform.LocalDensity.current) { bottomPaddingPx.toDp() },
+                    ),
             )
         }
     }
@@ -672,9 +681,11 @@ private fun HomepageModuleItem(
         val rankingCurrentExploreUrl = rankingTabState
             ?.tabs?.getOrNull(rankingTabState.selectedIndex)?.exploreUrl
         // 箭头显示逻辑：多 Tab 时在 Tab 栏 → 标题行不显示；单 Tab 或无 Tab 时在标题行显示
-        val hasArrow = ((module.exploreUrl != null || rankingCurrentExploreUrl != null)
-                && module.type != HomepageModuleType.ButtonGroup
-                && (!isRankingTabs || (rankingTabState?.tabs?.size ?: 0) <= 1))
+        val hasArrow = (
+            (module.exploreUrl != null || rankingCurrentExploreUrl != null) &&
+                module.type != HomepageModuleType.ButtonGroup &&
+                (!isRankingTabs || (rankingTabState?.tabs?.size ?: 0) <= 1)
+            )
 
         // 模块标题
         Row(
@@ -687,15 +698,15 @@ private fun HomepageModuleItem(
                             onModuleHeaderClick(
                                 module.title,
                                 module.sourceUrl,
-                                rankingCurrentExploreUrl ?: module.exploreUrl
+                                rankingCurrentExploreUrl ?: module.exploreUrl,
                             )
                         }
                     } else {
                         Modifier
-                    }
+                    },
                 ),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = module.title,
@@ -704,21 +715,21 @@ private fun HomepageModuleItem(
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             if (hasArrow) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = stringResource(R.string.homepage_more),
                     tint = pageSecondaryTextColor(),
-                    modifier = Modifier.padding(start = 8.dp)
+                    modifier = Modifier.padding(start = 8.dp),
                 )
             }
         }
 
         // Module content
         Box(
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
         ) {
             when (val state = module.state) {
                 is ModuleLoadState.Loading -> {
@@ -728,18 +739,18 @@ private fun HomepageModuleItem(
                 is ModuleLoadState.Error -> {
                     GlassCard(
                         modifier = Modifier.fillMaxWidth(),
-                        cornerRadius = 12.dp
+                        cornerRadius = 12.dp,
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Text(
                                 text = stringResource(R.string.homepage_load_failed),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.error
+                                color = MaterialTheme.colorScheme.error,
                             )
                             Text(
                                 text = stringResource(R.string.homepage_click_retry),
@@ -747,7 +758,7 @@ private fun HomepageModuleItem(
                                 color = pageAccentColor(),
                                 modifier = Modifier
                                     .padding(top = 4.dp)
-                                    .clickable { viewModel.retryModule(module.globalId) }
+                                    .clickable { viewModel.retryModule(module.globalId) },
                             )
                         }
                     }
@@ -758,13 +769,13 @@ private fun HomepageModuleItem(
                         HomepageModuleType.Banner -> BannerModule(
                             books = state.books,
                             onClick = { book, _ -> onBookClick(book) },
-                            onLongClick = { book, _ -> onBookLongClick(book) }
+                            onLongClick = { book, _ -> onBookLongClick(book) },
                         )
 
                         HomepageModuleType.Card -> CardModule(
                             books = state.books,
                             onClick = { book, _ -> onBookClick(book) },
-                            onLongClick = { book, _ -> onBookLongClick(book) }
+                            onLongClick = { book, _ -> onBookLongClick(book) },
                         )
 
                         HomepageModuleType.Grid, HomepageModuleType.InfiniteGrid -> Column(modifier = Modifier.fillMaxWidth()) {
@@ -772,13 +783,13 @@ private fun HomepageModuleItem(
                                 books = state.books,
                                 onClick = { book, _ -> onBookClick(book) },
                                 onLongClick = { book, _ -> onBookLongClick(book) },
-                                maxRows = if (module.type == HomepageModuleType.InfiniteGrid) null else 2
+                                maxRows = if (module.type == HomepageModuleType.InfiniteGrid) null else 2,
                             )
                             // 无限网格显示加载更多
                             if (module.type == HomepageModuleType.InfiniteGrid && state.hasMore) {
                                 LoadMoreFooter(
                                     isLoading = state.isLoadingMore,
-                                    onClick = { viewModel.loadMoreModule(module.globalId) }
+                                    onClick = { viewModel.loadMoreModule(module.globalId) },
                                 )
                             }
                         }
@@ -786,12 +797,12 @@ private fun HomepageModuleItem(
                         HomepageModuleType.Ranking -> AutoLoadMoreContainer(
                             enabled = state.hasMore,
                             isLoading = state.isLoadingMore,
-                            onLoadMore = { viewModel.loadMoreModule(module.globalId) }
+                            onLoadMore = { viewModel.loadMoreModule(module.globalId) },
                         ) {
                             RankingModule(
                                 books = state.books,
                                 onClick = { book, _ -> onBookClick(book) },
-                                onLongClick = { book, _ -> onBookLongClick(book) }
+                                onLongClick = { book, _ -> onBookLongClick(book) },
                             )
                         }
 
@@ -801,7 +812,9 @@ private fun HomepageModuleItem(
                             onLongClick = { item -> onBookLongClick(item.book) },
                             onLoadMore = if (state.hasMore && !state.isLoadingMore) {
                                 { viewModel.loadMoreModule(module.globalId) }
-                            } else null
+                            } else {
+                                null
+                            },
                         )
 
                         HomepageModuleType.Waterfall -> {
@@ -812,29 +825,29 @@ private fun HomepageModuleItem(
                                 val rightColumn = displayBooks.filterIndexed { index, _ -> index % 2 == 1 }
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
                                     Column(
                                         modifier = Modifier.weight(1f),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
                                     ) {
                                         leftColumn.forEach { item ->
                                             WaterfallItem(
                                                 book = item,
                                                 onClick = { onBookClick(item.book) },
-                                                onLongClick = { onBookLongClick(item.book) }
+                                                onLongClick = { onBookLongClick(item.book) },
                                             )
                                         }
                                     }
                                     Column(
                                         modifier = Modifier.weight(1f),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
                                     ) {
                                         rightColumn.forEach { item ->
                                             WaterfallItem(
                                                 book = item,
                                                 onClick = { onBookClick(item.book) },
-                                                onLongClick = { onBookLongClick(item.book) }
+                                                onLongClick = { onBookLongClick(item.book) },
                                             )
                                         }
                                     }
@@ -843,7 +856,7 @@ private fun HomepageModuleItem(
                                 if (state.hasMore) {
                                     LoadMoreFooter(
                                         isLoading = state.isLoadingMore,
-                                        onClick = { viewModel.loadMoreModule(module.globalId) }
+                                        onClick = { viewModel.loadMoreModule(module.globalId) },
                                     )
                                 }
                             }
@@ -860,7 +873,7 @@ private fun HomepageModuleItem(
                         sourceUrl = module.sourceUrl,
                         onKindClick = { sourceUrl, url, kindTitle ->
                             viewModel.onKindUrlClick(sourceUrl, url, kindTitle)
-                        }
+                        },
                     )
                 }
 
@@ -880,7 +893,7 @@ private fun HomepageModuleItem(
                         },
                         onLoadMore = { tabIndex ->
                             viewModel.loadMoreRankingTab(module.globalId, tabIndex)
-                        }
+                        },
                     )
                 }
             }
@@ -899,18 +912,18 @@ private fun LoadMoreFooter(
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.size(6.dp),
                 strokeWidth = 0.5.dp,
-                color = pageAccentColor()
+                color = pageAccentColor(),
             )
             Spacer(modifier = Modifier.width(3.dp))
             Text(
                 text = stringResource(R.string.homepage_loading),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
-                color = pageSecondaryTextColor()
+                color = pageSecondaryTextColor(),
             )
         }
     } else {
@@ -921,26 +934,26 @@ private fun LoadMoreFooter(
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(6.dp),
             color = pageAccentColor().copy(alpha = 0.08f),
-            border = BorderStroke(0.5.dp, pageAccentColor().copy(alpha = 0.15f))
+            border = BorderStroke(0.5.dp, pageAccentColor().copy(alpha = 0.15f)),
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = stringResource(R.string.homepage_load_more),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
-                    color = pageAccentColor()
+                    color = pageAccentColor(),
                 )
                 Spacer(modifier = Modifier.width(3.dp))
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
                     contentDescription = null,
                     tint = pageAccentColor(),
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(14.dp),
                 )
             }
         }
@@ -971,7 +984,7 @@ private fun RankingTabsModule(
         if (tabs.size > 1) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 val scrollState = rememberScrollState()
                 Row(
@@ -983,23 +996,30 @@ private fun RankingTabsModule(
                     tabs.forEachIndexed { index, tab ->
                         val accent = pageAccentColor()
                         Surface(
-                            color = if (selectedIndex == index)
+                            color = if (selectedIndex == index) {
                                 accent.copy(alpha = 0.12f)
-                            else Color.Transparent,
-                            contentColor = if (selectedIndex == index)
+                            } else {
+                                Color.Transparent
+                            },
+                            contentColor = if (selectedIndex == index) {
                                 accent
-                            else pageSecondaryTextColor(),
+                            } else {
+                                pageSecondaryTextColor()
+                            },
                             shape = RoundedCornerShape(8.dp),
-                            border = if (selectedIndex == index) null
-                            else BorderStroke(1.dp, pageSecondaryTextColor().copy(alpha = 0.2f)),
-                            onClick = { onTabSelected(index) }
+                            border = if (selectedIndex == index) {
+                                null
+                            } else {
+                                BorderStroke(1.dp, pageSecondaryTextColor().copy(alpha = 0.2f))
+                            },
+                            onClick = { onTabSelected(index) },
                         ) {
                             Text(
                                 text = tab.title,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                             )
                         }
                     }
@@ -1013,7 +1033,7 @@ private fun RankingTabsModule(
                         modifier = Modifier
                             .padding(start = 4.dp, end = 8.dp)
                             .size(18.dp)
-                            .clickable { onArrowClick(currentTab) }
+                            .clickable { onArrowClick(currentTab) },
                     )
                 }
             }
@@ -1023,64 +1043,66 @@ private fun RankingTabsModule(
         // 注意：外层 HomepageModuleItem 已应用 padding(horizontal = 16.dp)，此处不再重复
         Box {
             androidx.compose.runtime.key(selectedIndex) {
-            when {
-                currentTab.books != null -> {
-                    val books = currentTab.books!!
-                    when (moduleType) {
-                        HomepageModuleType.Ranking -> {
-                            RankingModule(
-                                books = books,
-                                onClick = { book, _ -> onBookClick(book) },
-                                onLongClick = { book, _ -> onBookLongClick(book) }
-                            )
-                        }
-                        HomepageModuleType.GridRanking -> {
-                            GridRankingModule(
-                                books = books,
-                                onClick = { item -> onBookClick(item.book) },
-                                onLongClick = { item -> onBookLongClick(item.book) },
-                                onLoadMore = if (currentTab.hasMore && !currentTab.isLoadingMore) {
-                                    { onLoadMore(selectedIndex) }
-                                } else null,
-                                initialPage = currentPage,
-                                onPageChanged = { newPage ->
-                                    pageStates[currentTab.title] = newPage
-                                }
-                            )
-                        }
-                        else -> {
-                            RankingModule(
-                                books = books,
-                                onClick = { book, _ -> onBookClick(book) },
-                                onLongClick = { book, _ -> onBookLongClick(book) }
-                            )
+                when {
+                    currentTab.books != null -> {
+                        val books = currentTab.books!!
+                        when (moduleType) {
+                            HomepageModuleType.Ranking -> {
+                                RankingModule(
+                                    books = books,
+                                    onClick = { book, _ -> onBookClick(book) },
+                                    onLongClick = { book, _ -> onBookLongClick(book) },
+                                )
+                            }
+                            HomepageModuleType.GridRanking -> {
+                                GridRankingModule(
+                                    books = books,
+                                    onClick = { item -> onBookClick(item.book) },
+                                    onLongClick = { item -> onBookLongClick(item.book) },
+                                    onLoadMore = if (currentTab.hasMore && !currentTab.isLoadingMore) {
+                                        { onLoadMore(selectedIndex) }
+                                    } else {
+                                        null
+                                    },
+                                    initialPage = currentPage,
+                                    onPageChanged = { newPage ->
+                                        pageStates[currentTab.title] = newPage
+                                    },
+                                )
+                            }
+                            else -> {
+                                RankingModule(
+                                    books = books,
+                                    onClick = { book, _ -> onBookClick(book) },
+                                    onLongClick = { book, _ -> onBookLongClick(book) },
+                                )
+                            }
                         }
                     }
-                }
-                currentTab.errorMessage != null -> {
-                    GlassCard(modifier = Modifier.fillMaxWidth(), cornerRadius = 12.dp) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                    currentTab.errorMessage != null -> {
+                        GlassCard(modifier = Modifier.fillMaxWidth(), cornerRadius = 12.dp) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.homepage_load_failed),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        }
+                    }
+                    else -> {
+                        // 加载中
+                        Box(
+                            modifier = Modifier.fillMaxWidth().height(100.dp),
+                            contentAlignment = Alignment.Center,
                         ) {
-                            Text(
-                                text = stringResource(R.string.homepage_load_failed),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.error
-                            )
+                            CircularProgressIndicator(modifier = Modifier.size(32.dp))
                         }
                     }
                 }
-                else -> {
-                    // 加载中
-                    Box(
-                        modifier = Modifier.fillMaxWidth().height(100.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(32.dp))
-                    }
-                }
-            }
             } // key(selectedIndex)
         }
     }
@@ -1108,7 +1130,7 @@ private fun AutoLoadMoreContainer(
             } else {
                 triggered = false
             }
-        }
+        },
     ) {
         content()
     }
@@ -1138,7 +1160,7 @@ private fun ScrollToTopFab(
         visible = visible,
         enter = scaleIn(),
         exit = scaleOut(),
-        modifier = modifier
+        modifier = modifier,
     ) {
         Surface(
             shape = RoundedCornerShape(22.dp),
@@ -1150,13 +1172,13 @@ private fun ScrollToTopFab(
                     listState.animateScrollToItem(0)
                 }
             },
-            modifier = Modifier.size(44.dp)
+            modifier = Modifier.size(44.dp),
         ) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowUp,
                 contentDescription = null,
                 tint = pageAccentColor(),
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             )
         }
     }

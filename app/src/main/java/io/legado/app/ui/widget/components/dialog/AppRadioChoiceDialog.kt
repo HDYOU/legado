@@ -1,5 +1,7 @@
 package io.legado.app.ui.widget.components.dialog
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,15 +51,16 @@ fun AppRadioChoiceDialog(
     options: List<String>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
 ) {
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = modifier
+        // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+        modifier = modifier.eInkGrayscale(),
     ) {
         Surface(
             shape = MaterialTheme.shapes.large,
-            color = MaterialTheme.colorScheme.surfaceContainerHigh
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -69,20 +72,20 @@ fun AppRadioChoiceDialog(
                         start = AppDimens.panelRowHorizontalPadding,
                         top = AppDimens.panelRowHorizontalPadding,
                         end = AppDimens.panelRowHorizontalPadding,
-                        bottom = AppDimens.panelTitleBottomPadding
-                    )
+                        bottom = AppDimens.panelTitleBottomPadding,
+                    ),
                 )
                 Column(
                     modifier = Modifier
                         // 选项过多时弹窗会顶穿屏幕，这里限高后滚动，保证取消按钮始终可见
                         .heightIn(max = AppDimens.dialogOptionsMaxHeight)
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(rememberScrollState()),
                 ) {
                     options.forEachIndexed { index, label ->
                         DialogOptionRow(
                             label = label,
                             selected = index == selectedIndex,
-                            onClick = { onSelect(index) }
+                            onClick = { onSelect(index) },
                         )
                     }
                 }
@@ -92,12 +95,12 @@ fun AppRadioChoiceDialog(
                         .fillMaxWidth()
                         .padding(
                             end = AppDimens.panelRowTitleSpacing,
-                            bottom = AppDimens.panelRowTitleSpacing
-                        )
+                            bottom = AppDimens.panelRowTitleSpacing,
+                        ),
                 ) {
                     TextButton(
                         onClick = onDismissRequest,
-                        shape = RoundedCornerShape(composeActionRadius())
+                        shape = RoundedCornerShape(composeActionRadius()),
                     ) {
                         Text(text = stringResource(R.string.cancel))
                     }
@@ -111,7 +114,7 @@ fun AppRadioChoiceDialog(
 private fun DialogOptionRow(
     label: String,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -120,8 +123,8 @@ private fun DialogOptionRow(
             .clickable(onClick = onClick)
             .padding(
                 start = AppDimens.panelRowTitleSpacing,
-                end = AppDimens.panelRowHorizontalPadding
-            )
+                end = AppDimens.panelRowHorizontalPadding,
+            ),
     ) {
         RadioButton(selected = selected, onClick = onClick)
         Spacer(modifier = Modifier.width(AppDimens.panelRowTitleSpacing))
@@ -134,7 +137,7 @@ private fun DialogOptionRow(
                 MaterialTheme.colorScheme.onSurface
             },
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

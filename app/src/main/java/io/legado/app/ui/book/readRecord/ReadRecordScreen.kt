@@ -1,10 +1,11 @@
 package io.legado.app.ui.book.readRecord
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -63,7 +64,7 @@ import java.util.Locale
 fun ReadRecordScreen(
     viewModel: ReadRecordViewModel = viewModel(),
     onBackClick: () -> Unit,
-    onBookClick: (String, String) -> Unit
+    onBookClick: (String, String) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -90,6 +91,7 @@ fun ReadRecordScreen(
 
     if (showDeleteConfirm && pendingDeleteAction != null) {
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { showDeleteConfirm = false },
             containerColor = MaterialTheme.colorScheme.surface,
             title = { Text(stringResource(R.string.rr_confirm_delete)) },
@@ -98,11 +100,11 @@ fun ReadRecordScreen(
                     Text(stringResource(R.string.rr_confirm_delete_msg))
                     Row(
                         modifier = Modifier.padding(top = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Checkbox(
                             checked = skipDeleteConfirm,
-                            onCheckedChange = { skipDeleteConfirm = it }
+                            onCheckedChange = { skipDeleteConfirm = it },
                         )
                         Text(stringResource(R.string.rr_dont_show_again), modifier = Modifier.padding(start = 8.dp))
                     }
@@ -124,7 +126,7 @@ fun ReadRecordScreen(
                 }) {
                     Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onSurface)
                 }
-            }
+            },
         )
     }
 
@@ -134,6 +136,7 @@ fun ReadRecordScreen(
         }.value
 
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { showMergeDialog = false },
             containerColor = MaterialTheme.colorScheme.surface,
             title = { Text(stringResource(R.string.rr_merge_same_name)) },
@@ -146,7 +149,7 @@ fun ReadRecordScreen(
                         candidates.forEach { record ->
                             Text(
                                 text = "· ${record.bookName} - ${record.bookAuthor.ifBlank { stringResource(R.string.rr_unknown_author) }}",
-                                modifier = Modifier.padding(vertical = 4.dp)
+                                modifier = Modifier.padding(vertical = 4.dp),
                             )
                         }
                     }
@@ -164,12 +167,13 @@ fun ReadRecordScreen(
                 TextButton(onClick = { showMergeDialog = false }) {
                     Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onSurface)
                 }
-            }
+            },
         )
     }
 
     if (showMergeAllDialog) {
         AlertDialog(
+            modifier = Modifier.eInkGrayscale(),
             onDismissRequest = { showMergeAllDialog = false },
             containerColor = MaterialTheme.colorScheme.surface,
             title = { Text(stringResource(R.string.rr_merge_all_same_name)) },
@@ -184,7 +188,7 @@ fun ReadRecordScreen(
                             } else {
                                 context.getString(R.string.rr_merge_all_none)
                             },
-                            android.widget.Toast.LENGTH_SHORT
+                            android.widget.Toast.LENGTH_SHORT,
                         ).show()
                     }
                     showMergeAllDialog = false
@@ -196,7 +200,7 @@ fun ReadRecordScreen(
                 TextButton(onClick = { showMergeAllDialog = false }) {
                     Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onSurface)
                 }
-            }
+            },
         )
     }
 
@@ -210,12 +214,12 @@ fun ReadRecordScreen(
                         scrolledContainerColor = Color.Transparent,
                         navigationIconContentColor = topBarColors.contentColor,
                         titleContentColor = topBarColors.contentColor,
-                        actionIconContentColor = topBarColors.contentColor
+                        actionIconContentColor = topBarColors.contentColor,
                     ),
                     title = {
                         Text(
                             text = stringResource(R.string.rr_selected_items, state.selectedRecords.size),
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
                         )
                     },
                     navigationIcon = {
@@ -235,7 +239,7 @@ fun ReadRecordScreen(
                         }) {
                             Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.rr_delete_selected))
                         }
-                    }
+                    },
                 )
             } else {
                 AppPageTopBar(
@@ -262,7 +266,7 @@ fun ReadRecordScreen(
                                     DisplayMode.TIMELINE -> DisplayMode.LATEST
                                     DisplayMode.LATEST -> DisplayMode.READ_TIME
                                     DisplayMode.READ_TIME -> DisplayMode.AGGREGATE
-                                }
+                                },
                             )
                         }) {
                             Icon(
@@ -272,7 +276,7 @@ fun ReadRecordScreen(
                                     DisplayMode.LATEST -> Icons.Default.AutoAwesome
                                     DisplayMode.READ_TIME -> Icons.Default.Schedule
                                 },
-                                contentDescription = stringResource(R.string.rr_switch_view)
+                                contentDescription = stringResource(R.string.rr_switch_view),
                             )
                         }
                         Box {
@@ -280,8 +284,9 @@ fun ReadRecordScreen(
                                 Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_menu))
                             }
                             DropdownMenu(
+                                modifier = Modifier.eInkGrayscale(),
                                 expanded = showOverflowMenu,
-                                onDismissRequest = { showOverflowMenu = false }
+                                onDismissRequest = { showOverflowMenu = false },
                             ) {
                                 DropdownMenuItem(
                                     text = {
@@ -298,9 +303,9 @@ fun ReadRecordScreen(
                                             } else {
                                                 Icons.Default.Visibility
                                             },
-                                            contentDescription = null
+                                            contentDescription = null,
                                         )
-                                    }
+                                    },
                                 )
                                 DropdownMenuItem(
                                     text = {
@@ -313,22 +318,22 @@ fun ReadRecordScreen(
                                     leadingIcon = {
                                         Icon(
                                             imageVector = Icons.Default.MergeType,
-                                            contentDescription = null
+                                            contentDescription = null,
                                         )
-                                    }
+                                    },
                                 )
                             }
                         }
-                    }
+                    },
                 )
             }
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
             AnimatedVisibility(visible = showSearch) {
                 OutlinedTextField(
@@ -355,19 +360,19 @@ fun ReadRecordScreen(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                         focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     ),
-                    singleLine = true
+                    singleLine = true,
                 )
             }
 
             if (state.isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             } else if (
@@ -378,27 +383,27 @@ fun ReadRecordScreen(
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = Icons.Default.MenuBook,
                             contentDescription = null,
                             modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = stringResource(R.string.rr_no_records),
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
             } else {
                 LazyColumn(
                     state = listState,
-                    contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset)
+                    contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + navigationBarBottomInset),
                 ) {
                     item {
                         SummaryCard(
@@ -408,7 +413,7 @@ fun ReadRecordScreen(
                             activeDays = state.activeDays,
                             currentStreak = state.currentStreak,
                             longestStreak = state.longestStreak,
-                            bookCount = state.latestRecords.size
+                            bookCount = state.latestRecords.size,
                         )
                     }
 
@@ -428,7 +433,7 @@ fun ReadRecordScreen(
                         onMergeClick = { record ->
                             selectedRecord = record
                             showMergeDialog = true
-                        }
+                        },
                     )
                 }
             }
@@ -441,7 +446,7 @@ fun ReadRecordScreen(
                         !state.timelineLoadingMore &&
                         listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index != null &&
                         listState.layoutInfo.visibleItemsInfo.lastOrNull()!!.index >=
-                            listState.layoutInfo.totalItemsCount - 5
+                        listState.layoutInfo.totalItemsCount - 5
                 }
             }
             LaunchedEffect(shouldLoadMore.value) {
@@ -460,7 +465,7 @@ fun ReadRecordScreen(
             selectedDate = state.selectedDate,
             onDateSelected = { viewModel.setSelectedDate(it) },
             onModeChanged = { heatmapMode = it },
-            onDismiss = { showCalendar = false }
+            onDismiss = { showCalendar = false },
         )
     }
 }
@@ -470,7 +475,7 @@ private fun BookCoverImage(
     bookName: String,
     bookAuthor: String,
     viewModel: ReadRecordViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val contextProvider = rememberUpdatedState(context)
@@ -489,27 +494,30 @@ private fun BookCoverImage(
         shape = RoundedCornerShape(6.dp),
         color = if (AppConfig.bookCoverShadow) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
         modifier = modifier.then(
-            if (AppConfig.bookCoverShadow) Modifier.shadow(4.dp, RoundedCornerShape(6.dp))
-            else Modifier
-        )
+            if (AppConfig.bookCoverShadow) {
+                Modifier.shadow(4.dp, RoundedCornerShape(6.dp))
+            } else {
+                Modifier
+            },
+        ),
     ) {
         if (coverBitmap != null) {
             androidx.compose.foundation.Image(
                 bitmap = coverBitmap!!.asImageBitmap(),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
             )
         } else {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Default.Book,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
             }
         }
@@ -561,7 +569,7 @@ private fun LazyListScope.RecordListContent(
     viewModel: ReadRecordViewModel,
     onBookClick: (String, String) -> Unit,
     onConfirmDelete: (() -> Unit) -> Unit,
-    onMergeClick: (ReadRecord) -> Unit
+    onMergeClick: (ReadRecord) -> Unit,
 ) {
     when (displayMode) {
         DisplayMode.AGGREGATE -> {
@@ -575,7 +583,7 @@ private fun LazyListScope.RecordListContent(
                         viewModel = viewModel,
                         isSelectionMode = state.isSelectionMode,
                         isSelected = viewModel.isSelected(detail),
-                        onClick = { 
+                        onClick = {
                             if (state.isSelectionMode) {
                                 viewModel.toggleRecordSelection(detail)
                             } else {
@@ -587,7 +595,7 @@ private fun LazyListScope.RecordListContent(
                                 viewModel.enterSelectionMode(detail)
                             }
                         },
-                        onDelete = { onConfirmDelete { viewModel.deleteDetail(detail) } }
+                        onDelete = { onConfirmDelete { viewModel.deleteDetail(detail) } },
                     )
                 }
             }
@@ -598,19 +606,19 @@ private fun LazyListScope.RecordListContent(
                     TimelineDateHeader(
                         date = date,
                         totalDuration = state.dailyReadTimes[
-                            LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE)
-                        ] ?: 0L
+                            LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE),
+                        ] ?: 0L,
                     )
                 }
                 sessions.forEachIndexed { index, session ->
-                    item(key = "timeline_item_${date}|${session.id}") {
+                    item(key = "timeline_item_$date|${session.id}") {
                         TimelineSessionView(
                             session = session,
                             isLast = index == sessions.size - 1,
                             viewModel = viewModel,
                             isSelectionMode = state.isSelectionMode,
                             isSelected = viewModel.isSelected(session),
-                            onClick = { 
+                            onClick = {
                                 if (state.isSelectionMode) {
                                     viewModel.toggleRecordSelection(session)
                                 } else {
@@ -622,7 +630,7 @@ private fun LazyListScope.RecordListContent(
                                     viewModel.enterSelectionMode(session)
                                 }
                             },
-                            onDelete = { onConfirmDelete { viewModel.deleteSession(session) } }
+                            onDelete = { onConfirmDelete { viewModel.deleteSession(session) } },
                         )
                     }
                 }
@@ -634,12 +642,12 @@ private fun LazyListScope.RecordListContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
                             strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -652,7 +660,7 @@ private fun LazyListScope.RecordListContent(
                     viewModel = viewModel,
                     isSelectionMode = state.isSelectionMode,
                     isSelected = viewModel.isSelected(record),
-                    onClick = { 
+                    onClick = {
                         if (state.isSelectionMode) {
                             viewModel.toggleRecordSelection(record)
                         } else {
@@ -665,7 +673,7 @@ private fun LazyListScope.RecordListContent(
                         }
                     },
                     onDelete = { onConfirmDelete { viewModel.deleteReadRecord(record) } },
-                    onMerge = { onMergeClick(record) }
+                    onMerge = { onMergeClick(record) },
                 )
             }
         }
@@ -676,7 +684,7 @@ private fun LazyListScope.RecordListContent(
                     viewModel = viewModel,
                     isSelectionMode = state.isSelectionMode,
                     isSelected = viewModel.isSelected(record),
-                    onClick = { 
+                    onClick = {
                         if (state.isSelectionMode) {
                             viewModel.toggleRecordSelection(record)
                         } else {
@@ -688,24 +696,18 @@ private fun LazyListScope.RecordListContent(
                             viewModel.enterSelectionMode(record)
                         }
                     },
-                    onDelete = { onConfirmDelete { viewModel.deleteReadRecord(record) } }
+                    onDelete = { onConfirmDelete { viewModel.deleteReadRecord(record) } },
                 )
             }
         }
     }
 }
 
-private fun detailRecordKey(date: String, detail: ReadRecordDetail): String {
-    return "agg_item_${date}|${detail.deviceId}|${detail.bookName}|${detail.bookAuthor}"
-}
+private fun detailRecordKey(date: String, detail: ReadRecordDetail): String = "agg_item_$date|${detail.deviceId}|${detail.bookName}|${detail.bookAuthor}"
 
-private fun latestRecordKey(record: ReadRecord): String {
-    return "latest_${record.deviceId}|${record.bookName}|${record.bookAuthor}"
-}
+private fun latestRecordKey(record: ReadRecord): String = "latest_${record.deviceId}|${record.bookName}|${record.bookAuthor}"
 
-private fun readTimeRecordKey(record: ReadRecord): String {
-    return "readtime_${record.deviceId}|${record.bookName}|${record.bookAuthor}"
-}
+private fun readTimeRecordKey(record: ReadRecord): String = "readtime_${record.deviceId}|${record.bookName}|${record.bookAuthor}"
 
 @Composable
 private fun DateHeader(date: String, totalDuration: Long) {
@@ -718,25 +720,25 @@ private fun DateHeader(date: String, totalDuration: Long) {
     val dateFormat = stringResource(R.string.rr_date_format_md_weekday)
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = headerColor
+        color = headerColor,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = formatFriendlyDate(date, todayStr, yesterdayStr, dayBeforeYesterdayStr, dateFormat),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = formatReadDuration(context,totalDuration),
+                text = formatReadDuration(context, totalDuration),
                 style = MaterialTheme.typography.bodySmall,
-                color = secondaryTextColor
+                color = secondaryTextColor,
             )
         }
     }
@@ -753,25 +755,25 @@ private fun TimelineDateHeader(date: String, totalDuration: Long) {
     val dateFormat = stringResource(R.string.rr_date_format_md_weekday)
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = headerColor
+        color = headerColor,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = formatFriendlyDate(date, todayStr, yesterdayStr, dayBeforeYesterdayStr, dateFormat),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = formatReadDuration(context,totalDuration),
+                text = formatReadDuration(context, totalDuration),
                 style = MaterialTheme.typography.bodySmall,
-                color = secondaryTextColor
+                color = secondaryTextColor,
             )
         }
     }
@@ -787,21 +789,21 @@ private fun TimelineSessionView(
     isSelected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     val context = LocalContext.current
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     val startTime = timeFormat.format(Date(session.startTime))
     val timelineAccentColor = readRecordTimelineAccentColor()
     val secondaryTextColor = readRecordSecondaryTextColor()
-    
+
     val deleteAction = rememberSwipeDeleteAction(onDelete)
     var chapterTitle by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(session.bookName, session.bookAuthor) {
         chapterTitle = viewModel.getBookDurChapterTitle(session.bookName, session.bookAuthor)
     }
-    
+
     if (isSelectionMode) {
         Row(
             modifier = Modifier
@@ -809,18 +811,18 @@ private fun TimelineSessionView(
                 .padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 0.dp)
                 .combinedClickable(
                     onClick = onClick,
-                    onLongClick = onLongClick
+                    onLongClick = onLongClick,
                 ),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Checkbox(
                 checked = isSelected,
                 onCheckedChange = { onClick() },
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = 8.dp),
             )
             Box(
                 modifier = Modifier.width(20.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 if (!isLast) {
                     Box(
@@ -828,7 +830,7 @@ private fun TimelineSessionView(
                             .width(2.dp)
                             .height(48.dp)
                             .shadow(2.dp, RoundedCornerShape(1.dp), clip = false)
-                            .background(timelineAccentColor.copy(alpha = 0.7f))
+                            .background(timelineAccentColor.copy(alpha = 0.7f)),
                     )
                 }
                 Surface(
@@ -836,40 +838,40 @@ private fun TimelineSessionView(
                     color = timelineAccentColor,
                     modifier = Modifier
                         .size(12.dp)
-                        .shadow(3.dp, CircleShape, clip = false)
+                        .shadow(3.dp, CircleShape, clip = false),
                 ) {}
             }
-            
+
             Spacer(modifier = Modifier.width(8.dp))
-            
+
             Box(
                 modifier = Modifier.width(48.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = startTime,
                     style = MaterialTheme.typography.bodySmall,
-                    color = secondaryTextColor
+                    color = secondaryTextColor,
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(8.dp))
-            
+
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 BookCoverImage(
                     bookName = session.bookName,
                     bookAuthor = session.bookAuthor,
                     viewModel = viewModel,
-                    modifier = Modifier.width(40.dp).height(54.dp)
+                    modifier = Modifier.width(40.dp).height(54.dp),
                 )
-                
+
                 Spacer(modifier = Modifier.width(12.dp))
-                
+
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = session.bookName,
@@ -877,12 +879,12 @@ private fun TimelineSessionView(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         text = session.bookAuthor.ifBlank { stringResource(R.string.rr_unknown_author) },
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     chapterTitle?.let {
                         Text(
@@ -890,7 +892,7 @@ private fun TimelineSessionView(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -899,17 +901,17 @@ private fun TimelineSessionView(
     } else {
         SwipeActionContainer(
             modifier = Modifier.fillMaxWidth(),
-            startActions = listOf(deleteAction)
+            startActions = listOf(deleteAction),
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 0.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
                     modifier = Modifier.width(20.dp),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     if (!isLast) {
                         Box(
@@ -917,7 +919,7 @@ private fun TimelineSessionView(
                                 .width(2.dp)
                                 .height(48.dp)
                                 .shadow(2.dp, RoundedCornerShape(1.dp), clip = false)
-                                .background(timelineAccentColor.copy(alpha = 0.7f))
+                                .background(timelineAccentColor.copy(alpha = 0.7f)),
                         )
                     }
                     Surface(
@@ -925,44 +927,44 @@ private fun TimelineSessionView(
                         color = timelineAccentColor,
                         modifier = Modifier
                             .size(12.dp)
-                            .shadow(3.dp, CircleShape, clip = false)
+                            .shadow(3.dp, CircleShape, clip = false),
                     ) {}
                 }
-                
+
                 Spacer(modifier = Modifier.width(8.dp))
-                
+
                 Box(
                     modifier = Modifier.width(48.dp),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = startTime,
                         style = MaterialTheme.typography.bodySmall,
-                        color = secondaryTextColor
+                        color = secondaryTextColor,
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.width(8.dp))
-                
+
                 Row(
                     modifier = Modifier
                         .weight(1f)
                         .combinedClickable(
                             onClick = onClick,
-                            onLongClick = onLongClick
+                            onLongClick = onLongClick,
                         )
                         .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     BookCoverImage(
                         bookName = session.bookName,
                         bookAuthor = session.bookAuthor,
                         viewModel = viewModel,
-                        modifier = Modifier.width(40.dp).height(54.dp)
+                        modifier = Modifier.width(40.dp).height(54.dp),
                     )
-                    
+
                     Spacer(modifier = Modifier.width(12.dp))
-                    
+
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = session.bookName,
@@ -970,12 +972,12 @@ private fun TimelineSessionView(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = session.bookAuthor.ifBlank { context.getString(R.string.rr_unknown_author) },
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         chapterTitle?.let {
                             Text(
@@ -983,7 +985,7 @@ private fun TimelineSessionView(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }
@@ -1002,7 +1004,7 @@ private fun RecordDetailItem(
     isSelected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     val context = LocalContext.current
     val deleteAction = rememberSwipeDeleteAction(onDelete)
@@ -1014,7 +1016,7 @@ private fun RecordDetailItem(
     LaunchedEffect(detail.bookName, detail.bookAuthor) {
         chapterTitle = viewModel.getBookDurChapterTitle(detail.bookName, detail.bookAuthor)
     }
-    
+
     if (isSelectionMode) {
         Surface(
             modifier = Modifier
@@ -1022,32 +1024,32 @@ private fun RecordDetailItem(
                 .padding(horizontal = 16.dp, vertical = 4.dp)
                 .combinedClickable(
                     onClick = onClick,
-                    onLongClick = onLongClick
+                    onLongClick = onLongClick,
                 ),
             color = containerColor,
             shape = RoundedCornerShape(12.dp),
-            border = border
+            border = border,
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Checkbox(
                     checked = isSelected,
                     onCheckedChange = { onClick() },
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
                 )
                 BookCoverImage(
                     bookName = detail.bookName,
                     bookAuthor = detail.bookAuthor,
                     viewModel = viewModel,
-                    modifier = Modifier.width(44.dp).height(60.dp)
+                    modifier = Modifier.width(44.dp).height(60.dp),
                 )
-                
+
                 Spacer(modifier = Modifier.width(12.dp))
-                
+
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = detail.bookName,
@@ -1055,12 +1057,12 @@ private fun RecordDetailItem(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         text = detail.bookAuthor.ifBlank { stringResource(R.string.rr_unknown_author) },
                         style = MaterialTheme.typography.bodySmall,
-                        color = secondaryTextColor
+                        color = secondaryTextColor,
                     )
                     chapterTitle?.let {
                         Text(
@@ -1068,15 +1070,15 @@ private fun RecordDetailItem(
                             style = MaterialTheme.typography.bodySmall,
                             color = secondaryTextColor,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
-                
+
                 Text(
-                    text = formatReadDuration(context,detail.readTime),
+                    text = formatReadDuration(context, detail.readTime),
                     style = MaterialTheme.typography.bodySmall,
-                    color = secondaryTextColor
+                    color = secondaryTextColor,
                 )
             }
         }
@@ -1085,34 +1087,34 @@ private fun RecordDetailItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp),
-            startActions = listOf(deleteAction)
+            startActions = listOf(deleteAction),
         ) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .combinedClickable(
                         onClick = onClick,
-                        onLongClick = onLongClick
+                        onLongClick = onLongClick,
                     ),
                 color = containerColor,
                 shape = RoundedCornerShape(12.dp),
-                border = border
+                border = border,
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     BookCoverImage(
                         bookName = detail.bookName,
                         bookAuthor = detail.bookAuthor,
                         viewModel = viewModel,
-                        modifier = Modifier.width(44.dp).height(60.dp)
+                        modifier = Modifier.width(44.dp).height(60.dp),
                     )
-                    
+
                     Spacer(modifier = Modifier.width(12.dp))
-                    
+
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = detail.bookName,
@@ -1120,12 +1122,12 @@ private fun RecordDetailItem(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = detail.bookAuthor.ifBlank { context.getString(R.string.rr_unknown_author) },
                             style = MaterialTheme.typography.bodySmall,
-                            color = secondaryTextColor
+                            color = secondaryTextColor,
                         )
                         chapterTitle?.let {
                             Text(
@@ -1133,15 +1135,15 @@ private fun RecordDetailItem(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = secondaryTextColor,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }
-                    
+
                     Text(
-                        text = formatReadDuration(context,detail.readTime),
+                        text = formatReadDuration(context, detail.readTime),
                         style = MaterialTheme.typography.bodySmall,
-                        color = secondaryTextColor
+                        color = secondaryTextColor,
                     )
                 }
             }
@@ -1159,7 +1161,7 @@ private fun LatestRecordItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onDelete: () -> Unit,
-    onMerge: () -> Unit
+    onMerge: () -> Unit,
 ) {
     val context = LocalContext.current
     var showMenu by remember { mutableStateOf(false) }
@@ -1178,34 +1180,34 @@ private fun LatestRecordItem(
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .combinedClickable(
                 onClick = onClick,
-                onLongClick = onLongClick
+                onLongClick = onLongClick,
             ),
         color = containerColor,
         shape = RoundedCornerShape(12.dp),
-        border = border
+        border = border,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             if (isSelectionMode) {
                 Checkbox(
                     checked = isSelected,
                     onCheckedChange = { onClick() },
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
                 )
             }
             BookCoverImage(
                 bookName = record.bookName,
                 bookAuthor = record.bookAuthor,
                 viewModel = viewModel,
-                modifier = Modifier.width(44.dp).height(60.dp)
+                modifier = Modifier.width(44.dp).height(60.dp),
             )
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = record.bookName,
@@ -1213,12 +1215,12 @@ private fun LatestRecordItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = record.bookAuthor.ifBlank { stringResource(R.string.rr_unknown_author) },
                     style = MaterialTheme.typography.bodySmall,
-                    color = secondaryTextColor
+                    color = secondaryTextColor,
                 )
                 chapterTitle?.let {
                     Text(
@@ -1226,27 +1228,27 @@ private fun LatestRecordItem(
                         style = MaterialTheme.typography.bodySmall,
                         color = secondaryTextColor,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = formatReadDuration(context,record.readTime),
+                        text = formatReadDuration(context, record.readTime),
                         style = MaterialTheme.typography.bodySmall,
-                        color = secondaryTextColor
+                        color = secondaryTextColor,
                     )
                     Text(
                         text = "·",
                         style = MaterialTheme.typography.bodySmall,
-                        color = secondaryTextColor
+                        color = secondaryTextColor,
                     )
                     Text(
                         text = formatDateTime(record.lastRead),
                         style = MaterialTheme.typography.bodySmall,
-                        color = secondaryTextColor
+                        color = secondaryTextColor,
                     )
                 }
             }
@@ -1256,9 +1258,10 @@ private fun LatestRecordItem(
                         Icon(Icons.Default.MoreVert, contentDescription = context.getString(R.string.rr_more), tint = readRecordMutedIconTint())
                     }
                     DropdownMenu(
+                        modifier = Modifier.eInkGrayscale(),
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false },
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = MaterialTheme.colorScheme.surface,
                     ) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.rr_merge_same_name)) },
@@ -1268,7 +1271,7 @@ private fun LatestRecordItem(
                             },
                             leadingIcon = {
                                 Icon(Icons.Default.Merge, contentDescription = null, tint = readRecordMutedIconTint())
-                            }
+                            },
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
@@ -1278,7 +1281,7 @@ private fun LatestRecordItem(
                             },
                             leadingIcon = {
                                 Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error)
-                            }
+                            },
                         )
                     }
                 }
@@ -1296,7 +1299,7 @@ private fun ReadTimeRecordItem(
     isSelected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     val context = LocalContext.current
     var chapterTitle by remember { mutableStateOf<String?>(null) }
@@ -1317,28 +1320,28 @@ private fun ReadTimeRecordItem(
                 .padding(horizontal = 16.dp, vertical = 4.dp)
                 .combinedClickable(
                     onClick = onClick,
-                    onLongClick = onLongClick
+                    onLongClick = onLongClick,
                 ),
             color = containerColor,
             shape = RoundedCornerShape(12.dp),
-            border = border
+            border = border,
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Checkbox(
                     checked = isSelected,
                     onCheckedChange = { onClick() },
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
                 )
                 BookCoverImage(
                     bookName = record.bookName,
                     bookAuthor = record.bookAuthor,
                     viewModel = viewModel,
-                    modifier = Modifier.width(44.dp).height(60.dp)
+                    modifier = Modifier.width(44.dp).height(60.dp),
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -1350,12 +1353,12 @@ private fun ReadTimeRecordItem(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         text = record.bookAuthor.ifBlank { context.getString(R.string.rr_unknown_author) },
                         style = MaterialTheme.typography.bodySmall,
-                        color = secondaryTextColor
+                        color = secondaryTextColor,
                     )
                     chapterTitle?.let {
                         Text(
@@ -1363,16 +1366,16 @@ private fun ReadTimeRecordItem(
                             style = MaterialTheme.typography.bodySmall,
                             color = secondaryTextColor,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
 
                 Text(
-                    text = formatReadDuration(context,record.readTime),
+                    text = formatReadDuration(context, record.readTime),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
@@ -1381,30 +1384,30 @@ private fun ReadTimeRecordItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp),
-            startActions = listOf(deleteAction)
+            startActions = listOf(deleteAction),
         ) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .combinedClickable(
                         onClick = onClick,
-                        onLongClick = onLongClick
+                        onLongClick = onLongClick,
                     ),
                 color = containerColor,
                 shape = RoundedCornerShape(12.dp),
-                border = border
+                border = border,
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     BookCoverImage(
                         bookName = record.bookName,
                         bookAuthor = record.bookAuthor,
                         viewModel = viewModel,
-                        modifier = Modifier.width(44.dp).height(60.dp)
+                        modifier = Modifier.width(44.dp).height(60.dp),
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
@@ -1416,12 +1419,12 @@ private fun ReadTimeRecordItem(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = record.bookAuthor.ifBlank { context.getString(R.string.rr_unknown_author) },
                             style = MaterialTheme.typography.bodySmall,
-                            color = secondaryTextColor
+                            color = secondaryTextColor,
                         )
                         chapterTitle?.let {
                             Text(
@@ -1429,16 +1432,16 @@ private fun ReadTimeRecordItem(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = secondaryTextColor,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }
 
                     Text(
-                        text = formatReadDuration(context,record.readTime),
+                        text = formatReadDuration(context, record.readTime),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }
@@ -1451,7 +1454,7 @@ private fun formatFriendlyDate(
     todayStr: String,
     yesterdayStr: String,
     dayBeforeYesterdayStr: String,
-    dateFormat: String
+    dateFormat: String,
 ): String {
     return try {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -1479,7 +1482,7 @@ private fun formatFriendlyDateTime(
     todayStr: String,
     yesterdayStr: String,
     dayBeforeYesterdayStr: String,
-    dateFormat: String
+    dateFormat: String,
 ): String {
     val date = Date(timestamp)
     val today = LocalDate.now()

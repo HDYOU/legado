@@ -1,5 +1,7 @@
 package io.legado.app.ui.book.readRecord.components
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -596,6 +598,7 @@ fun HeatmapCalendarBottomSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,

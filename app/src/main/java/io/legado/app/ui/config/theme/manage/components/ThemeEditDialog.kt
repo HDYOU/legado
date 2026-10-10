@@ -1,5 +1,7 @@
 package io.legado.app.ui.config.theme.manage.components
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -69,6 +71,7 @@ fun ThemeEditDialog(
     val config = draft ?: return
 
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         title = {
             Text(

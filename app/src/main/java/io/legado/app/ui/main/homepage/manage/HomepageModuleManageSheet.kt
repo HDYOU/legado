@@ -1,5 +1,7 @@
 package io.legado.app.ui.main.homepage.manage
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
@@ -12,7 +14,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -188,11 +189,13 @@ fun HomepageModuleManageSheet(
                 IconButton(onClick = { handleBack() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.homepage_back)
+                        contentDescription = stringResource(R.string.homepage_back),
                     )
                 }
             }
-        } else null
+        } else {
+            null
+        },
     ) {
         AnimatedContent(
             targetState = currentPage,
@@ -200,9 +203,9 @@ fun HomepageModuleManageSheet(
                 // 根据页面深度确定滑动方向：进入时向左滑入，返回时向右滑入
                 val direction = if (targetState.depth > initialState.depth) 1 else -1
                 slideInHorizontally { fullWidth -> fullWidth * direction } togetherWith
-                        slideOutHorizontally { fullWidth -> -fullWidth * direction }
+                    slideOutHorizontally { fullWidth -> -fullWidth * direction }
             },
-            modifier = Modifier.fillMaxWidth().height(contentHeight)
+            modifier = Modifier.fillMaxWidth().height(contentHeight),
         ) { page ->
             when (page) {
                 // 集列表页：展示所有集，支持创建自定义集和浏览书源
@@ -321,6 +324,7 @@ fun HomepageModuleManageSheet(
         if (showCreateSetDialog) {
             var newSetName by remember { mutableStateOf("") }
             AlertDialog(
+                modifier = Modifier.eInkGrayscale(),
                 onDismissRequest = {
                     showCreateSetDialog = false
                     newSetName = ""
@@ -332,7 +336,7 @@ fun HomepageModuleManageSheet(
                         onValueChange = { newSetName = it },
                         label = { Text(stringResource(R.string.homepage_set_name)) },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 },
                 confirmButton = {
@@ -343,7 +347,7 @@ fun HomepageModuleManageSheet(
                             }
                             showCreateSetDialog = false
                             newSetName = ""
-                        }
+                        },
                     ) {
                         Text(stringResource(R.string.homepage_create))
                     }
@@ -353,11 +357,11 @@ fun HomepageModuleManageSheet(
                         onClick = {
                             showCreateSetDialog = false
                             newSetName = ""
-                        }
+                        },
                     ) {
                         Text(stringResource(R.string.homepage_cancel))
                     }
-                }
+                },
             )
         }
 
@@ -365,6 +369,7 @@ fun HomepageModuleManageSheet(
         if (renameSetId != null) {
             var newName by remember(renameSetId) { mutableStateOf("") }
             AlertDialog(
+                modifier = Modifier.eInkGrayscale(),
                 onDismissRequest = {
                     renameSetId = null
                 },
@@ -375,7 +380,7 @@ fun HomepageModuleManageSheet(
                         onValueChange = { newName = it },
                         label = { Text(stringResource(R.string.homepage_new_name)) },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 },
                 confirmButton = {
@@ -385,7 +390,7 @@ fun HomepageModuleManageSheet(
                                 actions.onRenameCustomSet(renameSetId!!, newName)
                             }
                             renameSetId = null
-                        }
+                        },
                     ) {
                         Text(stringResource(R.string.homepage_confirm))
                     }
@@ -394,13 +399,14 @@ fun HomepageModuleManageSheet(
                     TextButton(onClick = { renameSetId = null }) {
                         Text(stringResource(R.string.homepage_cancel))
                     }
-                }
+                },
             )
         }
 
         // 删除集确认对话框
         if (deleteSetConfirmId != null) {
             AlertDialog(
+                modifier = Modifier.eInkGrayscale(),
                 onDismissRequest = { deleteSetConfirmId = null },
                 title = { Text(stringResource(R.string.homepage_delete_set)) },
                 text = { Text(stringResource(R.string.homepage_delete_set_msg)) },
@@ -409,7 +415,7 @@ fun HomepageModuleManageSheet(
                         onClick = {
                             actions.onDeleteCustomSet(deleteSetConfirmId!!)
                             deleteSetConfirmId = null
-                        }
+                        },
                     ) {
                         Text(stringResource(R.string.homepage_delete))
                     }
@@ -418,13 +424,14 @@ fun HomepageModuleManageSheet(
                     TextButton(onClick = { deleteSetConfirmId = null }) {
                         Text(stringResource(R.string.homepage_cancel))
                     }
-                }
+                },
             )
         }
 
         // 删除模块确认对话框
         if (deleteModuleConfirmId != null) {
             AlertDialog(
+                modifier = Modifier.eInkGrayscale(),
                 onDismissRequest = { deleteModuleConfirmId = null },
                 title = { Text(stringResource(R.string.homepage_delete_module)) },
                 text = { Text(stringResource(R.string.homepage_delete_module_msg)) },
@@ -433,7 +440,7 @@ fun HomepageModuleManageSheet(
                         onClick = {
                             actions.onDeleteModule(deleteModuleConfirmId!!)
                             deleteModuleConfirmId = null
-                        }
+                        },
                     ) {
                         Text(stringResource(R.string.homepage_delete))
                     }
@@ -442,7 +449,7 @@ fun HomepageModuleManageSheet(
                     TextButton(onClick = { deleteModuleConfirmId = null }) {
                         Text(stringResource(R.string.homepage_cancel))
                     }
-                }
+                },
             )
         }
 
@@ -458,7 +465,7 @@ fun HomepageModuleManageSheet(
                 actions.onAddCustomModule(sourceUrl, setId, moduleDef)
                 addDialogPrefill = null
             },
-            onDismiss = { addDialogPrefill = null }
+            onDismiss = { addDialogPrefill = null },
         )
 
         // 编辑模块对话框（编辑模式）
@@ -473,13 +480,14 @@ fun HomepageModuleManageSheet(
                 }
                 editingModule = null
             },
-            onDismiss = { editingModule = null }
+            onDismiss = { editingModule = null },
         )
 
         // 自定义标题编辑对话框
         if (customSetTitleEdit != null) {
             var customTitle by remember(customSetTitleEdit) { mutableStateOf("") }
             AlertDialog(
+                modifier = Modifier.eInkGrayscale(),
                 onDismissRequest = {
                     customSetTitleEdit = null
                 },
@@ -490,7 +498,7 @@ fun HomepageModuleManageSheet(
                         onValueChange = { customTitle = it },
                         label = { Text(stringResource(R.string.homepage_custom_title_hint)) },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 },
                 confirmButton = {
@@ -498,10 +506,10 @@ fun HomepageModuleManageSheet(
                         onClick = {
                             actions.onSetCustomSetTitle(
                                 customSetTitleEdit!!,
-                                customTitle.ifBlank { null }
+                                customTitle.ifBlank { null },
                             )
                             customSetTitleEdit = null
-                        }
+                        },
                     ) {
                         Text(stringResource(R.string.homepage_confirm))
                     }
@@ -510,7 +518,7 @@ fun HomepageModuleManageSheet(
                     TextButton(onClick = { customSetTitleEdit = null }) {
                         Text(stringResource(R.string.homepage_cancel))
                     }
-                }
+                },
             )
         }
     }
@@ -572,13 +580,11 @@ private sealed interface ManageScreen {
  * @param setUrl 目标集的 URL
  * @return true 表示模块属于该集，false 表示不属于
  */
-private fun belongsToSet(module: HomepageModuleManageUi, setUrl: String): Boolean {
-    return if (HomepageViewModel.isCustomSetUrl(setUrl)) {
-        // 自定义集：通过集 ID 匹配
-        val setId = HomepageViewModel.customSetIdFromUrl(setUrl)
-        module.customSetId == setId
-    } else {
-        // 书源集：setUrl 即为集 ID（如 src_http://...），直接匹配 customSetId
-        module.customSetId == setUrl
-    }
+private fun belongsToSet(module: HomepageModuleManageUi, setUrl: String): Boolean = if (HomepageViewModel.isCustomSetUrl(setUrl)) {
+    // 自定义集：通过集 ID 匹配
+    val setId = HomepageViewModel.customSetIdFromUrl(setUrl)
+    module.customSetId == setId
+} else {
+    // 书源集：setUrl 即为集 ID（如 src_http://...），直接匹配 customSetId
+    module.customSetId == setUrl
 }

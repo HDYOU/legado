@@ -1,5 +1,7 @@
 package io.legado.app.ui.widget.dialog
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
@@ -108,39 +110,37 @@ class CustomHelpDocManageDialog : DialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setContent {
-                LegadoTheme {
-                    CustomHelpDocManageContent(
-                        onDismiss = { dismissAllowingStateLoss() },
-                        onRefreshContentChanged = { refreshContent = it },
-                        onImportDoc = { group ->
-                            pendingImportGroupPath = group.folderPath
-                        },
-                        onCancelImport = {
-                            pendingImportGroupPath = null
-                        },
-                        onSelectFile = {
-                            importFileLauncher.launch(
-                                Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                                    addCategory(Intent.CATEGORY_OPENABLE)
-                                    type = "*/*"
-                                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                }
-                            )
-                        },
-                        onSelectFolder = {
-                            importFolderLauncher.launch(null)
-                        },
-                        onChanged = {
-                            HelpDocManager.refreshCustomGroups(requireContext())
-                            onChanged?.invoke()
-                        }
-                    )
-                }
+        savedInstanceState: Bundle?,
+    ): View = ComposeView(requireContext()).apply {
+        setContent {
+            LegadoTheme {
+                CustomHelpDocManageContent(
+                    onDismiss = { dismissAllowingStateLoss() },
+                    onRefreshContentChanged = { refreshContent = it },
+                    onImportDoc = { group ->
+                        pendingImportGroupPath = group.folderPath
+                    },
+                    onCancelImport = {
+                        pendingImportGroupPath = null
+                    },
+                    onSelectFile = {
+                        importFileLauncher.launch(
+                            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "*/*"
+                                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            },
+                        )
+                    },
+                    onSelectFolder = {
+                        importFolderLauncher.launch(null)
+                    },
+                    onChanged = {
+                        HelpDocManager.refreshCustomGroups(requireContext())
+                        onChanged?.invoke()
+                    },
+                )
             }
         }
     }
@@ -155,7 +155,7 @@ private fun CustomHelpDocManageContent(
     onCancelImport: () -> Unit,
     onSelectFile: () -> Unit,
     onSelectFolder: () -> Unit,
-    onChanged: () -> Unit
+    onChanged: () -> Unit,
 ) {
     val context = LocalContext.current
     var groups by remember { mutableStateOf(CustomHelpDocManager.scanCustomDocs(context, true)) }
@@ -192,7 +192,7 @@ private fun CustomHelpDocManageContent(
                     inputDialog = null
                     refresh()
                 }
-            }
+            },
         )
     }
 
@@ -208,7 +208,7 @@ private fun CustomHelpDocManageContent(
                     deleteDialog = null
                     refresh()
                 }
-            }
+            },
         )
     }
 
@@ -225,7 +225,7 @@ private fun CustomHelpDocManageContent(
             onSelectFolder = {
                 showAddDocDialog = false
                 onSelectFolder()
-            }
+            },
         )
     }
 
@@ -233,14 +233,14 @@ private fun CustomHelpDocManageContent(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             dismissOnBackPress = true,
-            dismissOnClickOutside = true
-        )
+            dismissOnClickOutside = true,
+        ),
     ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 620.dp),
-            color = MaterialTheme.colorScheme.surface
+            color = MaterialTheme.colorScheme.surface,
         ) {
             Column {
                 TopAppBar(
@@ -249,7 +249,7 @@ private fun CustomHelpDocManageContent(
                             text = selectedGroup?.displayName ?: "自定义分组",
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     },
                     navigationIcon = {
@@ -260,11 +260,11 @@ private fun CustomHelpDocManageContent(
                                 } else {
                                     selectedGroupPath = null
                                 }
-                            }
+                            },
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = if (selectedGroupPath == null) "关闭" else "返回"
+                                contentDescription = if (selectedGroupPath == null) "关闭" else "返回",
                             )
                         }
                     },
@@ -279,14 +279,14 @@ private fun CustomHelpDocManageContent(
                                         CustomHelpDocManager.createGroup(context, name)
                                     }
                                 }
-                            }
+                            },
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Add,
-                                contentDescription = if (selectedGroup == null) "添加分组" else "添加文件"
+                                contentDescription = if (selectedGroup == null) "添加分组" else "添加文件",
                             )
                         }
-                    }
+                    },
                 )
                 HorizontalDivider()
                 if (selectedGroup == null) {
@@ -301,11 +301,11 @@ private fun CustomHelpDocManageContent(
                         onDelete = { group ->
                             deleteDialog = CustomHelpDocDelete(
                                 title = "删除分组",
-                                message = "确定删除“${group.displayName}”及其中全部文件？"
+                                message = "确定删除“${group.displayName}”及其中全部文件？",
                             ) {
                                 CustomHelpDocManager.deleteGroup(group.folderPath)
                             }
-                        }
+                        },
                     )
                 } else {
                     DocList(
@@ -318,11 +318,11 @@ private fun CustomHelpDocManageContent(
                         onDelete = { doc ->
                             deleteDialog = CustomHelpDocDelete(
                                 title = "删除文件",
-                                message = "确定删除“${doc.getFullFileName()}”？"
+                                message = "确定删除“${doc.getFullFileName()}”？",
                             ) {
                                 CustomHelpDocManager.deleteDoc(doc.filePath)
                             }
-                        }
+                        },
                     )
                 }
             }
@@ -335,7 +335,7 @@ private fun GroupList(
     groups: List<CustomHelpDocGroup>,
     onOpen: (CustomHelpDocGroup) -> Unit,
     onRename: (CustomHelpDocGroup) -> Unit,
-    onDelete: (CustomHelpDocGroup) -> Unit
+    onDelete: (CustomHelpDocGroup) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.heightIn(min = 320.dp, max = 560.dp)) {
         items(groups, key = { it.folderPath }) { group ->
@@ -347,7 +347,7 @@ private fun GroupList(
                     Text(
                         text = group.displayName,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 },
                 supportingContent = { Text("${group.docs.size} 个文件") },
@@ -364,7 +364,7 @@ private fun GroupList(
                         }
                     }
                 },
-                modifier = Modifier.clickable { onOpen(group) }
+                modifier = Modifier.clickable { onOpen(group) },
             )
             HorizontalDivider()
         }
@@ -373,7 +373,7 @@ private fun GroupList(
                 Text(
                     text = "还没有自定义分组",
                     modifier = Modifier.padding(18.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -384,7 +384,7 @@ private fun GroupList(
 private fun DocList(
     group: CustomHelpDocGroup,
     onRename: (CustomHelpDoc) -> Unit,
-    onDelete: (CustomHelpDoc) -> Unit
+    onDelete: (CustomHelpDoc) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.heightIn(min = 320.dp, max = 560.dp)) {
         items(group.docs, key = { it.filePath }) { doc ->
@@ -396,7 +396,7 @@ private fun DocList(
                     Text(
                         text = doc.displayName,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 },
                 supportingContent = { Text(doc.getFullFileName()) },
@@ -409,7 +409,7 @@ private fun DocList(
                             Icon(Icons.Filled.Delete, contentDescription = "删除文件")
                         }
                     }
-                }
+                },
             )
             HorizontalDivider()
         }
@@ -418,7 +418,7 @@ private fun DocList(
                 Text(
                     text = "这个分组还没有文件",
                     modifier = Modifier.padding(18.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -429,9 +429,10 @@ private fun DocList(
 private fun AddDocDialog(
     onDismiss: () -> Unit,
     onSelectFile: () -> Unit,
-    onSelectFolder: () -> Unit
+    onSelectFolder: () -> Unit,
 ) {
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         title = { Text("添加文件") },
         text = {
@@ -439,13 +440,13 @@ private fun AddDocDialog(
                 ListItem(
                     headlineContent = { Text("选择文件") },
                     supportingContent = { Text("可一次选择多个 md/txt 文件") },
-                    modifier = Modifier.clickable(onClick = onSelectFile)
+                    modifier = Modifier.clickable(onClick = onSelectFile),
                 )
                 HorizontalDivider()
                 ListItem(
                     headlineContent = { Text("选择文件夹") },
                     supportingContent = { Text("导入文件夹内的 md/txt 文件") },
-                    modifier = Modifier.clickable(onClick = onSelectFolder)
+                    modifier = Modifier.clickable(onClick = onSelectFolder),
                 )
             }
         },
@@ -453,7 +454,7 @@ private fun AddDocDialog(
             TextButton(onClick = onDismiss) {
                 Text("取消")
             }
-        }
+        },
     )
 }
 
@@ -462,10 +463,11 @@ private fun NameInputDialog(
     title: String,
     initialName: String,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     var name by remember(initialName) { mutableStateOf(initialName) }
     AlertDialog(
+        modifier = Modifier.eInkGrayscale(),
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
@@ -473,13 +475,13 @@ private fun NameInputDialog(
                 value = name,
                 onValueChange = { name = it },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         },
         confirmButton = {
             TextButton(
                 enabled = name.isNotBlank(),
-                onClick = { onConfirm(name.trim()) }
+                onClick = { onConfirm(name.trim()) },
             ) {
                 Text("确定")
             }
@@ -488,7 +490,7 @@ private fun NameInputDialog(
             TextButton(onClick = onDismiss) {
                 Text("取消")
             }
-        }
+        },
     )
 }
 
@@ -497,7 +499,7 @@ private fun DeleteConfirmDialog(
     title: String,
     message: String,
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
 ) {
     AppConfirmDialog(
         title = title,
@@ -505,35 +507,30 @@ private fun DeleteConfirmDialog(
         confirmText = "删除",
         destructive = true,
         onConfirm = onConfirm,
-        onDismissRequest = onDismiss
+        onDismissRequest = onDismiss,
     )
 }
 
-private fun ClipData.toUriList(): List<Uri> {
-    return buildList {
-        for (index in 0 until itemCount) {
-            getItemAt(index)?.uri?.let { add(it) }
-        }
+private fun ClipData.toUriList(): List<Uri> = buildList {
+    for (index in 0 until itemCount) {
+        getItemAt(index)?.uri?.let { add(it) }
     }
 }
 
-private fun List<CustomHelpDocManager.CustomHelpDocImportResult>.mergeImportResults():
-        CustomHelpDocManager.CustomHelpDocImportResult {
-    return CustomHelpDocManager.CustomHelpDocImportResult(
-        importedCount = sumOf { it.importedCount },
-        skippedReasons = flatMap { it.skippedReasons },
-        failedReasons = flatMap { it.failedReasons }
-    )
-}
+private fun List<CustomHelpDocManager.CustomHelpDocImportResult>.mergeImportResults(): CustomHelpDocManager.CustomHelpDocImportResult = CustomHelpDocManager.CustomHelpDocImportResult(
+    importedCount = sumOf { it.importedCount },
+    skippedReasons = flatMap { it.skippedReasons },
+    failedReasons = flatMap { it.failedReasons },
+)
 
 private data class CustomHelpDocInput(
     val title: String,
     val initialName: String = "",
-    val onConfirm: (String) -> Boolean
+    val onConfirm: (String) -> Boolean,
 )
 
 private data class CustomHelpDocDelete(
     val title: String,
     val message: String,
-    val onConfirm: () -> Boolean
+    val onConfirm: () -> Boolean,
 )
