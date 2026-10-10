@@ -129,7 +129,8 @@ fun TextMenuConfigDialogContent(
             ),
         ) {
             Surface(
-                modifier = Modifier
+                // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+                modifier = Modifier.eInkGrayscale()
                     .fillMaxWidth()
                     .wrapContentHeight(),
                 shape = MaterialTheme.shapes.large,
@@ -419,7 +420,8 @@ fun ProcessTextConfigContent(
         ),
     ) {
         Surface(
-            modifier = Modifier
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = Modifier.eInkGrayscale()
                 .fillMaxWidth()
                 .wrapContentHeight(),
             shape = MaterialTheme.shapes.large,

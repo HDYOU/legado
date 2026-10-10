@@ -1,5 +1,7 @@
 package io.legado.app.ui.widget.dialog
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,7 +44,7 @@ class BackupSelectorDialog : BaseComposeDialogFragment() {
     override fun DialogContent() {
         BackupSelectorDialogContent(
             viewModel = viewModel,
-            onDismiss = { dismiss() }
+            onDismiss = { dismiss() },
         )
     }
 }
@@ -50,7 +52,7 @@ class BackupSelectorDialog : BaseComposeDialogFragment() {
 @Composable
 fun BackupSelectorDialogContent(
     viewModel: BackupSelectorViewModel,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     // 保持 Composable 只负责渲染；加载、选择和持久化都放在 ViewModel 中处理。
     val uiState by viewModel.uiState.collectAsState()
@@ -83,9 +85,9 @@ fun BackupSelectorDialogContent(
                             0f
                         },
                         onTabClick = viewModel::onScopeChange,
-                        labelText = { stringResource(it.labelRes()) }
+                        labelText = { stringResource(it.labelRes()) },
                     )
-                }
+                },
             )
         }
     }
@@ -99,27 +101,28 @@ private fun BackupSelectorConfig.Scope.labelRes(): Int = when (this) {
 
 @Composable
 private fun BackupSelectorLoadingDialog(
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             dismissOnBackPress = true,
-            dismissOnClickOutside = true
-        )
+            dismissOnClickOutside = true,
+        ),
     ) {
         Surface(
-            modifier = Modifier
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = Modifier.eInkGrayscale()
                 .fillMaxWidth()
                 .wrapContentHeight(),
             shape = MaterialTheme.shapes.large,
-            color = pageCardContainerColor()
+            color = pageCardContainerColor(),
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
             }

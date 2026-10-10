@@ -1,5 +1,7 @@
 package io.legado.app.ui.widget.components.dialog
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,125 +22,126 @@ import io.legado.app.ui.theme.pageCardContainerColor
 import io.legado.app.ui.theme.pageTopBarColors
 
 /**
- * 多选项目数据模�?
+ * 澶氶€夐」鐩暟鎹ā鍨?
  */
 data class MultiSelectItem(
-    val key: String,                    // 唯一标识
-    val title: String,                  // 主标�?
-    val subtitle: String? = null,       // 副标�?(如文件名)
-    val size: String? = null,           // 大小信息 (�?"2.5 MB")
+    val key: String, // 鍞竴鏍囪瘑
+    val title: String, // 涓绘爣棰?
+    val subtitle: String? = null, // 鍓爣棰?(濡傛枃浠跺悕)
+    val size: String? = null, // 澶у皬淇℃伅 (濡?"2.5 MB")
     val rawSize: Long? = null,
-    val count: String? = null,          // 数量信息 (�?"128 �?)
-    val group: String,                  // 分组名称
-    val iconEmoji: String? = null,      // Emoji图标 (�?"📚")
-    val selected: Boolean = true        // 是否选中
+    val count: String? = null, // 鏁伴噺淇℃伅 (濡?"128 涓?)
+    val group: String, // 鍒嗙粍鍚嶇О
+    val iconEmoji: String? = null, // Emoji鍥炬爣 (濡?"馃摎")
+    val selected: Boolean = true, // 鏄惁閫変腑
 )
 
 /**
- * 分组数据模型
+ * 鍒嗙粍鏁版嵁妯″瀷
  */
 data class MultiSelectGroup(
-    val name: String,                   // 分组名称
-    val iconEmoji: String? = null,      // 分组图标
-    val items: List<MultiSelectItem>    // 该分组的项目
+    val name: String, // 鍒嗙粍鍚嶇О
+    val iconEmoji: String? = null, // 鍒嗙粍鍥炬爣
+    val items: List<MultiSelectItem>, // 璇ュ垎缁勭殑椤圭洰
 )
 
 /**
- * 通用的多选对话框组件
- * 
- * 功能特�?
- * - 分组展示项目
- * - 显示多种信息(标题、副标题、大小、数量、图�?
- * - 实时计算选中项总大�?
- * - 全�?全不选快捷按�?
- * - 主题适配
- * - 可选插�? 标题栏动作按钮、行尾内容、独立的确定回调(�?开始恢�?)
+ * 閫氱敤鐨勫閫夊璇濇缁勪欢
+ *
+ * 鍔熻兘鐗规€?
+ * - 鍒嗙粍灞曠ず椤圭洰
+ * - 鏄剧ず澶氱淇℃伅(鏍囬銆佸壇鏍囬銆佸ぇ灏忋€佹暟閲忋€佸浘鏍?
+ * - 瀹炴椂璁＄畻閫変腑椤规€诲ぇ灏?
+ * - 鍏ㄩ€?鍏ㄤ笉閫夊揩鎹锋寜閽?
+ * - 涓婚閫傞厤
+ * - 鍙€夋彃妲? 鏍囬鏍忓姩浣滄寜閽€佽灏惧唴瀹广€佺嫭绔嬬殑纭畾鍥炶皟(濡?寮€濮嬫仮澶?)
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun MultiSelectDialogContent(
-    title: String,                      // 对话框标�?
-    description: String? = null,        // 描述文字
-    groups: List<MultiSelectGroup>,     // 分组数据
-    selectedKeys: Set<String>,          // 已选中的key集合
-    totalSizeCalculator: (List<MultiSelectItem>) -> String?, // 总大小计算器
-    onSelectionChange: (String, Boolean) -> Unit, // 选择变化回调
-    onDismiss: () -> Unit,              // 关闭回调
-    onSelectAll: () -> Unit,            // 全选回�?
-    onDeselectAll: () -> Unit,          // 全不选回�?
-    headerAction: (@Composable () -> Unit)? = null, // 标题栏动作按钮插�?(�?检测格�?)
-    itemTrailing: (@Composable (MultiSelectItem) -> Unit)? = null, // 行尾内容插槽 (如验证状态图�?
+    title: String, // 瀵硅瘽妗嗘爣棰?
+    description: String? = null, // 鎻忚堪鏂囧瓧
+    groups: List<MultiSelectGroup>, // 鍒嗙粍鏁版嵁
+    selectedKeys: Set<String>, // 宸查€変腑鐨刱ey闆嗗悎
+    totalSizeCalculator: (List<MultiSelectItem>) -> String?, // 鎬诲ぇ灏忚绠楀櫒
+    onSelectionChange: (String, Boolean) -> Unit, // 閫夋嫨鍙樺寲鍥炶皟
+    onDismiss: () -> Unit, // 鍏抽棴鍥炶皟
+    onSelectAll: () -> Unit, // 鍏ㄩ€夊洖璋?
+    onDeselectAll: () -> Unit, // 鍏ㄤ笉閫夊洖璋?
+    headerAction: (@Composable () -> Unit)? = null, // 鏍囬鏍忓姩浣滄寜閽彃妲?(濡?妫€娴嬫牸寮?)
+    itemTrailing: (@Composable (MultiSelectItem) -> Unit)? = null, // 琛屽熬鍐呭鎻掓Ы (濡傞獙璇佺姸鎬佸浘鏍?
     headerContent: (@Composable () -> Unit)? = null,
-    onConfirm: (() -> Unit)? = null     // 确定按钮回调, 为空时确定按钮仅关闭弹窗
+    onConfirm: (() -> Unit)? = null, // 纭畾鎸夐挳鍥炶皟, 涓虹┖鏃剁‘瀹氭寜閽粎鍏抽棴寮圭獥
 ) {
     val topBarColor = pageTopBarColors().containerColor
     val cardColor = pageCardContainerColor()
-    
-    // 计算选中�?
+
+    // 璁＄畻閫変腑椤?
     val selectedItems = remember(groups, selectedKeys) {
         groups.flatMap { it.items }.filter { it.key in selectedKeys }
     }
-    
-    // 计算总大�?
+
+    // 璁＄畻鎬诲ぇ灏?
     val totalSize = remember(selectedItems) {
         totalSizeCalculator(selectedItems)
     }
-    
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             dismissOnBackPress = true,
-            dismissOnClickOutside = true
-        )
+            dismissOnClickOutside = true,
+        ),
     ) {
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
+        // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+        BoxWithConstraints(Modifier.fillMaxWidth().eInkGrayscale()) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .heightIn(max = maxHeight * 0.92f),
                 shape = MaterialTheme.shapes.large,
-                color = cardColor
+                color = cardColor,
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    // 标题�?
+                    // 鏍囬鏍?
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(topBarColor)
                             .padding(horizontal = 20.dp, vertical = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top
+                        verticalAlignment = Alignment.Top,
                     ) {
-                        // 左侧：标题和描述
+                        // 宸︿晶锛氭爣棰樺拰鎻忚堪
                         Column(
-                            modifier = Modifier.weight(1f, fill = false)
+                            modifier = Modifier.weight(1f, fill = false),
                         ) {
                             Text(
                                 text = title,
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
                             )
                             if (!description.isNullOrBlank()) {
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = description,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
 
-                        // 右侧：有动作按钮时放按钮（已选数量下移到底部），否则显示已选数�?
+                        // 鍙充晶锛氭湁鍔ㄤ綔鎸夐挳鏃舵斁鎸夐挳锛堝凡閫夋暟閲忎笅绉诲埌搴曢儴锛夛紝鍚﹀垯鏄剧ず宸查€夋暟閲?
                         if (headerAction != null) {
                             Box(
                                 modifier = Modifier
                                     .padding(start = 16.dp)
-                                    .align(Alignment.CenterVertically)
+                                    .align(Alignment.CenterVertically),
                             ) {
                                 headerAction()
                             }
@@ -147,18 +150,18 @@ fun MultiSelectDialogContent(
                                 text = stringResource(
                                     R.string.multi_select_selected_count,
                                     selectedItems.size,
-                                    groups.sumOf { it.items.size }
+                                    groups.sumOf { it.items.size },
                                 ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(start = 16.dp)
+                                modifier = Modifier.padding(start = 16.dp),
                             )
                         }
                     }
 
-                    // 项目列表
+                    // 椤圭洰鍒楄〃
                     headerContent?.invoke()
 
                     LazyColumn(
@@ -166,21 +169,21 @@ fun MultiSelectDialogContent(
                             .fillMaxWidth()
                             .weight(1f, fill = false)
                             .padding(vertical = 8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     ) {
-                        // 分组展示 (分组名为空时按平铺列表处�? 不渲染分组头)
+                        // 鍒嗙粍灞曠ず (鍒嗙粍鍚嶄负绌烘椂鎸夊钩閾哄垪琛ㄥ鐞? 涓嶆覆鏌撳垎缁勫ご)
                         groups.forEach { group ->
                             if (group.name.isNotBlank()) {
-                                // 分组标题
+                                // 鍒嗙粍鏍囬
                                 item {
                                     GroupHeader(
                                         groupName = group.name,
-                                        iconEmoji = group.iconEmoji
+                                        iconEmoji = group.iconEmoji,
                                     )
                                 }
                             }
 
-                            // 分组内的项目
+                            // 鍒嗙粍鍐呯殑椤圭洰
                             items(group.items, key = { it.key }) { item ->
                                 MultiSelectItemRow(
                                     item = item,
@@ -188,35 +191,35 @@ fun MultiSelectDialogContent(
                                     onSelectionChange = { isSelected ->
                                         onSelectionChange(item.key, isSelected)
                                     },
-                                    trailing = itemTrailing
+                                    trailing = itemTrailing,
                                 )
                             }
 
-                            // 分组间距
+                            // 鍒嗙粍闂磋窛
                             item {
                                 Spacer(modifier = Modifier.height(12.dp))
                             }
                         }
                     }
 
-                    // 底部信息区：总大小显示（在操作按钮上方）
-                    // 标题栏有动作按钮时，已选数量从标题栏下移到这里展示
+                    // 搴曢儴淇℃伅鍖猴細鎬诲ぇ灏忔樉绀猴紙鍦ㄦ搷浣滄寜閽笂鏂癸級
+                    // 鏍囬鏍忔湁鍔ㄤ綔鎸夐挳鏃讹紝宸查€夋暟閲忎粠鏍囬鏍忎笅绉诲埌杩欓噷灞曠ず
                     if (totalSize != null || headerAction != null) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             if (headerAction != null) {
                                 Text(
                                     text = stringResource(
                                         R.string.multi_select_selected_count,
                                         selectedItems.size,
-                                        groups.sumOf { it.items.size }
+                                        groups.sumOf { it.items.size },
                                     ),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                                 if (totalSize != null) {
                                     Spacer(modifier = Modifier.height(2.dp))
@@ -228,30 +231,30 @@ fun MultiSelectDialogContent(
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary,
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
                                 )
                             }
                         }
                     }
 
-                    // 操作按钮
+                    // 鎿嶄綔鎸夐挳
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 12.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         OutlinedButton(
                             onClick = onSelectAll,
                             modifier = Modifier
                                 .weight(1f)
-                                .defaultMinSize(minWidth = 96.dp)
+                                .defaultMinSize(minWidth = 96.dp),
                         ) {
                             Text(
                                 text = stringResource(R.string.select_all),
                                 maxLines = 2,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
                             )
                         }
 
@@ -259,12 +262,12 @@ fun MultiSelectDialogContent(
                             onClick = onDeselectAll,
                             modifier = Modifier
                                 .weight(1f)
-                                .defaultMinSize(minWidth = 96.dp)
+                                .defaultMinSize(minWidth = 96.dp),
                         ) {
                             Text(
                                 text = stringResource(R.string.un_select_all),
                                 maxLines = 2,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
                             )
                         }
 
@@ -272,12 +275,12 @@ fun MultiSelectDialogContent(
                             onClick = onConfirm ?: onDismiss,
                             modifier = Modifier
                                 .weight(1f)
-                                .defaultMinSize(minWidth = 96.dp)
+                                .defaultMinSize(minWidth = 96.dp),
                         ) {
                             Text(
                                 text = stringResource(R.string.ok),
                                 maxLines = 2,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
                             )
                         }
                     }
@@ -288,24 +291,24 @@ fun MultiSelectDialogContent(
 }
 
 /**
- * 分组标题
+ * 鍒嗙粍鏍囬
  */
 @Composable
 private fun GroupHeader(
     groupName: String,
-    iconEmoji: String?
+    iconEmoji: String?,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         if (iconEmoji != null) {
             Text(
                 text = iconEmoji,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = 8.dp),
             )
         }
 
@@ -316,55 +319,55 @@ private fun GroupHeader(
             color = MaterialTheme.colorScheme.primary,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false)
+            modifier = Modifier.weight(1f, fill = false),
         )
-        
+
         Divider(
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 8.dp),
             color = MaterialTheme.colorScheme.outlineVariant,
-            thickness = 1.dp
+            thickness = 1.dp,
         )
     }
 }
 
 /**
- * 多选项目行
+ * 澶氶€夐」鐩
  */
 @Composable
 private fun MultiSelectItemRow(
     item: MultiSelectItem,
     isSelected: Boolean,
     onSelectionChange: (Boolean) -> Unit,
-    trailing: (@Composable (MultiSelectItem) -> Unit)? = null
+    trailing: (@Composable (MultiSelectItem) -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        // 复选框
+        // 澶嶉€夋
         Checkbox(
             checked = isSelected,
             onCheckedChange = onSelectionChange,
-            modifier = Modifier.padding(end = 8.dp)
+            modifier = Modifier.padding(end = 8.dp),
         )
-        
-        // 内容区域
+
+        // 鍐呭鍖哄煙
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) {
-            // 主标题行
+            // 涓绘爣棰樿
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (item.iconEmoji != null) {
                     Text(
                         text = item.iconEmoji,
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(end = 6.dp)
+                        modifier = Modifier.padding(end = 6.dp),
                     )
                 }
 
@@ -379,16 +382,16 @@ private fun MultiSelectItemRow(
                     },
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false)
+                    modifier = Modifier.weight(1f, fill = false),
                 )
             }
-            
-            // 副标题和详细信息
+
+            // 鍓爣棰樺拰璇︾粏淇℃伅
             Row(
                 modifier = Modifier.padding(top = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                // 副标�?(文件�?
+                // 鍓爣棰?(鏂囦欢鍚?
                 if (item.subtitle != null) {
                     Text(
                         text = item.subtitle,
@@ -396,40 +399,40 @@ private fun MultiSelectItemRow(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
+                        modifier = Modifier.weight(1f, fill = false),
                     )
                 }
 
-                // 数量信息
+                // 鏁伴噺淇℃伅
                 if (item.count != null) {
                     Surface(
                         color = MaterialTheme.colorScheme.secondaryContainer,
-                        shape = MaterialTheme.shapes.extraSmall
+                        shape = MaterialTheme.shapes.extraSmall,
                     ) {
                         Text(
                             text = item.count,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             maxLines = 1,
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
                         )
                     }
                 }
 
-                // 大小信息
+                // 澶у皬淇℃伅
                 if (item.size != null) {
                     Text(
                         text = item.size,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Medium,
-                        maxLines = 1
+                        maxLines = 1,
                     )
                 }
             }
         }
 
-        // 行尾插槽 (如验证状态图�?
+        // 琛屽熬鎻掓Ы (濡傞獙璇佺姸鎬佸浘鏍?
         trailing?.invoke(item)
     }
 }

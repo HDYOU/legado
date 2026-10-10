@@ -237,7 +237,8 @@ private fun CustomHelpDocManageContent(
         ),
     ) {
         Surface(
-            modifier = Modifier
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = Modifier.eInkGrayscale()
                 .fillMaxWidth()
                 .heightIn(max = 620.dp),
             color = MaterialTheme.colorScheme.surface,

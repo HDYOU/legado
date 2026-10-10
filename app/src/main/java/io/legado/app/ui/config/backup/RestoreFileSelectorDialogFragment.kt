@@ -1,5 +1,7 @@
 package io.legado.app.ui.config.backup
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import android.os.Bundle
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -82,7 +84,7 @@ class RestoreFileSelectorDialogFragment : BaseComposeDialogFragment() {
         if (uiState.isRestoring) {
             RestoreProgressDialog(
                 progress = uiState.restoreProgress,
-                onCancel = { dismiss() }
+                onCancel = { dismiss() },
             )
             return
         }
@@ -98,10 +100,10 @@ class RestoreFileSelectorDialogFragment : BaseComposeDialogFragment() {
                             title = file.displayName,
                             size = BackupInfoHelper.formatSize(file.size),
                             rawSize = file.size,
-                            group = ""
+                            group = "",
                         )
-                    }
-                )
+                    },
+                ),
             )
         }
 
@@ -119,7 +121,7 @@ class RestoreFileSelectorDialogFragment : BaseComposeDialogFragment() {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(18.dp),
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(stringResource(R.string.fvd_detect_format))
@@ -128,16 +130,16 @@ class RestoreFileSelectorDialogFragment : BaseComposeDialogFragment() {
             itemTrailing = { item ->
                 ValidationStatusTrailing(
                     result = uiState.validationResults[item.key],
-                    onInfoClick = { viewModel.showValidationDetail(item.key) }
+                    onInfoClick = { viewModel.showValidationDetail(item.key) },
                 )
             },
-            onConfirm = { viewModel.restoreSelected(backupPath) }
+            onConfirm = { viewModel.restoreSelected(backupPath) },
         )
 
         uiState.detailResult?.let { result ->
             ValidationErrorDetailDialog(
                 result = result,
-                onDismiss = { viewModel.hideValidationDetail() }
+                onDismiss = { viewModel.hideValidationDetail() },
             )
         }
     }
@@ -145,11 +147,9 @@ class RestoreFileSelectorDialogFragment : BaseComposeDialogFragment() {
     companion object {
         private const val ARG_BACKUP_PATH = "backupPath"
 
-        fun newInstance(backupPath: String): RestoreFileSelectorDialogFragment {
-            return RestoreFileSelectorDialogFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_BACKUP_PATH, backupPath)
-                }
+        fun newInstance(backupPath: String): RestoreFileSelectorDialogFragment = RestoreFileSelectorDialogFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_BACKUP_PATH, backupPath)
             }
         }
     }
@@ -163,53 +163,53 @@ class RestoreFileSelectorDialogFragment : BaseComposeDialogFragment() {
 @Composable
 private fun ValidationStatusTrailing(
     result: ValidationResult?,
-    onInfoClick: () -> Unit
+    onInfoClick: () -> Unit,
 ) {
     when (result?.state) {
         ValidationState.VALID -> Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = stringResource(R.string.fvd_valid),
             tint = Color(0xFF4CAF50),
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
         )
 
         ValidationState.WARNING -> {
             IconButton(
                 onClick = onInfoClick,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(32.dp),
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Help,
                     contentDescription = stringResource(R.string.fvd_view_details),
                     tint = Color(0xFFFF9800),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
             }
             Icon(
                 imageVector = Icons.Default.Warning,
                 contentDescription = stringResource(R.string.fvd_warning),
                 tint = Color(0xFFFF9800),
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             )
         }
 
         ValidationState.ERROR -> {
             IconButton(
                 onClick = onInfoClick,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(32.dp),
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Help,
                     contentDescription = stringResource(R.string.fvd_view_details),
                     tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
             }
             Icon(
                 imageVector = Icons.Default.Error,
                 contentDescription = stringResource(R.string.fvd_invalid),
                 tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             )
         }
 
@@ -217,7 +217,7 @@ private fun ValidationStatusTrailing(
             imageVector = Icons.Default.HourglassEmpty,
             contentDescription = stringResource(R.string.fvd_validating),
             tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
         )
 
         else -> {}
@@ -230,31 +230,35 @@ private fun ValidationStatusTrailing(
 @Composable
 private fun RestoreProgressDialog(
     progress: String,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
 ) {
     Dialog(
         onDismissRequest = {},
-        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
     ) {
         Card(
-            modifier = Modifier
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = Modifier.eInkGrayscale()
                 .fillMaxWidth()
                 .wrapContentHeight(),
             shape = MaterialTheme.shapes.large,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 CircularProgressIndicator()
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = if (progress.isNotEmpty()) progress
-                    else stringResource(R.string.fvd_restoring),
-                    style = MaterialTheme.typography.bodyMedium
+                    text = if (progress.isNotEmpty()) {
+                        progress
+                    } else {
+                        stringResource(R.string.fvd_restoring)
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 TextButton(onClick = onCancel) {

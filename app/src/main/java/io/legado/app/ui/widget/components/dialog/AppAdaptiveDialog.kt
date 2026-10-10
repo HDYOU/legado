@@ -1,5 +1,7 @@
 package io.legado.app.ui.widget.components.dialog
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -48,21 +50,22 @@ fun AppAdaptiveDialog(
     maxWidth: Dp = 560.dp,
     maxHeightFraction: Float = 0.9f,
     buttons: (@Composable RowScope.() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties()
+        properties = DialogProperties(),
     ) {
         AppAdaptiveDialogPanel(
             title = title,
-            modifier = modifier,
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = modifier.eInkGrayscale(),
             description = description,
             minWidth = minWidth,
             maxWidth = maxWidth,
             maxHeightFraction = maxHeightFraction,
             buttons = buttons,
-            content = content
+            content = content,
         )
     }
 }
@@ -79,11 +82,11 @@ private fun AppAdaptiveDialogPanel(
     maxWidth: Dp = 560.dp,
     maxHeightFraction: Float = 0.9f,
     buttons: (@Composable RowScope.() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     BoxWithConstraints(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Surface(
             modifier = modifier
@@ -92,35 +95,35 @@ private fun AppAdaptiveDialogPanel(
                 .wrapContentHeight()
                 .heightIn(max = maxHeight * maxHeightFraction),
             shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.surfaceContainerHigh
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
                 Text(
                     text = title,
                     modifier = Modifier.padding(bottom = 16.dp),
                     style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 if (!description.isNullOrBlank()) {
                     Text(
                         text = description,
                         modifier = Modifier.padding(bottom = 24.dp),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                //fill = false：内容少时面板跟着收起来，内容多时最多占满剩余空间（由调用方滚动）
+                // fill = false：内容少时面板跟着收起来，内容多时最多占满剩余空间（由调用方滚动）
                 Column(
                     modifier = Modifier
                         .weight(1f, fill = false)
-                        .padding(bottom = 24.dp)
+                        .padding(bottom = 24.dp),
                 ) {
                     content()
                 }
                 if (buttons != null) {
                     Row(
                         modifier = Modifier.align(Alignment.End),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         buttons()
                     }

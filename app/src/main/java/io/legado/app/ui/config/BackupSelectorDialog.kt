@@ -1,5 +1,7 @@
 package io.legado.app.ui.config
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +24,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -56,7 +57,7 @@ fun BackupSelectorDialog(
     initialChecked: Map<String, Boolean>,
     itemSizes: Map<String, Long> = emptyMap(),
     onApply: (Map<String, Boolean>) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val checkedStates = remember(items) {
         mutableStateMapOf<String, Boolean>().apply {
@@ -70,14 +71,15 @@ fun BackupSelectorDialog(
             onApply(checkedStates.toMap())
             onDismiss()
         },
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Box(
-            modifier = Modifier
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = Modifier.eInkGrayscale()
                 .fillMaxSize()
                 .systemBarsPadding()
                 .padding(horizontal = 14.dp, vertical = 14.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Card(
                 modifier = Modifier
@@ -85,14 +87,14 @@ fun BackupSelectorDialog(
                     .fillMaxHeight(0.88f),
                 shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface,
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     BackupSelectorHeader(
                         selectedCount = selectedCount,
-                        totalCount = items.size
+                        totalCount = items.size,
                     )
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -101,14 +103,14 @@ fun BackupSelectorDialog(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
-                        contentPadding = PaddingValues(vertical = 6.dp)
+                        contentPadding = PaddingValues(vertical = 6.dp),
                     ) {
                         items(items, key = { it.key }) { item ->
                             BackupSelectorRow(
                                 item = item,
                                 checked = checkedStates[item.key] == true,
                                 size = itemSizes[item.key],
-                                onCheckedChange = { checkedStates[item.key] = it }
+                                onCheckedChange = { checkedStates[item.key] = it },
                             )
                         }
                     }
@@ -125,7 +127,7 @@ fun BackupSelectorDialog(
                         },
                         onSelectAll = {
                             items.forEach { checkedStates[it.key] = true }
-                        }
+                        },
                     )
                 }
             }
@@ -136,17 +138,17 @@ fun BackupSelectorDialog(
 @Composable
 private fun BackupSelectorHeader(
     selectedCount: Int,
-    totalCount: Int
+    totalCount: Int,
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 22.dp, vertical = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = stringResource(R.string.backup_selector),
@@ -155,7 +157,7 @@ private fun BackupSelectorHeader(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = "已选 $selectedCount/$totalCount",
@@ -163,7 +165,7 @@ private fun BackupSelectorHeader(
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(start = 12.dp),
-                maxLines = 1
+                maxLines = 1,
             )
         }
     }
@@ -174,41 +176,41 @@ private fun BackupSelectorRow(
     item: BackupSelectorConfig.BackupItem,
     checked: Boolean,
     size: Long?,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!checked) }
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(
             checked = checked,
             onCheckedChange = onCheckedChange,
             modifier = Modifier.size(44.dp),
             colors = CheckboxDefaults.colors(
-                checkedColor = MaterialTheme.colorScheme.primary
-            )
+                checkedColor = MaterialTheme.colorScheme.primary,
+            ),
         )
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 10.dp)
+                .padding(start = 10.dp),
         ) {
             Text(
                 text = item.title,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = item.group,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
         }
         Text(
@@ -218,7 +220,7 @@ private fun BackupSelectorRow(
             modifier = Modifier.padding(start = 12.dp),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.End
+            textAlign = TextAlign.End,
         )
     }
 }
@@ -227,18 +229,18 @@ private fun BackupSelectorRow(
 private fun BackupSelectorActions(
     onConfirm: () -> Unit,
     onSelectNone: () -> Unit,
-    onSelectAll: () -> Unit
+    onSelectAll: () -> Unit,
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp
+        tonalElevation = 2.dp,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(onClick = onConfirm) {
                 Text(text = stringResource(R.string.ok))

@@ -1,5 +1,7 @@
 package io.legado.app.ui.main.bookshelf
 
+import io.legado.app.lib.theme.eInkGrayscale
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -77,7 +79,8 @@ internal fun BookTagAddDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(
-            modifier = modifier
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = modifier.eInkGrayscale()
                 .fillMaxWidth(0.94f)
                 .fillMaxHeight(0.82f)
                 .widthIn(max = 620.dp),
@@ -255,7 +258,8 @@ internal fun BookTagAssignmentDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(
-            modifier = modifier
+            // 弹层是独立窗口，页面那层灰阶罩不到，这里再贴一次
+            modifier = modifier.eInkGrayscale()
                 .fillMaxWidth(0.96f)
                 .fillMaxHeight(0.90f)
                 .widthIn(max = 700.dp),
