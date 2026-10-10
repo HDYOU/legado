@@ -26,15 +26,12 @@ class RssSortViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule(StandardTestDispatcher())
 
-    private fun source(url: String, style: Int = 0, name: String = "") =
-        RssSource(sourceUrl = url, sourceName = name, articleStyle = style)
+    private fun source(url: String, style: Int = 0, name: String = "") = RssSource(sourceUrl = url, sourceName = name, articleStyle = style)
 
-    private fun record(record: String, origin: String) =
-        RssReadRecord(record = record, origin = origin)
+    private fun record(record: String, origin: String) = RssReadRecord(record = record, origin = origin)
 
     /** 注入与 Main 共享时钟的测试调度器，保证 advanceUntilIdle 收敛 body 队列 */
-    private fun newViewModel(repository: FakeRssSortRepository) =
-        RssSortViewModel(repository, StandardTestDispatcher(mainDispatcherRule.dispatcher.scheduler))
+    private fun newViewModel(repository: FakeRssSortRepository) = RssSortViewModel(repository, StandardTestDispatcher(mainDispatcherRule.dispatcher.scheduler))
 
     @Test
     fun `initData 加载已存在源并设置各字段`() = runTest(mainDispatcherRule.dispatcher) {
@@ -209,8 +206,7 @@ private class FakeRssSortRepository : RssSortRepository {
         deletedArticles += sourceUrl
     }
 
-    override fun getRecords(origin: String?): List<RssReadRecord> =
-        if (origin == null) records else records.filter { it.origin == origin }
+    override fun getRecords(origin: String?): List<RssReadRecord> = if (origin == null) records else records.filter { it.origin == origin }
 
     override fun countRecords(origin: String?): Int = getRecords(origin).size
 

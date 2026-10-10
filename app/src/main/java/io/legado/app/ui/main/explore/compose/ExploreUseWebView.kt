@@ -39,7 +39,6 @@ import io.legado.app.help.webView.WebJsExtensions.Companion.buildUseWebInjection
 import io.legado.app.help.webView.WebJsExtensions.Companion.nameCache
 import io.legado.app.help.webView.WebJsExtensions.Companion.nameJava
 import io.legado.app.help.webView.WebJsExtensions.Companion.nameSource
-import io.legado.app.help.webView.WebJsExtensions.Companion.wrapUseWebHtml
 import io.legado.app.help.webView.WebViewPool
 import io.legado.app.help.webView.WebViewPool.currentInlineContentGeneration
 import io.legado.app.help.webView.WebViewPool.installInlineContentRefitOnTouch
@@ -215,15 +214,13 @@ private fun syncExploreWebHeight(webView: WebView, onHeightMeasured: (Int) -> Un
     }
 }
 
-private fun createLoadingIndicator(context: Context, heightPx: Int): ProgressBar {
-    return ProgressBar(context).apply {
-        layoutParams = FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            heightPx,
-            Gravity.CENTER,
-        )
-        indeterminateTintList = ColorStateList.valueOf(context.accentColor)
-    }
+private fun createLoadingIndicator(context: Context, heightPx: Int): ProgressBar = ProgressBar(context).apply {
+    layoutParams = FrameLayout.LayoutParams(
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        heightPx,
+        Gravity.CENTER,
+    )
+    indeterminateTintList = ColorStateList.valueOf(context.accentColor)
 }
 
 /**
@@ -251,8 +248,7 @@ private class ExploreInlineWebViewClient(
     }
 
     /** 当前 WebView 是否仍是本客户端所属的那一代内容（池化复用/回收后即为 false） */
-    private fun isCurrent(webView: WebView): Boolean =
-        currentInlineContentGeneration(webView) == generation
+    private fun isCurrent(webView: WebView): Boolean = currentInlineContentGeneration(webView) == generation
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         request?.let {
@@ -342,9 +338,7 @@ private fun buildExploreUseWebStateKey(
     }
 }
 
-private fun buildExploreUseWebLayoutKey(stateKey: String, page: Int): String {
-    return "${stateKey}_layout_${page.coerceAtLeast(1)}"
-}
+private fun buildExploreUseWebLayoutKey(stateKey: String, page: Int): String = "${stateKey}_layout_${page.coerceAtLeast(1)}"
 
 /** 上下文签名：排除 `page` 字段后对 infoMap 签名，用于判断"同一份内容的不同上下文" */
 private fun buildExploreUseWebContextSignature(infoMap: InfoMap?): String {

@@ -83,7 +83,7 @@ fun BookBottomSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    
+
     // 预先获取字符串资源，避免在onClick中调用stringResource
     val addedToBookshelfMsg = stringResource(R.string.added_to_bookshelf, book?.name ?: "")
     val alreadyInBookshelfText = stringResource(R.string.already_in_bookshelf)
@@ -104,7 +104,7 @@ fun BookBottomSheet(
             // 导致内容顶 padding → sheet 高度 → Expanded 锚点(fullHeight-sheetHeight) 联动。
             // 简介较长等接近满屏时形成正反馈，滚动内容时整个弹窗持续上下抖动；
             // 去掉 Top 侧即可切断该反馈回路。
-            contentWindowInsets = { WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom) }
+            contentWindowInsets = { WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom) },
         ) {
             // 顶部用不受消耗链影响的静态状态栏高度补偿（asPaddingValues 不扣除
             // consumeWindowInsets 传入的 offset），满屏时标题不会顶到状态栏下
@@ -116,14 +116,14 @@ fun BookBottomSheet(
                     .padding(top = statusBarTop)
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp)
-                    .verticalScroll(scrollState)
+                    .verticalScroll(scrollState),
             ) {
                 // 书籍信息区域
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     // 封面图片
                     AndroidView(
@@ -138,7 +138,7 @@ fun BookBottomSheet(
                         },
                         update = { view ->
                             view.load(book, AppConfig.loadCoverOnlyWifi)
-                        }
+                        },
                     )
 
                     // 书籍基本信息
@@ -146,14 +146,14 @@ fun BookBottomSheet(
                         modifier = Modifier
                             .weight(1f)
                             .align(Alignment.Top),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         // 书名
                         Text(
                             text = book.name,
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
 
                         // 作者
@@ -161,7 +161,7 @@ fun BookBottomSheet(
                             Text(
                                 text = stringResource(R.string.author_show, book.author),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
 
@@ -171,14 +171,14 @@ fun BookBottomSheet(
                                 text = "✓ ${stringResource(R.string.already_in_bookshelf)}",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
                             )
                         } else if (shelfState == BookShelfState.SAME_NAME_AUTHOR) {
                             Text(
                                 text = "! ${stringResource(R.string.same_name_book_in_shelf)}",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
                             )
                         }
                     }
@@ -190,14 +190,14 @@ fun BookBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // 详细信息区域
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     // 分类（带外框）
                     val kindText = book.kind
@@ -221,7 +221,7 @@ fun BookBottomSheet(
                     if (book.originName.isNotBlank()) {
                         InfoRow(
                             label = if (isRssArticle) stringResource(R.string.rss_source) else stringResource(R.string.book_source),
-                            value = book.originName
+                            value = book.originName,
                         )
                     }
                 }
@@ -236,7 +236,7 @@ fun BookBottomSheet(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
-                                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
@@ -244,14 +244,14 @@ fun BookBottomSheet(
                             text = stringResource(R.string.intro),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = trimmedIntro,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -265,7 +265,7 @@ fun BookBottomSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         // 加入收藏按钮
                         TextButton(
@@ -273,17 +273,17 @@ fun BookBottomSheet(
                                 onAddToFavorites?.invoke(book)
                                 onDismiss()
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = addToFavoritesText,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = addToFavoritesText,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
 
@@ -293,17 +293,17 @@ fun BookBottomSheet(
                                 onViewContent?.invoke(book)
                                 onDismiss()
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Info,
                                 contentDescription = viewContentText,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = viewContentText,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -313,7 +313,7 @@ fun BookBottomSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         // 加入书架按钮
                         TextButton(
@@ -322,18 +322,21 @@ fun BookBottomSheet(
                                 Toast.makeText(context, addedToBookshelfMsg, Toast.LENGTH_SHORT).show()
                                 onDismiss()
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = addToBookshelfText,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = if (shelfState == BookShelfState.IN_SHELF) alreadyInBookshelfText 
-                                       else addToBookshelfText,
-                                color = MaterialTheme.colorScheme.primary
+                                text = if (shelfState == BookShelfState.IN_SHELF) {
+                                    alreadyInBookshelfText
+                                } else {
+                                    addToBookshelfText
+                                },
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
 
@@ -343,17 +346,17 @@ fun BookBottomSheet(
                                 onShowInfo(book)
                                 onDismiss()
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Info,
                                 contentDescription = viewDetailsText,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = viewDetailsText,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -370,11 +373,11 @@ fun BookBottomSheet(
 @Composable
 private fun InfoRow(
     label: String,
-    value: String
+    value: String,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
             text = "$label:",
@@ -382,7 +385,7 @@ private fun InfoRow(
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
-            softWrap = false
+            softWrap = false,
         )
         Text(
             text = value,
@@ -390,7 +393,7 @@ private fun InfoRow(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
             maxLines = Int.MAX_VALUE,
-            softWrap = true
+            softWrap = true,
         )
     }
 }
@@ -403,11 +406,11 @@ private fun InfoRow(
 @Composable
 private fun CategoryRow(
     label: String,
-    value: String
+    value: String,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         // 标签
         Text(
@@ -416,7 +419,7 @@ private fun CategoryRow(
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
-            softWrap = false
+            softWrap = false,
         )
         // 分类值（每个单独有外框）
         // 使用 splitNotBlank 方法分隔分类值（与书架标签一致，使用逗号和换行符）
@@ -424,7 +427,7 @@ private fun CategoryRow(
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             for (category in categories) {
                 Text(
@@ -434,16 +437,16 @@ private fun CategoryRow(
                     modifier = Modifier
                         .background(
                             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(8.dp),
                         )
                         .border(
                             width = 0.5.dp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(8.dp),
                         )
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     maxLines = Int.MAX_VALUE,
-                    softWrap = true
+                    softWrap = true,
                 )
             }
         }

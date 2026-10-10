@@ -1,8 +1,6 @@
 package io.legado.app.ui.main.explore.compose
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,18 +10,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -77,8 +70,7 @@ private data class ModernTagItem(
  * select/button/text/toggle 的 url 是模板/脚本（多数书源干脆留空），只进「发现页管理」表单，
  * 所以分组条是否显示某个分组，也要按这个口径判断——只有它下面存在这种可加载项才值得列出来。
  */
-private fun ModernTagItem.isLoadableTag(): Boolean =
-    url != null && kind.type == ExploreKind.Type.url
+private fun ModernTagItem.isLoadableTag(): Boolean = url != null && kind.type == ExploreKind.Type.url
 
 /** 分类项解析结果：标签项 + 大分组表头（表头的 style 供分组展开弹窗按书源声明排布宽度） */
 private class ModernTagModel(
@@ -239,7 +231,7 @@ fun ModernExploreContent(
             onLogin = onLogin,
             onEditSource = onEditSource,
             onSearchSource = onSearchSource,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         // 大分组条：仅当书源声明了整行分组项时显示
         if (currentGroupValue != null) {
@@ -248,7 +240,7 @@ fun ModernExploreContent(
                 selectedIndex = groups.indexOf(currentGroupValue),
                 onSelect = { index -> selectGroup(groups.getOrNull(index)) },
                 onExpand = { showGroupPicker = true },
-                showExpand = groups.size >= TAG_EXPAND_THRESHOLD
+                showExpand = groups.size >= TAG_EXPAND_THRESHOLD,
             )
         }
         // 当前分组的 url 类标签条
@@ -263,12 +255,12 @@ fun ModernExploreContent(
                 }
             },
             onExpand = { showTagPicker = true },
-            showExpand = tagItems.size >= TAG_EXPAND_THRESHOLD
+            showExpand = tagItems.size >= TAG_EXPAND_THRESHOLD,
         )
         Box(
             Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f),
         ) {
             ExploreShowListContent(
                 controller = controller,
@@ -278,7 +270,7 @@ fun ModernExploreContent(
                     sheetShelfState = controller.getBookShelfState(book)
                     showBookSheet = true
                 },
-                bottomPaddingPx = bottomPaddingPx
+                bottomPaddingPx = bottomPaddingPx,
             )
             if (showBlockProgress && controller.blockedCount > 0) {
                 BlockProgressChip(
@@ -289,8 +281,8 @@ fun ModernExploreContent(
                         .padding(
                             start = AppDimens.exploreShowBlockChipOuterHorizontal,
                             top = AppDimens.exploreShowBlockChipOuterTop,
-                            end = AppDimens.exploreShowBlockChipOuterHorizontal
-                        )
+                            end = AppDimens.exploreShowBlockChipOuterHorizontal,
+                        ),
                 )
             }
         }
@@ -305,7 +297,7 @@ fun ModernExploreContent(
                 showSourcePicker = false
                 sources.getOrNull(index)?.let(onSelectSource)
             },
-            onDismissRequest = { showSourcePicker = false }
+            onDismissRequest = { showSourcePicker = false },
         )
     }
 
@@ -324,7 +316,7 @@ fun ModernExploreContent(
                 }
             },
             onDismissRequest = { showTagPicker = false },
-            itemSpecs = tagSpecs
+            itemSpecs = tagSpecs,
         )
     }
 
@@ -338,7 +330,7 @@ fun ModernExploreContent(
                 selectGroup(groups.getOrNull(index))
             },
             onDismissRequest = { showGroupPicker = false },
-            itemSpecs = groupSpecs
+            itemSpecs = groupSpecs,
         )
     }
 
@@ -352,7 +344,7 @@ fun ModernExploreContent(
                 selectedTagUrl = url
                 controller.loadExploreUrl(url, title)
             },
-            onDismiss = { showSettingsSheet = false }
+            onDismiss = { showSettingsSheet = false },
         )
     }
 
@@ -363,7 +355,7 @@ fun ModernExploreContent(
             shelfState = sheetShelfState,
             onDismiss = { showBookSheet = false },
             onAddToShelf = { actions.addToShelf(it) },
-            onShowInfo = { actions.onShowBookInfo(it) }
+            onShowInfo = { actions.onShowBookInfo(it) },
         )
     }
 }
@@ -407,13 +399,13 @@ private fun ModernExploreHeader(
             // 自占旧版 TitleBar 的高度（状态栏 inset + 56dp toolbar），内容垂直居中
             .height(AppDimens.topBarHeight)
             .padding(horizontal = AppDimens.exploreShowTabsHorizontalPadding),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
             modifier = Modifier
                 .weight(1f)
                 .clickable(onClick = onPickSource),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = currentName,
@@ -422,13 +414,13 @@ private fun ModernExploreHeader(
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false)
+                modifier = Modifier.weight(1f, fill = false),
             )
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_drop_down),
                 contentDescription = stringResource(R.string.discovery),
                 tint = topBarColors.contentColor,
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(28.dp),
             )
         }
         // 搜索书籍：图标入口，放在「发现页管理」左侧（此前收在三点菜单里）
@@ -437,7 +429,7 @@ private fun ModernExploreHeader(
                 Icon(
                     painter = painterResource(R.drawable.ic_search),
                     contentDescription = stringResource(R.string.search),
-                    tint = topBarColors.contentColor
+                    tint = topBarColors.contentColor,
                 )
             }
         }
@@ -447,7 +439,7 @@ private fun ModernExploreHeader(
                     // 发现页管理=筛选/调节参数表单：用调节滑杆，比通用齿轮更贴语义
                     painter = painterResource(R.drawable.ic_tune),
                     contentDescription = stringResource(R.string.setting),
-                    tint = topBarColors.contentColor
+                    tint = topBarColors.contentColor,
                 )
             }
         }
@@ -456,26 +448,26 @@ private fun ModernExploreHeader(
                 Icon(
                     painter = painterResource(R.drawable.ic_more_vert),
                     contentDescription = stringResource(R.string.more),
-                    tint = topBarColors.contentColor
+                    tint = topBarColors.contentColor,
                 )
             }
             DropdownMenu(
                 expanded = showMoreMenu,
-                onDismissRequest = { showMoreMenu = false }
+                onDismissRequest = { showMoreMenu = false },
             ) {
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.menu_page, controller.currentPage)) },
                     onClick = {
                         showMoreMenu = false
                         actions.onPagePick(controller.currentPage) { controller.skipPageTo(it) }
-                    }
+                    },
                 )
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.refresh)) },
                     onClick = {
                         showMoreMenu = false
                         onRefreshSource()
-                    }
+                    },
                 )
                 if (hasLoginUrl) {
                     DropdownMenuItem(
@@ -483,7 +475,7 @@ private fun ModernExploreHeader(
                         onClick = {
                             showMoreMenu = false
                             onLogin()
-                        }
+                        },
                     )
                 }
                 DropdownMenuItem(
@@ -491,7 +483,7 @@ private fun ModernExploreHeader(
                     onClick = {
                         showMoreMenu = false
                         actions.onAddAllToShelfClick()
-                    }
+                    },
                 )
                 DropdownMenuItem(
                     text = {
@@ -505,7 +497,7 @@ private fun ModernExploreHeader(
                     onClick = {
                         showMoreMenu = false
                         controller.switchLayout()
-                    }
+                    },
                 )
                 // 列表布局没有列数概念，不显示选列入口
                 if (controller.layoutMode != EXPLORE_LAYOUT_LIST) {
@@ -516,7 +508,7 @@ private fun ModernExploreHeader(
                             actions.onColumnPick(controller.effectiveColumnCount()) {
                                 controller.selectColumnCount(it)
                             }
-                        }
+                        },
                     )
                 }
                 DropdownMenuItem(
@@ -524,7 +516,7 @@ private fun ModernExploreHeader(
                     onClick = {
                         showMoreMenu = false
                         actions.onShowBlockRuleClick()
-                    }
+                    },
                 )
                 // 与旧版长按书源菜单里的「编辑」同一动作，作用于当前选中的书源
                 DropdownMenuItem(
@@ -532,14 +524,14 @@ private fun ModernExploreHeader(
                     onClick = {
                         showMoreMenu = false
                         onEditSource()
-                    }
+                    },
                 )
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.switch_to_old_explore)) },
                     onClick = {
                         showMoreMenu = false
                         onSwitchLegacy()
-                    }
+                    },
                 )
             }
         }
@@ -593,7 +585,7 @@ private fun ModernExploreSettingsSheet(
                     val style = item.kind.style()
                     FlexWrapItemSpec(
                         style = style,
-                        fillLine = style.layout_flexBasisPercent < 0f && style.layout_flexGrow <= 0f
+                        fillLine = style.layout_flexBasisPercent < 0f && style.layout_flexGrow <= 0f,
                     )
                 },
                 // 表单读的是字，不是分类区的胶囊流：项间距按参考分支 RowUiForm 的 margin
@@ -626,7 +618,7 @@ private fun ModernExploreSettingsSheet(
                 Text(text = stringResource(R.string.confirm))
             }
         },
-        dismissButton = {}
+        dismissButton = {},
     )
 }
 
@@ -659,7 +651,7 @@ private fun buildModernTagItems(
                     text = group,
                     url = null,
                     group = group,
-                    kind = kind
+                    kind = kind,
                 )
             }
             if (!url.isNullOrBlank()) {
@@ -667,7 +659,7 @@ private fun buildModernTagItems(
                     text = allLabel,
                     url = url,
                     group = group,
-                    kind = kind
+                    kind = kind,
                 )
             }
             return@forEach
@@ -678,19 +670,22 @@ private fun buildModernTagItems(
                 text = kind.title,
                 url = url,
                 group = currentGroup,
-                kind = kind
+                kind = kind,
             )
             return@forEach
         }
 
-        if (isSelect || isButton || kind.type == ExploreKind.Type.text ||
-            kind.type == ExploreKind.Type.toggle || !action.isNullOrBlank()
+        if (isSelect ||
+            isButton ||
+            kind.type == ExploreKind.Type.text ||
+            kind.type == ExploreKind.Type.toggle ||
+            !action.isNullOrBlank()
         ) {
             result += ModernTagItem(
                 text = kind.title,
                 url = url,
                 group = currentGroup,
-                kind = kind
+                kind = kind,
             )
         }
     }
@@ -702,7 +697,7 @@ private fun buildModernTagItems(
         items = result
             .map { if (it.group == null) it.copy(group = otherLabel) else it }
             .distinctBy { "${it.group}|${it.kind.type}|${it.kind.title}|${it.kind.url}|${it.kind.action}" },
-        groupHeaders = groupHeaders
+        groupHeaders = groupHeaders,
     )
 }
 
@@ -750,11 +745,9 @@ private fun isModernMajorGroupKind(kind: ExploreKind, hasStartedGroup: Boolean):
 }
 
 /** 设置表单内容：select / text / toggle / button（含 action）类 */
-private fun buildModernSettingItems(items: List<ModernTagItem>): List<ModernTagItem> {
-    return items.filter {
-        it.kind.type == ExploreKind.Type.select ||
-            it.kind.type == ExploreKind.Type.text ||
-            it.kind.type == ExploreKind.Type.toggle ||
-            (it.kind.type == ExploreKind.Type.button && !it.kind.action.isNullOrBlank())
-    }
+private fun buildModernSettingItems(items: List<ModernTagItem>): List<ModernTagItem> = items.filter {
+    it.kind.type == ExploreKind.Type.select ||
+        it.kind.type == ExploreKind.Type.text ||
+        it.kind.type == ExploreKind.Type.toggle ||
+        (it.kind.type == ExploreKind.Type.button && !it.kind.action.isNullOrBlank())
 }

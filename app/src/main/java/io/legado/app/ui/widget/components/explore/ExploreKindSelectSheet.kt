@@ -110,10 +110,13 @@ fun ExploreKindSelectSheet(
 
     // 搜索过滤
     val filteredKinds = remember(query, kinds) {
-        if (query.isBlank()) kinds
-        else kinds.filter { kind ->
-            kind.title.contains(query, ignoreCase = true) ||
+        if (query.isBlank()) {
+            kinds
+        } else {
+            kinds.filter { kind ->
+                kind.title.contains(query, ignoreCase = true) ||
                     (kind.url?.contains(query, ignoreCase = true) == true)
+            }
         }
     }
 
@@ -137,7 +140,7 @@ fun ExploreKindSelectSheet(
         // 导致内容顶 padding → sheet 高度 → Expanded 锚点(fullHeight-sheetHeight) 联动。
         // 分类较多时内容高度接近满屏，形成正反馈，滑动列表时整个弹窗持续上下抖动；
         // 去掉 Top 侧即可切断该反馈回路。
-        contentWindowInsets = { WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom) }
+        contentWindowInsets = { WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom) },
     ) {
         // 顶部用不受消耗链影响的静态状态栏高度补偿（asPaddingValues 不扣除
         // consumeWindowInsets 传入的 offset），满屏时标题不会顶到状态栏下
@@ -148,13 +151,13 @@ fun ExploreKindSelectSheet(
                 .padding(top = statusBarTop)
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 32.dp)
-                .heightIn(max = maxHeight)
+                .heightIn(max = maxHeight),
         ) {
             // ---- 标题栏（对标 MD3-main AppModalBottomSheet header） ----
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+                    .padding(bottom = 16.dp),
             ) {
                 Text(
                     text = stringResource(R.string.homepage_select_category),
@@ -164,7 +167,7 @@ fun ExploreKindSelectSheet(
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 // 多选模式：标题栏右侧显示确认按钮
                 if (multiple && selectedUrls.isNotEmpty()) {
@@ -177,7 +180,7 @@ fun ExploreKindSelectSheet(
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = stringResource(R.string.confirm),
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -191,14 +194,14 @@ fun ExploreKindSelectSheet(
                 placeholder = {
                     Text(
                         text = stringResource(R.string.homepage_search_or_select_category),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
                 singleLine = true,
@@ -212,19 +215,19 @@ fun ExploreKindSelectSheet(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+                    .padding(bottom = 8.dp),
             )
 
             // ---- 分类网格列表（对标 MD3-main 6 列加权网格） ----
             LazyColumn(
-                contentPadding = PaddingValues(vertical = 8.dp)
+                contentPadding = PaddingValues(vertical = 8.dp),
             ) {
                 items(kindRows) { rowItems ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         rowItems.forEach { (kind, span) ->
                             val key = kindUrl(kind)
@@ -244,7 +247,7 @@ fun ExploreKindSelectSheet(
                                         onSelected(listOf(kind))
                                         onDismissRequest()
                                     }
-                                }
+                                },
                             )
                         }
                         // 填充剩余列（对齐效果）
@@ -284,7 +287,7 @@ private fun RowScope.KindChip(
             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
         },
         animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
-        label = "KindChipBg"
+        label = "KindChipBg",
     )
     val contentColor by animateColorAsState(
         targetValue = if (isSelected) {
@@ -293,7 +296,7 @@ private fun RowScope.KindChip(
             MaterialTheme.colorScheme.onSurfaceVariant
         },
         animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
-        label = "KindChipContent"
+        label = "KindChipContent",
     )
 
     GlassCard(
@@ -301,13 +304,13 @@ private fun RowScope.KindChip(
         cornerRadius = 12.dp,
         containerColor = backgroundColor,
         contentColor = contentColor,
-        modifier = Modifier.weight(spanWeight)
+        modifier = Modifier.weight(spanWeight),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = text,
@@ -316,7 +319,7 @@ private fun RowScope.KindChip(
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(horizontal = 4.dp)
+                modifier = Modifier.padding(horizontal = 4.dp),
             )
         }
     }
@@ -363,7 +366,9 @@ private fun calculateExploreKindRows(
                 val add = addEach + if (extra > 0) {
                     extra -= 1
                     1
-                } else 0
+                } else {
+                    0
+                }
                 currentRow[index] = kind to (span + add)
             }
         } else {
@@ -409,6 +414,4 @@ private fun calculateExploreKindRows(
  *
  * URL 是区分同名分类的唯一依据：多个分类可能标题相同但指向不同链接。
  */
-private fun kindUrl(kind: ExploreKind): String {
-    return kind.url?.takeIf { it.isNotBlank() } ?: kind.title
-}
+private fun kindUrl(kind: ExploreKind): String = kind.url?.takeIf { it.isNotBlank() } ?: kind.title

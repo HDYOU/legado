@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
  */
 class RssSortViewModel(
     private val repository: RssSortRepository = RssSortRepository.Default,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
 
     var url: String? = null
@@ -38,7 +38,7 @@ class RssSortViewModel(
             // Intent 未携带指定分类时保留当前分类：分类页内搜索会以 sortUrl=null 复用本页
             // （singleTop 触发 onNewIntent），退出搜索返回时应仍显示进入搜索前的指定分类
             sortUrl = intent.getStringExtra("sortUrl") ?: this.sortUrl,
-            searchKey = intent.getStringExtra("key")
+            searchKey = intent.getStringExtra("key"),
         )
     }
 
@@ -52,7 +52,7 @@ class RssSortViewModel(
         sourceUrl: String?,
         onFinally: () -> Unit,
         sortUrl: String? = null,
-        searchKey: String? = null
+        searchKey: String? = null,
     ) {
         viewModelScope.launch(ioDispatcher) {
             try {

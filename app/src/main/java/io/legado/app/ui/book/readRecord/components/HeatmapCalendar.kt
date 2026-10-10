@@ -4,10 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -19,16 +16,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import io.legado.app.R
 import androidx.compose.ui.platform.LocalContext
 import io.legado.app.utils.formatReadDuration
@@ -41,7 +34,7 @@ import java.util.*
 
 enum class HeatmapMode {
     COUNT,
-    TIME
+    TIME,
 }
 
 private const val HEATMAP_COUNT_BASELINE = 6
@@ -50,26 +43,26 @@ private const val HEATMAP_TIME_BASELINE_MINUTES = 120
 @Composable
 fun HeatmapCalendarStartAction(
     currentMode: HeatmapMode,
-    onModeChanged: (HeatmapMode) -> Unit
+    onModeChanged: (HeatmapMode) -> Unit,
 ) {
     Row {
         FilterChip(
             selected = currentMode == HeatmapMode.COUNT,
             onClick = { onModeChanged(HeatmapMode.COUNT) },
             label = { Text(stringResource(R.string.rr_heatmap_count)) },
-            modifier = Modifier.padding(end = 4.dp)
+            modifier = Modifier.padding(end = 4.dp),
         )
         FilterChip(
             selected = currentMode == HeatmapMode.TIME,
             onClick = { onModeChanged(HeatmapMode.TIME) },
-            label = { Text(stringResource(R.string.rr_heatmap_duration)) }
+            label = { Text(stringResource(R.string.rr_heatmap_duration)) },
         )
     }
 }
 
 @Composable
 fun HeatmapCalendarEndAction(
-    onClearDate: () -> Unit
+    onClearDate: () -> Unit,
 ) {
     TextButton(onClick = onClearDate) {
         Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.error)
@@ -84,7 +77,7 @@ fun HeatmapCalendarSection(
     dailyReadTimes: Map<LocalDate, Long>,
     currentMode: HeatmapMode,
     selectedDate: LocalDate?,
-    onDateSelected: (LocalDate?) -> Unit
+    onDateSelected: (LocalDate?) -> Unit,
 ) {
     val context = LocalContext.current
     val today = LocalDate.now()
@@ -119,45 +112,45 @@ fun HeatmapCalendarSection(
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
         ) {
             Column(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     IconButton(
-                        onClick = { currentYearMonth = currentYearMonth.minusMonths(1) }
+                        onClick = { currentYearMonth = currentYearMonth.minusMonths(1) },
                     ) {
                         Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = prevMonthStr)
                     }
 
                     Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
                             text = stringResource(R.string.rr_heatmap_year_month, currentYearMonth.year, currentYearMonth.monthValue),
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                         Text(
                             text = if (currentMode == HeatmapMode.COUNT) showByCountStr else showByDurationStr,
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
 
                     IconButton(
-                        onClick = { currentYearMonth = currentYearMonth.plusMonths(1) }
+                        onClick = { currentYearMonth = currentYearMonth.plusMonths(1) },
                     ) {
                         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = nextMonthStr)
                     }
@@ -165,22 +158,22 @@ fun HeatmapCalendarSection(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     MonthStatPill(
                         label = stringResource(R.string.rr_heatmap_read),
                         value = "$monthReadCount$timesStr",
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                     MonthStatPill(
                         label = stringResource(R.string.rr_heatmap_duration),
                         value = formatReadDuration(context, monthReadTime),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                     MonthStatPill(
                         label = stringResource(R.string.rr_heatmap_days),
                         value = "$activeDays$dayUnitStr",
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
@@ -188,7 +181,7 @@ fun HeatmapCalendarSection(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             listOf(
                 stringResource(R.string.rr_heatmap_mon),
@@ -197,7 +190,7 @@ fun HeatmapCalendarSection(
                 stringResource(R.string.rr_heatmap_thu),
                 stringResource(R.string.rr_heatmap_fri),
                 stringResource(R.string.rr_heatmap_sat),
-                stringResource(R.string.rr_heatmap_sun)
+                stringResource(R.string.rr_heatmap_sun),
             ).forEach { day ->
                 Text(
                     text = day,
@@ -205,7 +198,7 @@ fun HeatmapCalendarSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             }
         }
@@ -218,7 +211,7 @@ fun HeatmapCalendarSection(
             maxValue = maxValue,
             selectedDate = selectedDate,
             today = today,
-            onDateSelected = onDateSelected
+            onDateSelected = onDateSelected,
         )
 
         HeatmapLegend()
@@ -228,7 +221,7 @@ fun HeatmapCalendarSection(
                 date = selectedDate,
                 readCount = dailyReadCounts[selectedDate] ?: 0,
                 readTime = dailyReadTimes[selectedDate] ?: 0L,
-                onClearDate = { onDateSelected(null) }
+                onClearDate = { onDateSelected(null) },
             )
         }
     }
@@ -243,52 +236,52 @@ fun MonthCalendarGrid(
     maxValue: Int,
     selectedDate: LocalDate?,
     today: LocalDate,
-    onDateSelected: (LocalDate?) -> Unit
+    onDateSelected: (LocalDate?) -> Unit,
 ) {
     val firstDayOfMonth = yearMonth.atDay(1)
     val lastDayOfMonth = yearMonth.atEndOfMonth()
     val firstDayOfWeek = firstDayOfMonth.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-    
+
     val days = remember(firstDayOfWeek, lastDayOfMonth) {
         generateSequence(firstDayOfWeek) { it.plusDays(1) }
             .takeWhile { !it.isAfter(lastDayOfMonth) || it.dayOfWeek != DayOfWeek.SUNDAY }
             .toList()
     }
-    
+
     val weeks = days.chunked(7)
-    
+
     Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         weeks.forEach { week ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 week.forEach { date ->
                     val isCurrentMonth = date.month == yearMonth.month
-                    
+
                     val value = if (mode == HeatmapMode.COUNT) {
                         dailyReadCounts[date] ?: 0
                     } else {
                         ((dailyReadTimes[date] ?: 0L) / 60000).toInt()
                     }
-                    
+
                     val isSelected = date == selectedDate
                     val isToday = date == today
                     val backgroundColor = heatmapCellColor(
                         value = value,
                         maxValue = maxValue,
                         isCurrentMonth = isCurrentMonth,
-                        isSelected = isSelected
+                        isSelected = isSelected,
                     )
                     val textColor = heatmapTextColor(
                         value = value,
                         maxValue = maxValue,
                         isCurrentMonth = isCurrentMonth,
-                        isSelected = isSelected
+                        isSelected = isSelected,
                     )
-                    
+
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -300,28 +293,28 @@ fun MonthCalendarGrid(
                                     Modifier.border(
                                         width = 2.dp,
                                         color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.75f),
-                                        shape = RoundedCornerShape(8.dp)
+                                        shape = RoundedCornerShape(8.dp),
                                     )
                                 } else if (isToday) {
                                     Modifier.border(
                                         width = 2.dp,
                                         color = MaterialTheme.colorScheme.primary,
-                                        shape = RoundedCornerShape(8.dp)
+                                        shape = RoundedCornerShape(8.dp),
                                     )
                                 } else {
                                     Modifier
-                                }
+                                },
                             )
                             .clickable(enabled = isCurrentMonth) {
                                 onDateSelected(if (isSelected) null else date)
                             },
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             text = date.dayOfMonth.toString(),
                             style = MaterialTheme.typography.bodySmall,
                             color = textColor,
-                            fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal
+                            fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
                         )
                     }
                 }
@@ -339,13 +332,13 @@ fun HeatmapWeekColumn(
     maxValue: Int,
     selectedDate: LocalDate?,
     today: LocalDate,
-    onDateSelected: (LocalDate?) -> Unit
+    onDateSelected: (LocalDate?) -> Unit,
 ) {
     val surfaceColor = MaterialTheme.colorScheme.surface
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface
-    
+
     Column(
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         week.forEach { date ->
             val value = if (mode == HeatmapMode.COUNT) {
@@ -353,10 +346,10 @@ fun HeatmapWeekColumn(
             } else {
                 ((dailyReadTimes[date] ?: 0L) / 60000).toInt()
             }
-            
+
             val isSelected = date == selectedDate
             val isToday = date == today
-            
+
             val color = when {
                 isSelected -> MaterialTheme.colorScheme.primary
                 value == 0 -> MaterialTheme.colorScheme.surfaceVariant
@@ -365,22 +358,22 @@ fun HeatmapWeekColumn(
                     Color(
                         red = onSurfaceColor.red * intensity + surfaceColor.red * (1 - intensity),
                         green = onSurfaceColor.green * intensity + surfaceColor.green * (1 - intensity),
-                        blue = onSurfaceColor.blue * intensity + surfaceColor.blue * (1 - intensity)
+                        blue = onSurfaceColor.blue * intensity + surfaceColor.blue * (1 - intensity),
                     )
                 }
             }
-            
+
             Surface(
                 modifier = Modifier
                     .size(16.dp)
                     .clickable {
                         onDateSelected(
-                            if (isSelected) null else date
+                            if (isSelected) null else date,
                         )
                     },
                 shape = RoundedCornerShape(2.dp),
                 color = color,
-                shadowElevation = 2.dp
+                shadowElevation = 2.dp,
             ) {
                 if (isToday && !isSelected) {
                     Box(
@@ -390,8 +383,8 @@ fun HeatmapWeekColumn(
                             .border(
                                 width = 1.dp,
                                 color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(2.dp)
-                            )
+                                shape = RoundedCornerShape(2.dp),
+                            ),
                     )
                 }
             }
@@ -404,7 +397,7 @@ fun HeatmapLegend() {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(stringResource(R.string.rr_heatmap_less), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(modifier = Modifier.width(4.dp))
@@ -417,7 +410,7 @@ fun HeatmapLegend() {
                 lerp(
                     MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.42f),
                     MaterialTheme.colorScheme.primary,
-                    intensity
+                    intensity,
                 )
             }
             Surface(
@@ -425,7 +418,7 @@ fun HeatmapLegend() {
                     .size(14.dp)
                     .padding(1.dp),
                 shape = RoundedCornerShape(3.dp),
-                color = color
+                color = color,
             ) {}
         }
         Spacer(modifier = Modifier.width(4.dp))
@@ -437,29 +430,29 @@ fun HeatmapLegend() {
 private fun MonthStatPill(
     label: String,
     value: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
+                maxLines = 1,
             )
             Text(
                 text = value,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold,
-                maxLines = 1
+                maxLines = 1,
             )
         }
     }
@@ -470,7 +463,7 @@ private fun SelectedDateSummary(
     date: LocalDate,
     readCount: Int,
     readTime: Long,
-    onClearDate: () -> Unit
+    onClearDate: () -> Unit,
 ) {
     val context = LocalContext.current
     val timesStr = stringResource(R.string.rr_heatmap_times)
@@ -478,27 +471,27 @@ private fun SelectedDateSummary(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
                     text = date.format(DateTimeFormatter.ofPattern(dateFormatStr, Locale.CHINA)),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
                 Text(
                     text = "${readCount}$timesStr · ${formatReadDuration(context, readTime)}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -512,7 +505,7 @@ private fun heatmapCellColor(
     value: Int,
     maxValue: Int,
     isCurrentMonth: Boolean,
-    isSelected: Boolean
+    isSelected: Boolean,
 ): Color {
     if (isSelected) {
         return MaterialTheme.colorScheme.primary
@@ -528,7 +521,7 @@ private fun heatmapCellColor(
     return lerp(
         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.42f),
         MaterialTheme.colorScheme.primary,
-        intensity
+        intensity,
     )
 }
 
@@ -537,7 +530,7 @@ private fun heatmapTextColor(
     value: Int,
     maxValue: Int,
     isCurrentMonth: Boolean,
-    isSelected: Boolean
+    isSelected: Boolean,
 ): Color {
     if (isSelected) {
         return MaterialTheme.colorScheme.onPrimary
@@ -564,23 +557,19 @@ fun rememberDateRange(weeksToShow: Int): Pair<LocalDate, LocalDate> {
 }
 
 @Composable
-fun rememberWeeks(startDate: LocalDate, weeksToShow: Int): List<List<LocalDate>> {
-    return remember(startDate, weeksToShow) {
-        (0 until weeksToShow).map { weekIndex ->
-            (0 until 7).map { dayIndex ->
-                startDate.plusWeeks(weekIndex.toLong()).plusDays(dayIndex.toLong())
-            }
+fun rememberWeeks(startDate: LocalDate, weeksToShow: Int): List<List<LocalDate>> = remember(startDate, weeksToShow) {
+    (0 until weeksToShow).map { weekIndex ->
+        (0 until 7).map { dayIndex ->
+            startDate.plusWeeks(weekIndex.toLong()).plusDays(dayIndex.toLong())
         }
     }
 }
 
 @Composable
-fun rememberDaysInRange(startDate: LocalDate, endDate: LocalDate): List<LocalDate> {
-    return remember(startDate, endDate) {
-        generateSequence(startDate) { it.plusDays(1) }
-            .takeWhile { !it.isAfter(endDate) }
-            .toList()
-    }
+fun rememberDaysInRange(startDate: LocalDate, endDate: LocalDate): List<LocalDate> = remember(startDate, endDate) {
+    generateSequence(startDate) { it.plusDays(1) }
+        .takeWhile { !it.isAfter(endDate) }
+        .toList()
 }
 
 @Composable
@@ -589,7 +578,7 @@ fun NoEarlierDataIndicator(modifier: Modifier = Modifier) {
         text = stringResource(R.string.rr_heatmap_no_earlier_data),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -602,7 +591,7 @@ fun HeatmapCalendarBottomSheet(
     selectedDate: LocalDate?,
     onDateSelected: (LocalDate?) -> Unit,
     onModeChanged: (HeatmapMode) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -614,7 +603,7 @@ fun HeatmapCalendarBottomSheet(
         // ModalBottomSheet 内部 consumeWindowInsets(top = sheetState.offset) 随 offset 变化，
         // 导致内容顶 padding → 内容高度(fillMaxHeight) → Expanded 锚点 联动，滚动时整个弹窗抖动；
         // 去掉 Top 侧即可切断该反馈回路。
-        contentWindowInsets = { WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom) }
+        contentWindowInsets = { WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom) },
     ) {
         // 顶部用不受消耗链影响的静态状态栏高度补偿（asPaddingValues 不扣除
         // consumeWindowInsets 传入的 offset），满屏时标题不会顶到状态栏下
@@ -626,32 +615,32 @@ fun HeatmapCalendarBottomSheet(
                 .fillMaxHeight(0.88f)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp)
+                .padding(bottom = 32.dp),
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column {
                         Text(
                             text = stringResource(R.string.rr_heatmap_title),
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                         Text(
                             text = stringResource(R.string.rr_heatmap_subtitle),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     HeatmapCalendarStartAction(
                         currentMode = currentMode,
-                        onModeChanged = onModeChanged
+                        onModeChanged = onModeChanged,
                     )
                 }
             }
@@ -665,9 +654,8 @@ fun HeatmapCalendarBottomSheet(
                 selectedDate = selectedDate,
                 onDateSelected = { date ->
                     onDateSelected(date)
-                }
+                },
             )
         }
     }
 }
-
