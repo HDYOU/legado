@@ -402,39 +402,14 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
                 introTextView.text = intro
                 return
             }
-            val html = wrapUseWebHtml(intro.substring(8, lastIndex), VideoPlay.source)
-            val pooledWebView = this.pooledWebView ?: let{
-                val pooledWebView = WebViewPool.acquire(this, Scope.INLINE)
-                val webView = pooledWebView.realWebView
-                webView.onResume()
-                prepareForInlineContent(webView)
-                installInlineContentRefitOnTouch(webView) {
-                    binding.tvIntroContainer.requestLayout()
-                }
-                webView.webViewClient = CustomWebViewClient(VideoPlay.source)
-                webView.addJavascriptInterface(WebCacheManager, nameCache)
-                VideoPlay.source?.let {
-                    webView.addJavascriptInterface(it, nameSource)
-                    val webJsExtensions = WebJsExtensions(it, this, webView)
-                    webView.addJavascriptInterface(webJsExtensions, nameJava)
-                }
-                pooledWebView
+            val rawHtml = intro.substring(8, lastIndex)
+            val source = VideoPlay.source
+            // wrapUseWebHtml 会同步拼装 jsLib，URL 未命中缓存时内部 runBlocking 会阻塞主线程
+            // 先切 IO 拼装，完成后回主线程做 WebView 装配 + loadDataWithBaseURL
+            lifecycleScope.launch {
+                val html = withContext(IO) { wrapUseWebHtml(rawHtml, source) }
+                bindUseWebIntro(html, source)
             }
-            val webView = pooledWebView.realWebView
-            prepareForInlineContent(webView)
-            installInlineContentRefitOnTouch(webView) {
-                binding.tvIntroContainer.requestLayout()
-            }
-            if (initIntroView || this.pooledWebView == null) {
-                initIntroView = false
-                this.pooledWebView = pooledWebView
-                binding.tvIntroContainer.removeAllViews()
-                binding.tvIntroContainer.addView(webView)
-            }
-            val bookUrl = VideoPlay.book?.bookUrl
-                ?.takeIf { it.startsWith("http", true) }
-                ?.substringBefore(",")
-            webView.loadDataWithBaseURL(bookUrl, html, "text/html", "utf-8", bookUrl)
             return
         }
         if (!initIntroView || pooledWebView != null) {
@@ -510,6 +485,47 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
         } else {
             tvIntro.text = intro
         }
+    }
+
+    /**
+     * 主线程执行 useweb 简介的 WebView 装配与内容加载。
+     *
+     * 前置假设：html 已在 IO 线程拼装完成（参考 [showBookIntro] 的 <useweb> 分支），
+     * 本方法内不再触碰 SharedJsScope 相关同步接口。
+     */
+    private fun bindUseWebIntro(html: String, source: io.legado.app.data.entities.BaseSource?) {
+        val pooledWebView = this.pooledWebView ?: let {
+            val pooledWebView = WebViewPool.acquire(this, Scope.INLINE)
+            val webView = pooledWebView.realWebView
+            webView.onResume()
+            prepareForInlineContent(webView)
+            installInlineContentRefitOnTouch(webView) {
+                binding.tvIntroContainer.requestLayout()
+            }
+            webView.webViewClient = CustomWebViewClient(source)
+            webView.addJavascriptInterface(WebCacheManager, nameCache)
+            source?.let {
+                webView.addJavascriptInterface(it, nameSource)
+                val webJsExtensions = WebJsExtensions(it, this, webView)
+                webView.addJavascriptInterface(webJsExtensions, nameJava)
+            }
+            pooledWebView
+        }
+        val webView = pooledWebView.realWebView
+        prepareForInlineContent(webView)
+        installInlineContentRefitOnTouch(webView) {
+            binding.tvIntroContainer.requestLayout()
+        }
+        if (initIntroView || this.pooledWebView == null) {
+            initIntroView = false
+            this.pooledWebView = pooledWebView
+            binding.tvIntroContainer.removeAllViews()
+            binding.tvIntroContainer.addView(webView)
+        }
+        val bookUrl = VideoPlay.book?.bookUrl
+            ?.takeIf { it.startsWith("http", true) }
+            ?.substringBefore(",")
+        webView.loadDataWithBaseURL(bookUrl, html, "text/html", "utf-8", bookUrl)
     }
 
     private fun showCover(book: Book) {

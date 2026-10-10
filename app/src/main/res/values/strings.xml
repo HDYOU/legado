@@ -517,6 +517,7 @@
 
     <string name="source_http_header">HTTP Header</string>
     <string name="debug_source">Debug source</string>
+    <string name="stop_debug">Stop Debug</string>
     <string name="import_by_qr_code">Import from QR code</string>
     <string name="share_selected_source">Share selected sources</string>
     <string name="scan_qr_code">Scan QR code</string>
@@ -775,6 +776,11 @@
     <string name="search_engine_rule">Search engine rule</string>
     <string name="filter">Filter</string>
     <string name="overwrite">Overwrite</string>
+    <string name="source_url_duplicate_title">Duplicate book source URL</string>
+    <string name="source_url_duplicate_cover_msg">A book source with the same URL "%1$s" already exists. Saving will overwrite it. Continue?</string>
+    <string name="rss_source_url_duplicate_title">Duplicate RSS source URL</string>
+    <string name="rss_source_url_duplicate_cover_msg">An RSS source with the same URL "%1$s" already exists. Saving will overwrite it. Continue?</string>
+    <string name="overwrite_irrecoverable_hint">The rule recycle bin is disabled. The overwritten source will be permanently deleted and cannot be restored.</string>
     <string name="delete_forever">Delete forever</string>
     <string name="more">More</string>
     <string name="service_starting">Starting service</string>
@@ -1122,6 +1128,13 @@
     <string name="reverse_content">Reverse content</string>
     <string name="debug">Debug</string>
     <string name="source_used_api">Source Used API</string>
+    <string name="source_info">Source Info</string>
+    <string name="source_info_name">Name</string>
+    <string name="source_info_order">Sort Order</string>
+    <string name="source_info_update_time">Last Updated</string>
+    <string name="source_info_code_lines">Code Lines</string>
+    <string name="source_info_file_size">File Size</string>
+    <string name="source_info_never">Never</string>
     <string name="api_category_variable">Built-in Variables</string>
     <string name="api_category_function">Built-in Functions</string>
     <string name="api_category_source_method">Source Methods</string>
@@ -1136,6 +1149,7 @@
     <string name="api_source_not_found">Source not found</string>
     <string name="crash_log">Crash log</string>
     <string name="use_zh_layout">Custom Chinese line feed</string>
+    <string name="allow_punct_at_line_start">Allow punctuation at line start</string>
     <string name="image_style">Style of Images</string>
     <string name="system_tts">System tts</string>
     <string name="export_type">Exported file format</string>
@@ -1615,6 +1629,7 @@
     <string name="manga_color_filter">Color Filter</string>
     <string name="hide_manga_title">Hide Manga List Title</string>
     <string name="refresh_explore">Refresh Explore</string>
+    <string name="local_debug">Local Debug</string>
     <string name="padding_display_cutouts">Padding display cutouts</string>
     <string name="read_aloud_pause_resume">Pause/Resume Speech</string>
     <string name="manga_epaper">E-Paper Mode</string>
@@ -1642,6 +1657,7 @@
     <string name="query_hint">Enter content to query</string>
     <string name="find_prev_match">Previous Match</string>
     <string name="find_next_match">Next Match</string>
+    <string name="find_text">Find Text</string>
     <string name="query_result">Found %1$d matches</string>
     <string name="query_no_result">No matches found</string>
     <string name="please_focus_cursor_on_textbox">Please focus cursor on textbox</string>
@@ -2613,6 +2629,7 @@ Night: %5$s / %6$s / %7$s / %8$s</string>
     <string name="storage_cache_temp_name">Temporary file cache</string>
     <string name="storage_cache_tts_name">TTS voice cache</string>
     <string name="storage_cache_acache_name">ACache disk cache</string>
+    <string name="storage_cache_internal_name">Internal cache</string>
     <string name="storage_cache_db_name">Database cache</string>
     <string name="storage_cache_log_name">Log files</string>
     <string name="storage_cache_webview_name">WebView cache</string>
@@ -2621,6 +2638,7 @@ Night: %5$s / %6$s / %7$s / %8$s</string>
     <string name="storage_cache_temp_desc">Download temporary files, extraction temp directories, etc.</string>
     <string name="storage_cache_tts_desc">Voice files downloaded by online TTS engines</string>
     <string name="storage_cache_acache_desc">Runtime cache such as source variables and user info</string>
+    <string name="storage_cache_internal_desc">Cronet download temp files, export temp files, WebView network cache, etc.</string>
     <string name="storage_cache_db_desc">Temporary data records stored by CacheDao</string>
     <string name="storage_cache_log_desc">App runtime logs, error logs, etc.</string>
     <string name="storage_cache_webview_desc">Persisted WebView page data, local caches, cookies, etc.</string>

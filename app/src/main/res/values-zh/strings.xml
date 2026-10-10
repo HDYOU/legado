@@ -516,6 +516,7 @@
 
     <string name="source_http_header">请求头（header）</string>
     <string name="debug_source">调试源</string>
+    <string name="stop_debug">停止调试</string>
     <string name="import_by_qr_code">二维码导入</string>
     <string name="share_selected_source">分享选中源</string>
     <string name="scan_qr_code">扫描二维码</string>
@@ -774,6 +775,11 @@
     <string name="search_engine_rule">搜索引擎规则</string>
     <string name="filter">筛选</string>
     <string name="overwrite">覆盖</string>
+    <string name="source_url_duplicate_title">书源地址重复</string>
+    <string name="source_url_duplicate_cover_msg">已存在相同地址的书源“%1$s”，保存将覆盖它，是否继续？</string>
+    <string name="rss_source_url_duplicate_title">订阅源地址重复</string>
+    <string name="rss_source_url_duplicate_cover_msg">已存在相同地址的订阅源“%1$s”，保存将覆盖它，是否继续？</string>
+    <string name="overwrite_irrecoverable_hint">回收站已关闭，被覆盖的源将被彻底删除、无法恢复。</string>
     <string name="delete_forever">彻底删除</string>
     <string name="more">更多</string>
     <string name="service_starting">正在启动服务</string>
@@ -1120,6 +1126,13 @@
     <string name="reverse_content">反转内容</string>
     <string name="debug">调试</string>
     <string name="source_used_api">源所用API</string>
+    <string name="source_info">源信息</string>
+    <string name="source_info_name">名称</string>
+    <string name="source_info_order">排序编号</string>
+    <string name="source_info_update_time">最后更新时间</string>
+    <string name="source_info_code_lines">代码行数</string>
+    <string name="source_info_file_size">文件大小</string>
+    <string name="source_info_never">未更新</string>
     <string name="api_category_variable">内置变量</string>
     <string name="api_category_function">内置函数</string>
     <string name="api_category_source_method">源对象方法</string>
@@ -1134,6 +1147,7 @@
     <string name="api_source_not_found">未找到该书源</string>
     <string name="crash_log">崩溃日志</string>
     <string name="use_zh_layout">使用自定义中文分行</string>
+    <string name="allow_punct_at_line_start">标点允许出现在行首</string>
     <string name="image_style">图片样式</string>
     <string name="system_tts">系统 TTS</string>
     <string name="export_type">导出格式</string>
@@ -1454,6 +1468,7 @@
     <string name="query_hint">输入要查询的内容</string>
     <string name="find_prev_match">上一个匹配</string>
     <string name="find_next_match">下一个匹配</string>
+    <string name="find_text">查找文本</string>
     <string name="query_result">找到 %1$d 个匹配项</string>
     <string name="query_no_result">未找到匹配内容</string>
     <string name="please_focus_cursor_on_textbox">请将光标聚焦在文本框</string>
@@ -1652,6 +1667,7 @@
     <string name="manga_color_filter">滤镜</string>
     <string name="hide_manga_title">隐藏漫画列表标题</string>
     <string name="refresh_explore">刷新发现</string>
+    <string name="local_debug">本地调试</string>
     <string name="padding_display_cutouts">填充刘海区域</string>
     <string name="read_aloud_pause_resume">朗读暂停/继续</string>
     <string name="manga_epaper">墨水屏</string>
@@ -2597,6 +2613,7 @@
     <string name="storage_cache_temp_name">临时文件缓存</string>
     <string name="storage_cache_tts_name">TTS 语音缓存</string>
     <string name="storage_cache_acache_name">ACache 磁盘缓存</string>
+    <string name="storage_cache_internal_name">内部缓存</string>
     <string name="storage_cache_db_name">数据库缓存</string>
     <string name="storage_cache_log_name">日志文件</string>
     <string name="storage_cache_webview_name">WebView 缓存</string>
@@ -2605,6 +2622,7 @@
     <string name="storage_cache_temp_desc">下载临时文件、解压临时目录等</string>
     <string name="storage_cache_tts_desc">在线朗读引擎下载的语音文件</string>
     <string name="storage_cache_acache_desc">书源变量、用户信息等运行时缓存</string>
+    <string name="storage_cache_internal_desc">Cronet 下载临时文件、导出临时文件、WebView 网络缓存等</string>
     <string name="storage_cache_db_desc">CacheDao 存储的临时数据记录</string>
     <string name="storage_cache_log_desc">应用运行日志、错误日志等</string>
     <string name="storage_cache_webview_desc">WebView 页面数据、本地缓存、Cookie 等持久化内容</string>

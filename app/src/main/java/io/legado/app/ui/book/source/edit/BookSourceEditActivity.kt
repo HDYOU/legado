@@ -38,10 +38,12 @@ import io.legado.app.ui.book.search.SearchActivity
 import io.legado.app.ui.book.source.debug.BookSourceDebugActivity
 import io.legado.app.ui.book.source.usedapi.SourceUsedApiActivity
 import io.legado.app.ui.code.CodeEditActivity
+import io.legado.app.ui.code.CodeEditLauncher
 import io.legado.app.ui.file.HandleFileContract
 import io.legado.app.ui.login.SourceLoginActivity
 import io.legado.app.ui.qrcode.QrCodeResult
 import io.legado.app.ui.widget.dialog.UrlOptionDialog
+import io.legado.app.ui.widget.dialog.SourceInfoDialog
 import io.legado.app.ui.widget.dialog.VariableDialog
 import io.legado.app.ui.widget.keyboard.KeyboardToolPop
 import io.legado.app.ui.widget.recycler.NoChildScrollLinearLayoutManager
@@ -208,7 +210,7 @@ class BookSourceEditActivity :
         if (result.resultCode == RESULT_OK) {
             val data = result.data
             // 编辑后的文本内容
-            val text = data?.getStringExtra("text")
+            val text = CodeEditLauncher.readText(data)
             // 字段标识，如 "author" 表示作者字段
             val fieldKey = data?.getStringExtra("fieldKey")
             // 板块标识，如 "info" 表示详情板块
@@ -366,7 +368,7 @@ class BookSourceEditActivity :
      */
     private fun openFullEdit(editEntity: EditEntity) {
         val intent = Intent(this, CodeEditActivity::class.java).apply {
-            putExtra("text", editEntity.value ?: "")
+            CodeEditLauncher.putText(this, editEntity.value ?: "")
             putExtra("title", editEntity.hint)
             putExtra("cursorPosition", 0)
             putExtra("sourceType", "bookSource")
@@ -392,7 +394,7 @@ class BookSourceEditActivity :
             lastFocusedFieldKey = fieldKey
             lastFocusedTabKey = tabKey
             val intent = Intent(this, CodeEditActivity::class.java).apply {
-                putExtra("text", currentText)
+                CodeEditLauncher.putText(this, currentText)
                 putExtra("title", hint)
                 putExtra("cursorPosition", view.selectionStart)
                 putExtra("sourceType", "bookSource")
@@ -463,6 +465,7 @@ class BookSourceEditActivity :
             )
 
             R.id.menu_log -> showDialogFragment<AppLogDialog>()
+            R.id.menu_source_info -> showSourceInfo()
             R.id.menu_help -> showHelp("ruleHelp")
             R.id.menu_login -> saveSource(getSource()) { source ->
                 startActivity<SourceLoginActivity> {
@@ -775,12 +778,60 @@ class BookSourceEditActivity :
     }
 
     /**
-     * 保存书源。URL 变更时的书籍迁移在 ViewModel 的保存协程内完成，
-     * 这里只负责 isSaving 状态与成功回调：
-     * 保存期间保持 isSaving=true（阻止退出导致协程被取消），
-     * 迁移完成、结果回传与 isSaving 复位在同一批执行，成功回调不会再丢。
+     * 保存闸门：所有会写库的入口（保存/调试/源所用API/登录/搜索/设置源变量）统一先经过这里。
+     *
+     * 检测待保存地址是否命中列表中"另一条"已存在的书源——命中则弹覆盖警告，
+     * 用户确认后才真正保存，取消则中止（调试/登录/搜索等入口因此不会跳转）。
+     * bookSourceUrl 是主键，未改地址时命中的就是本条源自身，无覆盖风险，直接放行不查询。
      */
     private fun saveSource(
+        source: BookSource,
+        onSuccess: ((BookSource) -> Unit)? = null
+    ) {
+        val url = source.bookSourceUrl
+        val originalUrl = viewModel.bookSource?.bookSourceUrl
+        if (url.isBlank() || url == originalUrl) {
+            performSave(source, onSuccess)
+            return
+        }
+        // 经 ViewModel 的 execute 链（协程写在 VM 内，UI 不直连 DAO）：block 默认在 IO 上跑、回调回 Main；
+        // Coroutine 对 CancellationException 直接重抛、且仅在 scope 活跃时派发回调，取消不会被当作错误
+        viewModel.execute { viewModel.findByUrl(url) }
+            .onSuccess { existing ->
+                // 回调在 Main 且 Coroutine 仅在 scope 活跃时派发；为保险仍防一道销毁守卫
+                if (isFinishing || isDestroyed) return@onSuccess
+                if (existing != null) {
+                    // 回收站停用时覆盖等于永久丢弃，弹窗补不可恢复提醒
+                    val binHint = if (AppConfig.sourceRecycleBinEnabled) "" else
+                        "\n\n" + getString(R.string.overwrite_irrecoverable_hint)
+                    alert(R.string.source_url_duplicate_title) {
+                        setMessage(
+                            getString(
+                                R.string.source_url_duplicate_cover_msg,
+                                existing.bookSourceName.ifBlank { url }
+                            ) + binHint
+                        )
+                        positiveButton(R.string.overwrite) { performSave(source, onSuccess) }
+                        negativeButton(R.string.cancel)
+                    }
+                } else {
+                    performSave(source, onSuccess)
+                }
+            }
+            .onError {
+                // 检测本身绝不能阻断保存：查询异常走此分支照常保存
+                if (isFinishing || isDestroyed) return@onError
+                performSave(source, onSuccess)
+            }
+    }
+
+    /**
+     * 真正执行保存。URL 变更时的书籍迁移在 ViewModel 的保存协程内完成，
+     * 这里只负责保存计数与成功回调：
+     * 保存期间保持 pendingSaveCount > 0（阻止退出导致协程被取消），
+     * 迁移完成、结果回传与计数复位在同一批执行，成功回调不会再丢。
+     */
+    private fun performSave(
         source: BookSource,
         onSuccess: ((BookSource) -> Unit)? = null
     ) {
@@ -1140,6 +1191,24 @@ class BookSourceEditActivity :
                 )
             }
         }
+    }
+
+    /**
+     * 展示源信息：排序编号、最后更新时间、代码行数、整个源所占的文件大小。
+     * 代码行数取各规则字段内容的实际行数之和，文件大小取序列化 JSON 的字节数。
+     */
+    private fun showSourceInfo() {
+        val source = getSource()
+        val raw = GSON.toJson(source)
+        showDialogFragment(
+            SourceInfoDialog().apply {
+                sourceName = source.bookSourceName
+                customOrder = source.customOrder
+                lastUpdateTime = source.lastUpdateTime
+                codeLines = SourceInfoDialog.countSourceCodeLines(raw)
+                fileSize = raw.toByteArray(Charsets.UTF_8).size.toLong()
+            }
+        )
     }
 
     private fun showSourceJsonEdit() {

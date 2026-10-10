@@ -115,6 +115,7 @@ object WebBook {
             ruleData = ruleData,
             coroutineContext = currentCoroutineContext()
         )
+        analyzeUrl.localDebug = Debug.isLocalDebug(bookSource.bookSourceUrl)
         val checkJs = bookSource.loginCheckJs
         val res = kotlin.runCatching {
             analyzeUrl.getStrResponseAwait().let {
@@ -205,6 +206,7 @@ object WebBook {
             coroutineContext = currentCoroutineContext(),
             infoMap = exploreInfoMap
         )
+        analyzeUrl.localDebug = Debug.isLocalDebug(bookSource.bookSourceUrl)
         val checkJs = bookSource.loginCheckJs
         val res = kotlin.runCatching {
             analyzeUrl.getStrResponseAwait().let {
@@ -301,6 +303,7 @@ object WebBook {
                 ruleData = book,
                 coroutineContext = currentCoroutineContext()
             )
+            analyzeUrl.localDebug = Debug.isLocalDebug(bookSource.bookSourceUrl)
             val checkJs = bookSource.loginCheckJs
             val res = kotlin.runCatching {
                 analyzeUrl.getStrResponseAwait().let {
@@ -433,6 +436,7 @@ object WebBook {
                     ruleData = book,
                     coroutineContext = currentCoroutineContext()
                 )
+                analyzeUrl.localDebug = Debug.isLocalDebug(bookSource.bookSourceUrl)
                 val checkJs = bookSource.loginCheckJs
                 val res = kotlin.runCatching {
                     analyzeUrl.getStrResponseAwait().let {
@@ -494,12 +498,24 @@ object WebBook {
         runPerJs: Boolean = false,
         isFromBookInfo: Boolean = false
     ): Flow<PartialChapterList> {
+        AppLog.putReaderDebug(
+            "[TOC] getChapterListFlow入口A: bookUrl=${book.bookUrl}, " +
+                    "tocUrl='${book.tocUrl}', runPerJs=$runPerJs, " +
+                    "tocHtml.len=${book.tocHtml?.length ?: -1}"
+        )
         book.removeAllBookType()
         book.addType(bookSource.getBookType())
         if (runPerJs) {
+            val tPre = System.currentTimeMillis()
+            AppLog.putReaderDebug("[TOC] getChapterListFlow.preUpdateJs开始")
             runPreUpdateJs(bookSource, book, isFromBookInfo).getOrThrow()
+            AppLog.putReaderDebug("[TOC] getChapterListFlow.preUpdateJs完成: 耗时${System.currentTimeMillis() - tPre}ms")
         }
         return if (book.bookUrl == book.tocUrl && !book.tocHtml.isNullOrEmpty()) {
+            AppLog.putReaderDebug(
+                "[TOC] getChapterListFlow分支1: 直接从tocHtml分析(无网络), " +
+                        "body.len=${book.tocHtml?.length}"
+            )
             BookChapterList.analyzeChapterListFlow(
                 bookSource = bookSource,
                 book = book,
@@ -516,7 +532,10 @@ object WebBook {
                 ruleData = book,
                 coroutineContext = currentCoroutineContext()
             )
+            analyzeUrl.localDebug = Debug.isLocalDebug(bookSource.bookSourceUrl)
             val checkJs = bookSource.loginCheckJs
+            val tHttp = System.currentTimeMillis()
+            AppLog.putReaderDebug("[TOC] getChapterListFlow分支2: 发起首次HTTP ${book.tocUrl}")
             val res = kotlin.runCatching {
                 analyzeUrl.getStrResponseAwait().let {
                     if (!checkJs.isNullOrBlank()) {
@@ -526,6 +545,11 @@ object WebBook {
                     }
                 }
             }.getOrElse { throwable ->
+                AppLog.putReaderDebug(
+                    "[TOC] getChapterListFlow首次HTTP失败: 耗时${System.currentTimeMillis() - tHttp}ms, " +
+                            "err=${throwable.localizedMessage}",
+                    throwable
+                )
                 if (!checkJs.isNullOrBlank()) {
                     val errResponse = analyzeUrl.getErrStrResponse(throwable)
                     try {
@@ -541,6 +565,10 @@ object WebBook {
                     throw throwable
                 }
             }
+            AppLog.putReaderDebug(
+                "[TOC] getChapterListFlow首次HTTP完成: 耗时${System.currentTimeMillis() - tHttp}ms, " +
+                        "res.url='${res.url}', body.len=${res.body?.length ?: -1}, code=${res.code()}"
+            )
             checkRedirect(bookSource, res)
             BookChapterList.analyzeChapterListFlow(
                 bookSource = bookSource,
@@ -646,6 +674,7 @@ object WebBook {
                 chapter = bookChapter,
                 coroutineContext = currentCoroutineContext()
             )
+            analyzeUrl.localDebug = Debug.isLocalDebug(bookSource.bookSourceUrl)
             val checkJs = bookSource.loginCheckJs
             val res = kotlin.runCatching {
                 analyzeUrl.getStrResponseAwait(
@@ -727,6 +756,7 @@ object WebBook {
                 chapter = bookChapter,
                 coroutineContext = currentCoroutineContext()
             )
+            analyzeUrl.localDebug = Debug.isLocalDebug(bookSource.bookSourceUrl)
             val checkJs = bookSource.loginCheckJs
             val res = kotlin.runCatching {
                 analyzeUrl.getStrResponseAwait(

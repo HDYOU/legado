@@ -14,12 +14,12 @@ import io.legado.app.help.http.CookieStore
 import io.legado.app.help.http.newCallStrResponse
 import io.legado.app.help.http.okHttpClient
 import io.legado.app.help.source.SourceHelp
+import io.legado.app.help.source.SourceRecycleBinHelp
 import io.legado.app.help.source.clearExploreKindsCache
 import io.legado.app.help.storage.ImportOldData
 import io.legado.app.model.SharedJsScope
 import io.legado.app.utils.GSON
-import io.legado.app.utils.fromJsonArray
-import io.legado.app.utils.fromJsonObject
+import io.legado.app.utils.fromJsonArrayOrObject
 import io.legado.app.utils.getClipText
 import io.legado.app.utils.isAbsUrl
 import io.legado.app.utils.isJsonArray
@@ -34,6 +34,9 @@ class BookSourceEditViewModel(application: Application) : BaseViewModel(applicat
     var autoComplete = false
     var bookSource: BookSource? = null
 
+    /** 本次编辑对象的原始地址，initData 同步取自 intent，用于判定"是否原地更新"，不依赖异步加载字段 */
+    private var originalUrl: String? = null
+
     /**
      * 加载待编辑的书源并回调界面。
      *
@@ -41,6 +44,7 @@ class BookSourceEditViewModel(application: Application) : BaseViewModel(applicat
      * 且调用方用于区分"是否保存过"的引用会停留在 null，退出时会误报 RESULT_OK。
      */
     fun initData(intent: Intent, onFinally: () -> Unit) {
+        originalUrl = intent.getStringExtra("sourceUrl")
         executeLazy {
             val sourceUrl = intent.getStringExtra("sourceUrl")
             var source: BookSource? = null
@@ -93,6 +97,13 @@ class BookSourceEditViewModel(application: Application) : BaseViewModel(applicat
                     SourceConfig.removeSource(it.bookSourceUrl)
                 }
             }
+            // 目标地址命中"另一条"已存在书源（覆盖场景）：先把被覆盖的旧源送进回收站再 REPLACE 写入，
+            // 避免它被静默丢弃。以同步取自 intent 的原始地址判定是否原地更新，即便异步字段未就绪也不会误回收自身。
+            if (source.bookSourceUrl != originalUrl) {
+                appDb.bookSourceDao.getBookSource(source.bookSourceUrl)?.let { overwritten ->
+                    SourceRecycleBinHelp.recycleBookSources(listOf(overwritten))
+                }
+            }
             appDb.bookSourceDao.insert(source)
             bookSource = source
             concurrentRecordMap.remove(source.bookSourceUrl) // 删除并发限制缓存
@@ -121,6 +132,9 @@ class BookSourceEditViewModel(application: Application) : BaseViewModel(applicat
             finally?.invoke()
         }.start()
     }
+
+    /** 按地址查已存在的书源，供保存前的重复覆盖检测使用（DB 访问收在 ViewModel，UI 不直连 DAO） */
+    suspend fun findByUrl(url: String): BookSource? = appDb.bookSourceDao.getBookSource(url)
 
     fun pasteSource(onSuccess: (source: BookSource) -> Unit) {
         execute(context = Dispatchers.Main) {
@@ -160,7 +174,7 @@ class BookSourceEditViewModel(application: Application) : BaseViewModel(applicat
                     val jsonItem = jsonPath.parse(items[0])
                     ImportOldData.fromOldBookSource(jsonItem)
                 } else {
-                    GSON.fromJsonArray<BookSource>(text).getOrThrow()[0]
+                    GSON.fromJsonArrayOrObject<BookSource>(text).getOrThrow()[0]
                 }
             }
 
@@ -169,7 +183,7 @@ class BookSourceEditViewModel(application: Application) : BaseViewModel(applicat
                     val jsonItem = jsonPath.parse(text)
                     ImportOldData.fromOldBookSource(jsonItem)
                 } else {
-                    GSON.fromJsonObject<BookSource>(text).getOrThrow()
+                    GSON.fromJsonArrayOrObject<BookSource>(text).getOrThrow()[0]
                 }
             }
 

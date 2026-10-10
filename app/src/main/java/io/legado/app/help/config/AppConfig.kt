@@ -207,6 +207,10 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
                 ReadBookConfig.useZhLayout =
                     appCtx.getPrefBoolean(PreferKey.useZhLayout)
 
+            PreferKey.allowPunctAtLineStart ->
+                ReadBookConfig.allowPunctAtLineStart =
+                    appCtx.getPrefBoolean(PreferKey.allowPunctAtLineStart)
+
             PreferKey.userAgent -> userAgent = getPrefUserAgent()
 
             PreferKey.customHosts -> {
@@ -1063,7 +1067,7 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         }
 
     var sourceRecycleBinEnabled: Boolean
-        get() = appCtx.getPrefBoolean(PreferKey.sourceRecycleBinEnabled, false)
+        get() = appCtx.getPrefBoolean(PreferKey.sourceRecycleBinEnabled, true)
         set(value) {
             appCtx.putPrefBoolean(PreferKey.sourceRecycleBinEnabled, value)
         }

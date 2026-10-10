@@ -17,6 +17,58 @@ plugins {
 }
 apply from: 'download.gradle'
 
+// ---------- Android Lint 自适应范围（详见 docs/project-rules/build-commands.md） ----------
+// 目标：只改 app 主源码时快跑（跳过依赖模块连带分析 + 测试源码分析）；
+// 一旦触及依赖模块(:modules:*)、测试源码、或构建/lint 配置，则回退全量。
+// 逃生阀：-PlintFast 强制快跑；-PlintFull 强制全量；-PlintBase=<ref> 指定比较基线（默认 origin/main）。
+// CI（env CI/GITHUB_ACTIONS）一律全量，门禁永不降级。
+def lintResolveScope = {
+    if (project.hasProperty('lintFull')) return [true, '显式 -PlintFull', true]
+    if (project.hasProperty('lintFast')) return [false, '显式 -PlintFast', true]
+    if (System.getenv('CI') != null || System.getenv('GITHUB_ACTIONS') != null) {
+        return [true, 'CI 环境', true]
+    }
+    def taskNames = project.gradle.startParameter.taskNames.collect { it.toLowerCase() }
+    def askingLint = taskNames.any {
+        it.contains('lint') || it == 'check' || it.endsWith(':check') || it.contains('build')
+    }
+    if (!askingLint) return [true, '非 lint 调用', false]  // 不跑 git，也不打日志
+
+    def gitText = { List args ->
+        try {
+            def spec = providers.exec {
+                commandLine(['git'] + args)
+                workingDir = rootDir
+            }
+            // 非零退出（如基线 ref 不存在）视为失败 → 上层保守回退全量
+            if (spec.result.get().exitValue != 0) return null
+            return spec.standardOutput.asText.get()
+        } catch (ignored) {
+            return null
+        }
+    }
+    def base = (project.findProperty('lintBase') ?: 'origin/main') as String
+    def changed = new LinkedHashSet<String>()
+    def diff = gitText(['diff', '--name-only', "${base}...HEAD"])
+    if (diff == null) return [true, "git 不可用或基线 ${base} 缺失，保守全量", true]
+    diff.readLines().collect { it.trim() }.findAll { it }.each { changed << it.replace('\\', '/') }
+    def status = gitText(['status', '--porcelain', '-u'])
+    status?.readLines()?.findAll { it.trim() }?.each { line ->
+        def path = line.substring(2).trim()
+        if (path.contains(' -> ')) path = path.split(' -> ')[-1]
+        changed << path.replace('\\', '/')
+    }
+    def needsFull = changed.any { f ->
+        f.startsWith('modules/') ||
+            f.contains('/src/test/') || f.contains('/src/androidTest/') ||
+            f == 'build.gradle' || f == 'settings.gradle' || f == 'gradle.properties' ||
+            f == 'gradle/libs.versions.toml' || f.endsWith('build.gradle') ||
+            f.contains('lint-baseline.xml') || f == 'app/lint.xml'
+    }
+    def reason = changed.isEmpty() ? '无改动' : (needsFull ? '触及依赖模块/测试源码/构建配置' : '仅 app 主源码')
+    return [needsFull, reason, true]
+}
+
 static def releaseTime() {
     return new Date().format("yy.MMddHH", TimeZone.getTimeZone("GMT+8"))
 }
@@ -206,7 +258,13 @@ android {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
     lint {
-        checkDependencies = true
+        // 自适应范围：仅改 app 主源码→快跑（不连带依赖模块、不分析测试源码）；否则全量
+        def scope = lintResolveScope()
+        checkDependencies = scope[0]
+        checkTestSources = scope[0]
+        if (scope[2]) {
+            logger.lifecycle("[lint] 范围=${scope[0] ? '全量' : '快跑(仅 app 主源码)'}（原因：${scope[1]}）")
+        }
         // 存量问题基线：初次启用 lint 门禁时一次全量生成，此后 lint 只拦新增问题
         baseline = file("lint-baseline.xml")
     }

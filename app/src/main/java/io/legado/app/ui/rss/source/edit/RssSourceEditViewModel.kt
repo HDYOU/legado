@@ -11,13 +11,13 @@ import io.legado.app.help.AppCacheManager
 import io.legado.app.help.ConcurrentRateLimiter.Companion.concurrentRecordMap
 import io.legado.app.help.RuleComplete
 import io.legado.app.help.http.CookieStore
+import io.legado.app.help.source.SourceRecycleBinHelp
 import io.legado.app.help.source.removeSortCache
 import io.legado.app.model.SharedJsScope
 import io.legado.app.utils.GSON
-import io.legado.app.utils.fromJsonObject
+import io.legado.app.utils.fromJsonArrayOrObject
 import io.legado.app.utils.getClipText
 import io.legado.app.utils.printOnDebug
-import io.legado.app.utils.stackTraceStr
 import io.legado.app.utils.toastOnUi
 import kotlinx.coroutines.Dispatchers
 
@@ -26,6 +26,9 @@ class RssSourceEditViewModel(application: Application) : BaseViewModel(applicati
     var autoComplete = false
     var rssSource: RssSource? = null
 
+    /** 本次编辑对象的原始地址，initData 同步取自 intent，用于判定"是否原地更新"，不依赖异步加载字段 */
+    private var originalUrl: String? = null
+
     /**
      * 加载待编辑的订阅源并回调界面。
      *
@@ -33,6 +36,7 @@ class RssSourceEditViewModel(application: Application) : BaseViewModel(applicati
      * 退出时还会误判为"已保存过"而误报 RESULT_OK。
      */
     fun initData(intent: Intent, onFinally: () -> Unit) {
+        originalUrl = intent.getStringExtra("sourceUrl")
         executeLazy {
             val key = intent.getStringExtra("sourceUrl")
             if (key != null) {
@@ -77,6 +81,13 @@ class RssSourceEditViewModel(application: Application) : BaseViewModel(applicati
             }
             // 先落库再做附带迁移：迁移放在 delete 与 insert 之间时，
             // 迁移一旦抛异常新源就写不进去，而旧源已被删除 —— 源直接消失
+            // 目标地址命中"另一条"已存在订阅源（覆盖场景）：先把被覆盖的旧源送进回收站再 REPLACE 写入，
+            // 避免它被静默丢弃。以同步取自 intent 的原始地址判定是否原地更新，即便异步字段未就绪也不会误回收自身。
+            if (source.sourceUrl != originalUrl) {
+                appDb.rssSourceDao.getByKey(source.sourceUrl)?.let { overwritten ->
+                    SourceRecycleBinHelp.recycleRssSources(listOf(overwritten))
+                }
+            }
             appDb.rssSourceDao.insert(source)
             rssSource = source
             concurrentRecordMap.remove(source.sourceUrl) // 删除并发限制缓存
@@ -101,11 +112,14 @@ class RssSourceEditViewModel(application: Application) : BaseViewModel(applicati
         }.start()
     }
 
+    /** 按地址查已存在的订阅源，供保存前的重复覆盖检测使用（DB 访问收在 ViewModel，UI 不直连 DAO） */
+    suspend fun findByUrl(url: String): RssSource? = appDb.rssSourceDao.getByKey(url)
+
     fun pasteSource(onSuccess: (source: RssSource) -> Unit) {
         execute(context = Dispatchers.Main) {
             var source: RssSource? = null
             context.getClipText()?.let { json ->
-                source = GSON.fromJsonObject<RssSource>(json).getOrThrow()
+                source = GSON.fromJsonArrayOrObject<RssSource>(json).getOrThrow().firstOrNull()
             }
             source
         }.onError {
@@ -122,11 +136,11 @@ class RssSourceEditViewModel(application: Application) : BaseViewModel(applicati
     fun importSource(text: String, finally: (source: RssSource) -> Unit) {
         execute {
             val text1 = text.trim()
-            GSON.fromJsonObject<RssSource>(text1).getOrThrow().let {
-                finally.invoke(it)
+            GSON.fromJsonArrayOrObject<RssSource>(text1).getOrThrow().let {
+                finally.invoke(it.firstOrNull() ?: throw NoStackTraceException("格式不对"))
             }
         }.onError {
-            context.toastOnUi(it.stackTraceStr)
+            context.toastOnUi(it.localizedMessage)
         }
     }
 

@@ -158,6 +158,7 @@ class TextChapterLayout(
     private val paragraphIndent = ReadBookConfig.paragraphIndent
     private val titleMode = ReadBookConfig.titleMode
     private val useZhLayout = ReadBookConfig.useZhLayout
+    private val allowPunctAtLineStart = ReadBookConfig.allowPunctAtLineStart
     private val isMiddleTitle = ReadBookConfig.isMiddleTitle
     private val isRightTitle = ReadBookConfig.isRightTitle
     private val textFullJustify = ReadBookConfig.textFullJustify
@@ -1638,10 +1639,20 @@ class TextChapterLayout(
                 widthsArray.getOrElse(index) { 0f } + matchSpacingWidths[index]
             }
         }
-        val layout = if (useZhLayout) {
+        // 标点允许行首是「无视中文标点禁则」的诉求，只有自研断行器能实现（StaticLayout 由平台
+        // 按 UAX#14 硬编码避头尾，无 API 可关），因此该开关开启时强制走 ZhLayout
+        val layout = if (useZhLayout || allowPunctAtLineStart) {
             val (words, widths) = measureTextSplit(text, layoutWidthsArray)
             val indentSize = if (isFirstLine) paragraphIndent.length else 0
-            ZhLayout(text, textPaint, visibleWidth, words, widths, indentSize)
+            ZhLayout(
+                text,
+                textPaint,
+                visibleWidth,
+                words,
+                widths,
+                indentSize,
+                ignorePunctRules = allowPunctAtLineStart,
+            )
         } else {
             StaticLayout(
                 buildFontAwareLayoutText(

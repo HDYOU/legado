@@ -190,6 +190,16 @@ object AppLog {
     ) {
         message ?: return
 
+        // 临时镜像到 logcat（tag=AppReaderDebug），便于 adb logcat -s AppReaderDebug 定位问题；
+        // 与内置 DebugEventCenter 通道并行，不影响悬浮球收集。
+        if (BuildConfig.DEBUG) {
+            if (throwable != null) {
+                Log.d("AppReaderDebug", message, throwable)
+            } else {
+                Log.d("AppReaderDebug", message)
+            }
+        }
+
         DebugLogScope.launch {
             DebugEventCenter.emit(
                 DebugEvent(
