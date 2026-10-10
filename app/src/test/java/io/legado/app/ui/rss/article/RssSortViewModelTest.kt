@@ -61,6 +61,29 @@ class RssSortViewModelTest {
     }
 
     @Test
+    fun `initData 未携带 sortUrl 时保留已有分类`() = runTest(mainDispatcherRule.dispatcher) {
+        val repository = FakeRssSortRepository().apply {
+            sources["url1"] = source("url1", name = "源A")
+        }
+        val viewModel = newViewModel(repository)
+        // 模拟已进入指定分类页（如 java.open("sort") 打开的热搜）
+        viewModel.sortUrl = "sort-specified"
+        val intent = mockk<Intent>().apply {
+            every { getStringExtra("sourceUrl") } returns "url1"
+            every { getStringExtra("sortUrl") } returns null
+            every { getStringExtra("key") } returns "关键字"
+        }
+        var done = false
+
+        viewModel.initData(intent) { done = true }
+        advanceUntilIdle()
+
+        assertEquals("sort-specified", viewModel.sortUrl)
+        assertEquals("关键字", viewModel.searchKey)
+        assertTrue("onFinally 未回调", done)
+    }
+
+    @Test
     fun `initData 未知源回退为新建源`() = runTest(mainDispatcherRule.dispatcher) {
         val repository = FakeRssSortRepository()
         val viewModel = newViewModel(repository)

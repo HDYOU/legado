@@ -35,7 +35,9 @@ class RssSortViewModel(
         initData(
             sourceUrl = intent.getStringExtra("sourceUrl"),
             onFinally = onFinally,
-            sortUrl = intent.getStringExtra("sortUrl"),
+            // Intent 未携带指定分类时保留当前分类：分类页内搜索会以 sortUrl=null 复用本页
+            // （singleTop 触发 onNewIntent），退出搜索返回时应仍显示进入搜索前的指定分类
+            sortUrl = intent.getStringExtra("sortUrl") ?: this.sortUrl,
             searchKey = intent.getStringExtra("key")
         )
     }
