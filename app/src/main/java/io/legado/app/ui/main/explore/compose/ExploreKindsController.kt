@@ -224,7 +224,12 @@ class ExploreKindsController(
     }
 
     fun resumeWebViews() {
-        activeWebViews.values.forEach { it.realWebView.onResume() }
+        activeWebViews.values.forEach { pooledWebView ->
+            val webView = pooledWebView.realWebView
+            webView.onResume()
+            // 回到前台/视图重建可能丢掉 useweb 的稳定图层，底栏玻璃再采样时会频闪，这里补一次
+            WebViewPool.applyInlineContentHardwareLayer(webView)
+        }
     }
 
     fun releaseAllWebViews() {

@@ -171,6 +171,9 @@ private fun createExploreWebHost(
     val webView = pooledWebView.realWebView
     webView.onResume()
     prepareForInlineContent(webView, initialHeightPx)
+    // 底栏玻璃会对整个内容区重复采样，WebView 需要稳定的硬件图层才不会频闪
+    applyExploreUseWebLayerType(webView)
+    val generation = currentInlineContentGeneration(webView)
     val loadingIndicator = createLoadingIndicator(context, initialHeightPx)
     container.removeAllViews()
     container.addView(loadingIndicator)
@@ -182,9 +185,11 @@ private fun createExploreWebHost(
         pageJs = pageJs,
         pageLayoutKey = pageLayoutKey,
         loadingIndicator = loadingIndicator,
+        generation = generation,
         onHeightMeasured = onHeightMeasured,
     )
     installInlineContentRefitOnTouch(webView) {
+        applyExploreUseWebLayerType(webView)
         syncExploreWebHeight(webView, onHeightMeasured)
         container.requestLayout()
     }
@@ -195,6 +200,11 @@ private fun createExploreWebHost(
     val baseUrl = source.bookSourceUrl.takeIf { it.startsWith("http", true) }
     webView.loadDataWithBaseURL(baseUrl, html, "text/html", "utf-8", baseUrl)
     return pooledWebView
+}
+
+/** 给 useweb 的 WebView 套上稳定图层，避免底栏玻璃采样时频闪（详见 [WebViewPool.applyInlineContentHardwareLayer]） */
+private fun applyExploreUseWebLayerType(webView: WebView) {
+    WebViewPool.applyInlineContentHardwareLayer(webView)
 }
 
 /** 把 WebView 当前拟合出的高度同步给 Compose（高度由 Compose 决定，View 侧只负责测量） */
@@ -227,6 +237,8 @@ private class ExploreInlineWebViewClient(
     private val pageJs: String,
     private val pageLayoutKey: String,
     private val loadingIndicator: ProgressBar,
+    /** 创建时捕获的内联内容代次：WebView 被回收/复用后，过期的注入与高度回调直接丢弃 */
+    private val generation: Long,
     private val onHeightMeasured: (Int) -> Unit,
 ) : WebViewClient() {
 
@@ -237,6 +249,10 @@ private class ExploreInlineWebViewClient(
             append(pageJs)
         }
     }
+
+    /** 当前 WebView 是否仍是本客户端所属的那一代内容（池化复用/回收后即为 false） */
+    private fun isCurrent(webView: WebView): Boolean =
+        currentInlineContentGeneration(webView) == generation
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         request?.let {
@@ -261,17 +277,19 @@ private class ExploreInlineWebViewClient(
     }
 
     private fun injectPageState(webView: WebView, delayedRetries: LongArray = longArrayOf()) {
-        if (jsStr.isBlank()) return
+        if (jsStr.isBlank() || !isCurrent(webView)) return
         webView.evaluateJavascript(jsStr, null)
         delayedRetries.forEach { delayMillis ->
             webView.postDelayed({
-                if (!webView.isAttachedToWindow) return@postDelayed
+                if (!webView.isAttachedToWindow || !isCurrent(webView)) return@postDelayed
                 webView.evaluateJavascript(jsStr, null)
             }, delayMillis)
         }
     }
 
     private fun cacheMeasuredHeight(webView: WebView) {
+        if (!isCurrent(webView)) return
+        applyExploreUseWebLayerType(webView)
         syncExploreWebHeight(webView, onHeightMeasured)
         loadingIndicator.visibility = View.GONE
         webView.visibility = View.VISIBLE
@@ -279,12 +297,13 @@ private class ExploreInlineWebViewClient(
     }
 
     private fun fitAndCacheHeight(webView: WebView, delayed: Boolean) {
+        if (!isCurrent(webView)) return
         if (delayed) {
             scheduleInlineContentFit(webView, { cacheMeasuredHeight(webView) }, longArrayOf(120L, 360L, 720L))
         } else {
             WebViewPool.fitInlineContent(
                 webView,
-                currentInlineContentGeneration(webView),
+                generation,
                 afterLayout = { cacheMeasuredHeight(webView) },
             )
         }

@@ -138,6 +138,21 @@ object WebViewPool {
     }
 
     /**
+     * 把内联内容 WebView 切到硬件层。
+     *
+     * 发现页的底栏玻璃（LiquidGlass）会把整个内容容器重复绘制到自己的画布上采样，
+     * 没有稳定图层的 WebView 在这种重复绘制下会频闪；硬件层让它复用同一份 GPU 纹理。
+     * 归还池时由 [release] 复位为 [View.LAYER_TYPE_NONE]，避免影响复用它的其他场景。
+     *
+     * 须在主线程调用（[release] 中的复位同此要求）。
+     */
+    fun applyInlineContentHardwareLayer(webView: WebView) {
+        if (webView.layerType != View.LAYER_TYPE_HARDWARE) {
+            webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        }
+    }
+
+    /**
      * 从指定作用域的池中获取一个 WebView
      * 
      * 获取策略：
@@ -196,7 +211,10 @@ object WebViewPool {
             return
         }
         // 重置WebView状态
-        pooledWebView.realWebView.run {
+        val realWebView = pooledWebView.realWebView
+        // 递增内联内容代次，使归还前挂起的测量/注入回调全部失效
+        nextInlineContentGeneration(realWebView)
+        realWebView.run {
             // 从父视图中移除
             (parent as? ViewGroup)?.removeView(this)
             // 重置布局参数
@@ -219,6 +237,8 @@ object WebViewPool {
             outlineProvider = null
             clipToOutline = false
             webChromeClient = null
+            // 清除仅发现页 useweb 使用的硬件层，避免污染复用它的其他场景（详情页 useweb 空白）
+            setLayerType(View.LAYER_TYPE_NONE, null)
             clearFormData() //清除表单数据
             clearMatches() //清除查找匹配项
             clearDisappearingChildren() //清除消失中的子视图
