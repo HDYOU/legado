@@ -46,6 +46,7 @@ import io.legado.app.help.TextViewTagHandler
 import io.legado.app.help.WebCacheManager
 import io.legado.app.help.book.addType
 import io.legado.app.help.book.getRemoteUrl
+import io.legado.app.lib.theme.EInkRender
 import io.legado.app.help.book.isAudio
 import io.legado.app.help.book.isImage
 import io.legado.app.help.book.isLocal
@@ -617,10 +618,10 @@ class BookInfoActivity :
     private fun showBook(book: Book) = binding.run {
         AppLog.putReaderDebug(
             "[TOC] showBook回调: name=${book.name}, " +
-                    "intro.len=${book.intro?.length ?: -1}, intro.prefix='${book.intro?.take(16) ?: "null"}', " +
-                    "coverUrl='${book.coverUrl?.take(40) ?: "null"}', " +
-                    "latestChapterTitle='${book.latestChapterTitle}', " +
-                    "totalChapterNum=${book.totalChapterNum}"
+                "intro.len=${book.intro?.length ?: -1}, intro.prefix='${book.intro?.take(16) ?: "null"}', " +
+                "coverUrl='${book.coverUrl?.take(40) ?: "null"}', " +
+                "latestChapterTitle='${book.latestChapterTitle}', " +
+                "totalChapterNum=${book.totalChapterNum}",
         )
         showCover(book)
         tvName.text = book.name
@@ -881,11 +882,12 @@ class BookInfoActivity :
     }
 
     private fun showCover(book: Book) {
+        // 墨水屏渲染：整屏封面底图照常加载（此前在墨水屏下直接不加载，详情页看起来是空的），
+        // 由 ImageView 的 colorFilter 转灰阶
+        binding.bgBook.colorFilter = EInkRender.androidFilterOrNull()
         binding.ivCover.load(book, false) {
-            if (!AppConfig.isEInkMode) {
-                BookCover.loadBlur(this, BookCover.getDisplayCover(book), false, book.origin)
-                    .into(binding.bgBook)
-            }
+            BookCover.loadBlur(this, BookCover.getDisplayCover(book), false, book.origin)
+                .into(binding.bgBook)
         }
     }
 

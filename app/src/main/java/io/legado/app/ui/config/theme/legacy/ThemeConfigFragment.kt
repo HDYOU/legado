@@ -212,6 +212,14 @@ class ThemeConfigFragment :
             PreferKey.transparentStatusBar -> recreateActivities()
             PreferKey.immNavigationBar -> recreateActivities()
             PreferKey.bookshelfIconStyle -> recreateActivities()
+            PreferKey.enableEInk -> {
+                // 墨水屏渲染开关：色板按当前日夜重新推导，随后重建界面生效
+                listView.post {
+                    ThemeConfig.applyTheme(requireContext())
+                    recreateActivities()
+                }
+            }
+
             PreferKey.cPrimary,
             PreferKey.cAccent,
             PreferKey.cBackground,

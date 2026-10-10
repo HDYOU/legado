@@ -3,7 +3,6 @@ package io.legado.app.help.config
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
@@ -23,6 +22,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import io.legado.app.R
 import io.legado.app.constant.EventBus
+import io.legado.app.lib.theme.EInkRender
 import io.legado.app.lib.theme.ThemeStore
 import io.legado.app.lib.theme.getSecondaryTextColor
 import io.legado.app.utils.ColorUtils
@@ -67,7 +67,7 @@ data class NavigationBarConfig(
     var borderColor: Int? = null,
     var borderAlpha: Int = 100,
     var icons: Map<String, String> = emptyMap(),
-    var updatedAt: Long = System.currentTimeMillis()
+    var updatedAt: Long = System.currentTimeMillis(),
 ) {
 
     /** 底栏导航项元数据：key 用于图标存储，menuId 对应菜单资源 ID */
@@ -75,7 +75,7 @@ data class NavigationBarConfig(
         val key: String,
         @StringRes val titleRes: Int,
         @IdRes val menuId: Int,
-        @DrawableRes val defaultIconRes: Int
+        @DrawableRes val defaultIconRes: Int,
     )
 
     fun toJson(): String = GSON.toJson(this)
@@ -99,18 +99,25 @@ data class NavigationBarConfig(
     companion object {
         /** 布局模式：浮动底栏 */
         const val LAYOUT_FLOATING = "floating"
+
         /** 布局模式：标准底栏 */
         const val LAYOUT_STANDARD = "standard"
+
         /** 布局模式：侧边栏 */
         const val LAYOUT_SIDEBAR = "sidebar"
+
         /** 效果模式：纯色 */
         const val EFFECT_SOLID = "solid"
+
         /** 效果模式：玻璃质感 */
         const val EFFECT_GLASS = "glass"
+
         /** 效果模式：磨砂 */
         const val EFFECT_FROSTED = "frosted"
+
         /** 图标状态：常规 */
         const val STATE_NORMAL = "normal"
+
         /** 图标状态：选中 */
         const val STATE_SELECTED = "selected"
 
@@ -149,12 +156,10 @@ data class NavigationBarConfig(
          * 包一层本身很便宜，但启动期底栏图标会被应用两次以上，复用同一实例可以少一次分配；
          * 统一用 appCtx 的资源构造，避免静态缓存间接持有 Activity。
          */
-        private fun drawableOf(cacheKey: String, bitmap: Bitmap): Drawable {
-            return synchronized(iconDrawableCache) {
-                iconDrawableCache[cacheKey]
-            } ?: bitmap.toDrawable(appCtx.resources).also {
-                synchronized(iconDrawableCache) { iconDrawableCache.put(cacheKey, it) }
-            }
+        private fun drawableOf(cacheKey: String, bitmap: Bitmap): Drawable = synchronized(iconDrawableCache) {
+            iconDrawableCache[cacheKey]
+        } ?: bitmap.toDrawable(appCtx.resources).also {
+            synchronized(iconDrawableCache) { iconDrawableCache.put(cacheKey, it) }
         }
 
         /** 清空图标缓存（配置变更时调用） */
@@ -194,38 +199,32 @@ data class NavigationBarConfig(
             NavItem("bookshelf", R.string.bookshelf, R.id.menu_bookshelf, R.drawable.ic_bottom_books),
             NavItem("discovery", R.string.discovery, R.id.menu_discovery, R.drawable.ic_bottom_explore),
             NavItem("rss", R.string.rss, R.id.menu_rss, R.drawable.ic_bottom_rss_feed),
-            NavItem("my", R.string.my, R.id.menu_my_config, R.drawable.ic_bottom_person)
+            NavItem("my", R.string.my, R.id.menu_my_config, R.drawable.ic_bottom_person),
         )
 
-        fun fromJson(json: String): NavigationBarConfig {
-            return GSON.fromJsonObject<NavigationBarConfig>(json).getOrThrow()
-        }
+        fun fromJson(json: String): NavigationBarConfig = GSON.fromJsonObject<NavigationBarConfig>(json).getOrThrow()
 
-        fun createDefaultDay(): NavigationBarConfig {
-            return NavigationBarConfig(
-                id = "builtin_default_day",
-                name = appCtx.getString(R.string.nav_bar_default_day_name),
-                isNight = false,
-                isBuiltin = true,
-                layoutMode = LAYOUT_STANDARD,
-                effectMode = EFFECT_SOLID,
-                opacity = 30,
-                updatedAt = 0L
-            )
-        }
+        fun createDefaultDay(): NavigationBarConfig = NavigationBarConfig(
+            id = "builtin_default_day",
+            name = appCtx.getString(R.string.nav_bar_default_day_name),
+            isNight = false,
+            isBuiltin = true,
+            layoutMode = LAYOUT_STANDARD,
+            effectMode = EFFECT_SOLID,
+            opacity = 30,
+            updatedAt = 0L,
+        )
 
-        fun createDefaultNight(): NavigationBarConfig {
-            return NavigationBarConfig(
-                id = "builtin_default_night",
-                name = appCtx.getString(R.string.nav_bar_default_night_name),
-                isNight = true,
-                isBuiltin = true,
-                layoutMode = LAYOUT_STANDARD,
-                effectMode = EFFECT_SOLID,
-                opacity = 30,
-                updatedAt = 0L
-            )
-        }
+        fun createDefaultNight(): NavigationBarConfig = NavigationBarConfig(
+            id = "builtin_default_night",
+            name = appCtx.getString(R.string.nav_bar_default_night_name),
+            isNight = true,
+            isBuiltin = true,
+            layoutMode = LAYOUT_STANDARD,
+            effectMode = EFFECT_SOLID,
+            opacity = 30,
+            updatedAt = 0L,
+        )
 
         /**
          * [loadConfigs] 的解析结果缓存。
@@ -280,7 +279,7 @@ data class NavigationBarConfig(
             context.defaultSharedPreferences.edit(commit = true) {
                 putString(
                     PREF_KEY_CUSTOM_CONFIGS,
-                    GSON.toJson(configs.filter { !it.isBuiltin })
+                    GSON.toJson(configs.filter { !it.isBuiltin }),
                 )
             }
             // 写盘后键本就变了，这里再显式清一次，兜住失败/时序异常
@@ -333,9 +332,7 @@ data class NavigationBarConfig(
         }
 
         /** 获取当前激活的底栏配置 ID */
-        fun activeId(context: Context, isNight: Boolean): String? {
-            return context.getPrefString(if (isNight) PREF_KEY_ACTIVE_NIGHT else PREF_KEY_ACTIVE_DAY)
-        }
+        fun activeId(context: Context, isNight: Boolean): String? = context.getPrefString(if (isNight) PREF_KEY_ACTIVE_NIGHT else PREF_KEY_ACTIVE_DAY)
 
         /** 设置当前激活的底栏配置 ID */
         fun setActiveId(context: Context, isNight: Boolean, id: String?) {
@@ -371,7 +368,7 @@ data class NavigationBarConfig(
                 config.borderColor,
                 config.borderAlpha,
                 stableUpdatedAt,
-                iconSignature
+                iconSignature,
             ).joinToString("|")
         }
 
@@ -401,9 +398,9 @@ data class NavigationBarConfig(
                 val selected = loadIconDrawable(context, config.icons[iconKey(item.key, STATE_SELECTED)])
                 if (normal != null || selected != null) hasCustom = true
                 menu.findItem(item.menuId)?.icon = StateListDrawable().apply {
-                    addState(intArrayOf(android.R.attr.state_checked), selected ?: normal ?: defaultDrawable(context, item.defaultIconRes, true, bgColor))
-                    addState(intArrayOf(android.R.attr.state_selected), selected ?: normal ?: defaultDrawable(context, item.defaultIconRes, true, bgColor))
-                    addState(intArrayOf(), normal ?: defaultDrawable(context, item.defaultIconRes, false, bgColor))
+                    addState(intArrayOf(android.R.attr.state_checked), (selected ?: normal ?: defaultDrawable(context, item.defaultIconRes, true, bgColor)).withEInkGrayscale())
+                    addState(intArrayOf(android.R.attr.state_selected), (selected ?: normal ?: defaultDrawable(context, item.defaultIconRes, true, bgColor)).withEInkGrayscale())
+                    addState(intArrayOf(), (normal ?: defaultDrawable(context, item.defaultIconRes, false, bgColor)).withEInkGrayscale())
                 }
             }
             return hasCustom
@@ -412,9 +409,25 @@ data class NavigationBarConfig(
         /** 获取指定导航项的预览 Drawable（优先自定义图标，回退到默认） */
         fun previewDrawable(context: Context, config: NavigationBarConfig, item: NavItem, selected: Boolean, bgColor: Int? = null): Drawable? {
             val state = if (selected) STATE_SELECTED else STATE_NORMAL
-            return loadIconDrawable(context, config.icons[iconKey(item.key, state)])
+            val icon = loadIconDrawable(context, config.icons[iconKey(item.key, state)])
                 ?: loadIconDrawable(context, config.icons[iconKey(item.key, STATE_NORMAL)])
                 ?: defaultDrawable(context, item.defaultIconRes, selected, bgColor)
+            // 预览与底栏实际效果保持一致（墨水屏渲染下同样是灰阶）
+            return icon.withEInkGrayscale()
+        }
+
+        /**
+         * 墨水屏渲染：让自定义图标也走灰阶。
+         *
+         * 包一层共享同一张底图的 [BitmapDrawable]，而不是直接改传入实例的 `colorFilter`——
+         * 自定义图标来自 [iconDrawableCache]，改它会污染缓存（关掉开关后图标仍是灰的）。
+         * 包一层不重新解码，代价只有一次对象分配；非位图（内置图标由主题色染色，本身已无彩）
+         * 原样返回。
+         */
+        private fun Drawable.withEInkGrayscale(): Drawable {
+            val filter = EInkRender.androidFilterOrNull() ?: return this
+            val bitmap = (this as? BitmapDrawable)?.bitmap ?: return this
+            return BitmapDrawable(appCtx.resources, bitmap).apply { colorFilter = filter }
         }
 
         /** 生成图标存储 key："{itemKey}_{state}" */
@@ -455,8 +468,7 @@ data class NavigationBarConfig(
          * 又会因为单张超出缓存上限而根本留不住；先按目标尺寸降采样再交给 ImageView，
          * 时间与内存都成倍下降。
          */
-        private fun iconDecodeTarget(context: Context): Int =
-            (context.resources.displayMetrics.density * 96).toInt().coerceAtLeast(1)
+        private fun iconDecodeTarget(context: Context): Int = (context.resources.displayMetrics.density * 96).toInt().coerceAtLeast(1)
 
         /** 按目标尺寸降采样解码图标位图 */
         private fun decodeIconBitmap(path: String, targetSize: Int): Bitmap? = runCatching {
@@ -471,7 +483,7 @@ data class NavigationBarConfig(
             }
             BitmapFactory.decodeFile(
                 path,
-                BitmapFactory.Options().apply { inSampleSize = sampleSize }
+                BitmapFactory.Options().apply { inSampleSize = sampleSize },
             )
         }.getOrNull()
 

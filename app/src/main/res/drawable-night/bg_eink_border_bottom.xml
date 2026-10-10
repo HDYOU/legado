@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  墨水屏渲染的顶栏背景（夜间）：墨黑底 + 浅色分隔线。
+  日间版本（values/drawable/bg_eink_border_bottom.xml）是纸白底 + 深色分隔线，
+  两者靠 -night 限定符自动切换（AppCompat 夜间模式会翻转 uiMode）。
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <!--    边框颜色    -->
+            <solid android:color="#66FFFFFF" />
+        </shape>
+    </item>
+    <!--    边框位置和粗细    -->
+    <item android:bottom="1dp">
+        <shape>
+            <!--    背景颜色    -->
+            <solid android:color="@color/black" />
+        </shape>
+    </item>
+</layer-list>

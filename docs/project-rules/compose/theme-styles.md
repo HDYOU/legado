@@ -190,7 +190,7 @@ TopAppBar(
 
 - **必须**：主题切换需要重建页面的，统一接管 `recreate()` 为「销毁 + 全新 `startActivity`」——新实例在前，再 `finish()` 旧实例，使新窗口以 **全新启动路径** 建立，规避系统原地重建带来的 Compose 重组冻结。**禁止**直接调用 `super.recreate()` / `Activity.recreate()`。
 - **必须**：接管 `recreate()` 时应保留防重入守卫（`recreatePending` + `isFinishing`/`isDestroyed`），并记录本次重启的时刻（接管点记在 `recreate()` 里，或在 `onCreate` 记录实例创建时刻）；重建广播（`ThemeConfig.notifyRecreate` 合并窗口后迟到的事件总线 `RECREATE`）必须被「重启时刻 + 2s 宽限」拦截，避免二次重建打断正在建立的窗口。
-- **必须**：宽限窗只对**主题状态未变**的请求生效——宽限窗内状态已变的请求是用户新的一次切换，必须放行。只按时间丢弃会把「配置已改、新窗口还是旧主题」的请求一并吞掉：回主界面时底栏与背景被 `onResume` 刷成新主题，内容区（Compose 页）却停在旧主题（表现为「底栏切换了、界面没切换」）。基线取「触发本次重启时生效的主题状态」，**模式与色板一起比对**：主题模式（日间/夜间/跟随系统/墨水屏）+ 日夜 + 主题名 + 主色/强调色/背景/底栏色 + 背景图（含模糊）+ 透明底栏。漏掉模式会把「日间 ↔ 墨水屏」当成没变化（两者的色板都读日间偏好，取值完全相同）。
+- **必须**：宽限窗只对**主题状态未变**的请求生效——宽限窗内状态已变的请求是用户新的一次切换，必须放行。只按时间丢弃会把「配置已改、新窗口还是旧主题」的请求一并吞掉：回主界面时底栏与背景被 `onResume` 刷成新主题，内容区（Compose 页）却停在旧主题（表现为「底栏切换了、界面没切换」）。基线取「触发本次重启时生效的主题状态」，**模式 + 墨水屏开关 + 色板一起比对**：主题模式（日间/夜间/跟随系统）+ 墨水屏渲染开关 + 日夜 + 主题名 + 主色/强调色/背景/底栏色 + 背景图（含模糊）+ 透明底栏。墨水屏开关必须单列：它只改由 `ThemeConfig.applyTheme` 推导并写入 `ThemeStore` 的色板，不改 `getDurConfig()` 读到的日夜偏好，只比色板会把「开关墨水屏渲染」当成没变化而吞掉。
   参考实现：`ui/main/MainActivity`（`recreate()` 接管 + `RECREATE_IGNORE_MS = 2000L` + `isLateRecreateEcho()` 状态比对）。
   例外（待补状态比对）：`ui/config/theme/manage/ThemeManageActivity` 有同样的接管与纯时间宽限，二次应用落在窗内时日夜切换仍由 AppCompat relaunch 生效，纯色变化会被延后重绘。
 - **必须**：接管 `recreate()` 的主界面**必须**在 manifest 上挂 `AppTheme.Main`（`windowDisablePreview = true`）。重启期间系统按**系统日夜模式**给启动窗口（预览窗口 / Android 12+ splash）铺底，而应用自身的日夜模式是用户单独设置、可与系统不一致（如系统亮色 + 应用暗色），启动窗口会闪一屏与当前主题无关的底色；关掉预览窗口后保留旧界面内容直到新实例画出第一帧。**禁止**当成"冗余属性"删掉（冷启动入口是 `WelcomeActivity`，不受此主题影响）。
@@ -215,5 +215,20 @@ TopAppBar(
 - 行级列表/设置行的按压反馈**优先 ripple**——轻点场景下经重组的缩放形变可能完全不可见（见本节引言）；缩放形变适合卡片等大面积、值得视觉强调的元素。
 - 触控目标 ≥ 48×48 dp 见 `accessibility.md` §15.3。
 - 基准实现：`AppSettingsRowDecoration`（ripple 取舍与原因）、`CategoryTabs` / `LoadMoreFooter` / `ExploreShowItems`（去 ripple 的既有场景）。
+
+### 7.10 墨水屏渲染（强制）
+
+> 「启用墨水屏渲染」是**渲染层**开关（`AppConfig.isEInkMode`），不是主题模式：它不改日/夜，只在当前日夜基础上把色板换成灰阶（`ThemeConfig.applyTheme` 的墨水屏分支）、去掉阴影与动画，并把界面里的一切彩色内容转灰阶。色板与 XML 主题的取用见 §7.8.1 的状态比对。
+
+- **必须**：统一在 **UI 根部罩一层灰阶**（`io.legado.app.lib.theme.EInkRender`），不要逐控件贴滤镜：
+  - Compose：`LegadoTheme` 内包一层 `Box(Modifier.eInkGrayscale())`。放在 `LegadoTheme` 内部是刻意的——页面、弹窗、底部面板、下拉菜单各自的窗口都进这一层，新写的 Compose 代码自动跟着灰阶。
+  - View：给窗口的**内容根**挂 `EInkRender.applyRootLayer(...)`。Activity 由 `LifecycleHelp.onActivityStarted` 统一挂（Compose 页面走 `BaseComposeActivity`、View 页面走 `BaseActivity`，两者没有公共基类）；`BaseDialogFragment` / `BasePrefDialogFragment` / `AndroidAlertBuilder` 各自给弹窗窗口挂一层（弹窗是独立窗口，Activity 的层盖不到）。
+  - 图层用 `LAYER_TYPE_HARDWARE` / `saveLayer`，内容不变时不重画；同类型 + 同一 Paint 的重复调用不会重建图层，所以可以安全带在每次 start 里调用。
+- **禁止**：在图片 / 文本上再逐个贴滤镜。每张图、每段文字各开一层离屏合成比整窗一层更贵，而且漏一处就是一处彩色残留（文字里的**表情符号**是字体里的彩色字形，`colorFilter` 参数和 `Text.color` 都改不了，只有整窗合成的做法能覆盖）。
+- **例外**：**窗口背景图**（`window.decorView.background`，如主界面壁纸）在内容根之外，根层盖不到，要按 `Drawable` 挂 paint 级滤镜（`ThemeConfig.getBgImage` 的 `withEInkFilter`）。这类滤镜不改解码结果、不额外开图层，代价可忽略；`CoverImageView` 等少量控件同样保留 paint 级滤镜作兜底。
+- **例外**：视频窗口（`VideoPlayerActivity`）走 Surface 输出层，不做整层合成（见 `EInkRender.rootLayerExcludedActivities`），画面保持彩色。
+- 滤镜作用在绘图层而不是解码结果上：同一个 Bitmap 关掉开关后仍是彩色的，不要为了墨水屏清 Glide 缓存，也不要在 Glide 请求上挂 `BitmapTransformation`（会多一份磁盘缓存副本）。
+- 日/夜都用同一套灰阶、**不做反相**：主流墨水屏设备前光开启时图片也仍是灰阶，反相会把封面变成底片。
+- 成本实测（1440×2560 模拟器、书架连续滚动 12 次）：平均帧耗时 12.78ms → 15.05ms（+2.27ms/帧），janky 帧仍为 0。整窗一层是这个开关的固有代价，改渲染方案前请重新测这条。
 
 ---

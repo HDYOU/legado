@@ -17,6 +17,7 @@ import io.legado.app.constant.EventBus
 import io.legado.app.constant.PreferKey
 import io.legado.app.constant.Theme
 import io.legado.app.help.DefaultData
+import io.legado.app.lib.theme.EInkRender
 import io.legado.app.lib.theme.ThemeStateStore
 import io.legado.app.lib.theme.ThemeStore
 import io.legado.app.lib.theme.ThemeTransition
@@ -137,11 +138,14 @@ object ThemeConfig {
         return requested == night
     }
 
-    fun getTheme() = when {
-        AppConfig.isEInkMode -> Theme.EInk
-        AppConfig.isNightTheme -> Theme.Dark
-        else -> Theme.Light
-    }
+    /**
+     * 当前基础主题（日/夜）。
+     *
+     * 墨水屏渲染不再是独立主题：它只覆盖色板与交互（见 [AppConfig.isEInkMode]），
+     * 日/夜的 XML 主题与 `values-night` 资源限定符仍由这里决定，
+     * 因此墨水屏渲染在夜间同样走暗色资源，而不是永远当作白天。
+     */
+    fun getTheme() = if (AppConfig.isNightTheme) Theme.Dark else Theme.Light
 
     fun isDarkTheme(): Boolean = getTheme() == Theme.Dark
 
@@ -227,8 +231,7 @@ object ThemeConfig {
             }
         }
         if (path.endsWith(".9.png")) {
-            val bgDrawable = BitmapUtils.decodeNinePatchDrawable(path)
-            return bgDrawable
+            return BitmapUtils.decodeNinePatchDrawable(path)?.withEInkFilter()
         }
         val bgImgBlu = when (themeMode) {
             Theme.Light -> context.getPrefInt(PreferKey.bgImageBlurring, 0)
@@ -241,9 +244,22 @@ object ThemeConfig {
         val bgImage = BitmapUtils
             .decodeBitmap(path, safeWidth, safeHeight)
         if (bgImgBlu == 0) {
-            return bgImage?.toDrawable(context.resources)
+            return bgImage?.toDrawable(context.resources)?.withEInkFilter()
         }
-        return bgImage?.stackBlur(bgImgBlu)?.toDrawable(context.resources)
+        return bgImage?.stackBlur(bgImgBlu)?.toDrawable(context.resources)?.withEInkFilter()
+    }
+
+    /**
+     * 墨水屏渲染下的背景图滤镜（不开启时返回原 Drawable，并清掉可能残留的旧滤镜）。
+     *
+     * 滤镜挂在 Drawable 实例上而不是把位图重画一遍：`BitmapDrawable.setColorFilter` 存的是
+     * state 里的 Paint，`constantState?.newDrawable()?.mutate()` 会连着 Paint 一起复制，
+     * 所以 [getCachedBgImage] 取出的副本、以及主界面 content_container 的玻璃采样副本都带着滤镜，
+     * 每帧不需要再加一次离屏合成。签名里带了墨水屏开关（见 [getBackgroundSignature]），
+     * 缓存不会在开关两态之间混用。
+     */
+    private fun Drawable.withEInkFilter(): Drawable = apply {
+        colorFilter = EInkRender.androidFilterOrNull()
     }
 
     // ==================== 背景图进程级缓存（消除重建时的纯色闪烁） ====================
@@ -257,7 +273,7 @@ object ThemeConfig {
 
     /**
      * 计算当前主题背景的签名，取图逻辑与 [getBgImage] 保持一致。
-     * 纳入主题模式（日/夜）、背景路径、文件最后修改时间与大小、模糊强度，
+     * 纳入主题模式（日/夜）、背景路径、文件最后修改时间与大小、模糊强度与**墨水屏渲染开关**，
      * 任一变化都会使签名不同而触发重新解码。
      * 未配置背景图、或配置的图片文件不存在时返回 null（此时应显示纯色底，
      * 不得使用占位图）。
@@ -284,12 +300,11 @@ object ThemeConfig {
             0,
         )
         val file = File(path)
-        return "bg:$prefKey:${file.absolutePath}:${file.lastModified()}:${file.length()}:$blurring"
+        return "bg:$prefKey:${file.absolutePath}:${file.lastModified()}:${file.length()}:$blurring:${AppConfig.isEInkMode}"
     }
 
     /** 命中缓存返回独立副本（mutate），避免多窗口共享同一 Drawable 实例导致状态冲突 */
-    fun getCachedBgImage(signature: String): Drawable? =
-        bgDrawableCache.get(signature)?.constantState?.newDrawable()?.mutate()
+    fun getCachedBgImage(signature: String): Drawable? = bgDrawableCache.get(signature)?.constantState?.newDrawable()?.mutate()
 
     /** 缓存解码结果 */
     fun cacheBgImage(signature: String, drawable: Drawable) {
@@ -298,9 +313,8 @@ object ThemeConfig {
     }
 
     /** 最近一次应用的背景图（排除指定签名），供未命中缓存时作占位，返回独立副本 */
-    fun getLastBgImage(excludeSignature: String): Drawable? =
-        lastBgImage?.takeIf { it.first != excludeSignature }
-            ?.second?.constantState?.newDrawable()?.mutate()
+    fun getLastBgImage(excludeSignature: String): Drawable? = lastBgImage?.takeIf { it.first != excludeSignature }
+        ?.second?.constantState?.newDrawable()?.mutate()
 
     suspend fun upConfig() {
         addConfigs(DefaultData.themeConfigs)
@@ -638,11 +652,17 @@ object ThemeConfig {
     fun applyTheme(context: Context) = with(context) {
         when {
             AppConfig.isEInkMode -> {
+                // 墨水屏渲染：与日夜模式解耦，日间"纸白 + 墨黑"、夜间"墨黑底 + 浅灰字"，
+                // 对应主流墨水屏设备在自然光与前光（夜间）下的观感；纯色平面、无透明底栏，
+                // 不引入任何彩色。primary 取纸色（供 XML 主题按明度判定日/暗），accent 即"墨水"色。
+                val night = AppConfig.isNightTheme
+                val paper = if (night) 0xFF000000.toInt() else Color.WHITE
+                val ink = if (night) 0xFFC8C8C8.toInt() else Color.BLACK
                 ThemeStore.editTheme(this)
-                    .primaryColor(Color.WHITE)
-                    .accentColor(Color.BLACK)
-                    .backgroundColor(Color.WHITE)
-                    .bottomBackground(Color.WHITE)
+                    .primaryColor(paper)
+                    .accentColor(ink)
+                    .backgroundColor(paper)
+                    .bottomBackground(paper)
                     .transparentNavBar(false)
                     .apply()
             }

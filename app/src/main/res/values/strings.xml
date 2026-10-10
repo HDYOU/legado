@@ -539,6 +539,8 @@
     <string name="night_theme">Night Theme</string>
     <string name="eink_theme">E-Ink</string>
     <string name="eink_theme_desc">Optimization for E-ink devices</string>
+    <string name="enable_eink_render">Enable E-Ink rendering</string>
+    <string name="enable_eink_render_summary">Apply the E-Ink display style in both day and night mode. The UI and images turn grayscale, which costs extra rendering performance while scrolling</string>
     <string name="get_storage_per">requires storage permission</string>
     <string name="double_click_exit">Tap again to exit the program</string>
     <string name="import_book_per">Import local books requires storage permission</string>

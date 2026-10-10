@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
-import android.widget.EditText
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
@@ -19,6 +18,7 @@ import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.coroutine.Coroutine
+import io.legado.app.lib.theme.EInkRender
 import io.legado.app.lib.theme.ThemeStore
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.setBackgroundKeepPadding
@@ -26,10 +26,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
 
-
 abstract class BaseDialogFragment(
     @LayoutRes layoutID: Int,
-    private val adaptationSoftKeyboard: Boolean = false
+    private val adaptationSoftKeyboard: Boolean = false,
 ) : DialogFragment(layoutID) {
 
     private var onDismissListener: OnDismissListener? = null
@@ -40,6 +39,8 @@ abstract class BaseDialogFragment(
 
     override fun onStart() {
         super.onStart()
+        // 墨水屏渲染：弹窗是独立窗口，Activity 的根层盖不到，这里单独挂一层
+        EInkRender.applyRootLayer(dialog?.window?.findViewById(android.R.id.content))
         if (adaptationSoftKeyboard) {
             dialog?.window?.setBackgroundDrawableResource(R.color.transparent)
         } else if (AppConfig.isEInkMode) {
@@ -52,26 +53,28 @@ abstract class BaseDialogFragment(
                 it.decorView.setBackgroundKeepPadding(R.color.transparent)
             }
             // 修改gravity的时机一般在子类的onStart方法中, 因此需要在onStart之后执行.
-            lifecycle.addObserver(LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_START) {
-                    when (dialog?.window?.attributes?.gravity) {
-                        Gravity.TOP -> view?.setBackgroundResource(R.drawable.bg_eink_border_bottom)
-                        Gravity.BOTTOM -> view?.setBackgroundResource(R.drawable.bg_eink_border_top)
-                        else -> {
-                            val padding = 2.dpToPx();
-                            view?.setPadding(padding, padding, padding, padding)
-                            view?.setBackgroundResource(R.drawable.bg_eink_border_dialog)
+            lifecycle.addObserver(
+                LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_START) {
+                        when (dialog?.window?.attributes?.gravity) {
+                            Gravity.TOP -> view?.setBackgroundResource(R.drawable.bg_eink_border_bottom)
+                            Gravity.BOTTOM -> view?.setBackgroundResource(R.drawable.bg_eink_border_top)
+                            else -> {
+                                val padding = 2.dpToPx()
+                                view?.setPadding(padding, padding, padding, padding)
+                                view?.setBackgroundResource(R.drawable.bg_eink_border_dialog)
+                            }
                         }
                     }
-                }
-            })
+                },
+            )
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            //不加这个android 5.0对话框顶部会有空白
+            // 不加这个android 5.0对话框顶部会有空白
             setStyle(STYLE_NO_TITLE, 0)
         }
     }
@@ -85,14 +88,14 @@ abstract class BaseDialogFragment(
             view.setBackgroundColor(ThemeStore.backgroundColor())
         }
         onFragmentCreated(view, savedInstanceState)
-        observeLiveBus()    // 模板方法：子类覆写 observeLiveBus() 注册事件订阅，自动在 onViewCreated 中调用
+        observeLiveBus() // 模板方法：子类覆写 observeLiveBus() 注册事件订阅，自动在 onViewCreated 中调用
     }
 
     abstract fun onFragmentCreated(view: View, savedInstanceState: Bundle?)
 
     override fun show(manager: FragmentManager, tag: String?) {
         kotlin.runCatching {
-            //在每个add事务前增加一个remove事务，防止连续的add
+            // 在每个add事务前增加一个remove事务，防止连续的add
             manager.beginTransaction().remove(this).commit()
             super.show(manager, tag)
         }.onFailure {
@@ -108,7 +111,7 @@ abstract class BaseDialogFragment(
     fun <T> execute(
         scope: CoroutineScope = lifecycleScope,
         context: CoroutineContext = Dispatchers.IO,
-        block: suspend CoroutineScope.() -> T
+        block: suspend CoroutineScope.() -> T,
     ) = Coroutine.async(scope, context) { block() }
 
     /**

@@ -53,7 +53,23 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
     var editTheme = appCtx.getPrefInt(PreferKey.editTheme, 0)
     var editThemeDark = appCtx.getPrefInt(PreferKey.editThemeDark, 0)
     var editTemeAuto = appCtx.getPrefBoolean(PreferKey.editTemeAuto)
-    var isEInkMode = appCtx.getPrefString(PreferKey.themeMode) == "3"
+
+    init {
+        // 旧版把墨水屏当作「主题模式」取值 "3" 存过；该选项已移除，迁移为
+        // 「启用墨水屏渲染」开关 + 亮色模式，尽量保留原有观感
+        if (appCtx.getPrefString(PreferKey.themeMode) == "3") {
+            appCtx.putPrefBoolean(PreferKey.enableEInk, true)
+            appCtx.putPrefString(PreferKey.themeMode, "1")
+        }
+    }
+
+    /**
+     * 墨水屏渲染开关（默认关闭）。
+     *
+     * 与 [themeMode] 解耦：不再是一种主题模式，开启后无论日间还是夜间模式都套用墨水屏渲染，
+     * 具体色板由 [ThemeConfig.applyTheme] 按当前日夜分别给出。
+     */
+    var isEInkMode = appCtx.getPrefBoolean(PreferKey.enableEInk, false)
 
     // ==================== 点击区域动作配置 ====================
     // 九宫格点击区域: TL(左上) TC(中上) TR(右上)
@@ -158,10 +174,10 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
             PreferKey.showBoardLine -> showBoardLine = appCtx.getPrefInt(PreferKey.showBoardLine, 1)
             PreferKey.adaptSpecialStyle -> adaptSpecialStyle = appCtx.getPrefBoolean(PreferKey.adaptSpecialStyle, true)
 
-            PreferKey.themeMode -> {
-                themeMode = appCtx.getPrefString(PreferKey.themeMode, "0")
-                isEInkMode = themeMode == "3"
-            }
+            PreferKey.themeMode -> themeMode = appCtx.getPrefString(PreferKey.themeMode, "0")
+
+            PreferKey.enableEInk ->
+                isEInkMode = appCtx.getPrefBoolean(PreferKey.enableEInk, false)
 
             PreferKey.clickActionTL ->
                 clickActionTL =
@@ -273,7 +289,6 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         get() = when (themeMode) {
             "1" -> false
             "2" -> true
-            "3" -> false
             else -> sysConfiguration.isNightMode
         }
         set(value) {
@@ -281,7 +296,6 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
                 // 同步刷新本地缓存，保证同栈内 initNightMode() 读到正确目标模式，
                 // 避免缓存滞后触发错误/多余的 AppCompat 模式切换重建
                 themeMode = if (value) "2" else "1"
-                isEInkMode = false
                 appCtx.putPrefString(PreferKey.themeMode, themeMode)
             }
         }

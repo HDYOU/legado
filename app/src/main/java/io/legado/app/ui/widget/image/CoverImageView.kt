@@ -30,10 +30,10 @@ import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.data.entities.SearchBook
 import io.legado.app.help.config.AppConfig
-import io.legado.app.help.glide.AdaptiveCoverTransformation
 import io.legado.app.help.glide.HtmlCoverRenderer
 import io.legado.app.help.glide.ImageLoader
 import io.legado.app.help.glide.OkHttpModelLoader
+import io.legado.app.lib.theme.EInkRender
 import io.legado.app.lib.theme.accentColor
 import io.legado.app.lib.theme.backgroundColor
 import io.legado.app.model.BookCover
@@ -53,7 +53,7 @@ import splitties.init.appCtx
 
 /**
  * 封面图片视图
- * 
+ *
  * 支持多种封面来源：
  * - 网络图片（通过URL加载）
  * - 默认封面（全局设置）
@@ -63,7 +63,7 @@ import splitties.init.appCtx
 @Suppress("unused")
 class CoverImageView @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : AppCompatImageView(context, attrs) {
     init {
         updateCoverBackground()
@@ -76,7 +76,7 @@ class CoverImageView @JvmOverloads constructor(
          * 书名绘制缓存（公开供 CoverLoader 使用）
          */
         val nameBitmapCache: LruCache<String, Bitmap> get() = _nameBitmapCache
-        
+
         /**
          * 是否需要绘制书名标记缓存（公开供 CoverLoader 使用）
          */
@@ -84,7 +84,7 @@ class CoverImageView @JvmOverloads constructor(
 
         /**
          * 清除HTML封面缓存
-         * 
+         *
          * 在模板内容变更、切换选中模板、启用/禁用HTML封面时调用，
          * 确保书架上的封面能及时刷新
          */
@@ -135,7 +135,7 @@ class CoverImageView @JvmOverloads constructor(
         val measuredHeight = measuredWidth * 4 / 3
         super.onMeasure(
             widthMeasureSpec,
-            MeasureSpec.makeMeasureSpec(measuredHeight, MeasureSpec.EXACTLY)
+            MeasureSpec.makeMeasureSpec(measuredHeight, MeasureSpec.EXACTLY),
         )
     }
 
@@ -156,12 +156,12 @@ class CoverImageView @JvmOverloads constructor(
         val currentName = this.name ?: return
         if (AppConfig.useDefaultCover || needNameBitmap[bitmapPath.toString()] == true) {
             val currentAuthor = this.author
-            val pathName = if (drawBookAuthor){
+            val pathName = if (drawBookAuthor) {
                 currentName + currentAuthor
             } else {
                 currentName
             }
-            val cacheBitmap =  nameBitmapCache[pathName + width]
+            val cacheBitmap = nameBitmapCache[pathName + width]
             if (cacheBitmap != null) {
                 canvas.drawBitmap(cacheBitmap, 0f, 0f, null)
                 return
@@ -239,8 +239,7 @@ class CoverImageView @JvmOverloads constructor(
                     line++
                     namePaint.textSize = viewWidth / 10
                     startY = viewHeight * 0.2f + namePaint.textHeight * line
-                }
-                else if (startY > viewHeight * 0.8 && (name.size - index - 1) > 2) {
+                } else if (startY > viewHeight * 0.8 && (name.size - index - 1) > 2) {
                     startX += namePaint.textSize
                     line++
                     namePaint.textSize = viewWidth / 10
@@ -248,7 +247,7 @@ class CoverImageView @JvmOverloads constructor(
                 }
             }
         }
-        if (!drawBookAuthor){
+        if (!drawBookAuthor) {
             return bitmap
         }
         val authorPaint = TextPaint(namePaint).apply {
@@ -293,6 +292,19 @@ class CoverImageView @JvmOverloads constructor(
         } else {
             setBackgroundColor(Color.TRANSPARENT)
         }
+        applyEInkColorFilter()
+    }
+
+    /**
+     * 墨水屏渲染：封面位图灰阶。
+     *
+     * 主链路是窗口内容根的整层合成（[EInkRender.applyRootLayer]），这里是**零成本的兜底**：
+     * `ImageView.colorFilter` 只是绘制时的 Paint 过滤，不额外开离屏图层，且能覆盖根层够不到的
+     * 弹层（如自绘的 PopupWindow）。跟着 [updateCoverBackground] 一起刷新
+     * （init / 尺寸变化 / 每次 [load]），保证条目复用与开关切换（会重建界面）后都不残留旧滤镜。
+     */
+    private fun applyEInkColorFilter() {
+        colorFilter = EInkRender.androidFilterOrNull()
     }
 
     private val glideListener by lazy {
@@ -302,7 +314,7 @@ class CoverImageView @JvmOverloads constructor(
                 e: GlideException?,
                 model: Any?,
                 target: Target<Drawable>,
-                isFirstResource: Boolean
+                isFirstResource: Boolean,
             ): Boolean {
                 triggerChannel.trySend(Unit)
                 needNameBitmap.put(bitmapPath.toString(), true)
@@ -314,7 +326,7 @@ class CoverImageView @JvmOverloads constructor(
                 model: Any,
                 target: Target<Drawable>?,
                 dataSource: DataSource,
-                isFirstResource: Boolean
+                isFirstResource: Boolean,
             ): Boolean {
                 currentJob?.cancel()
                 currentJob = null
@@ -322,7 +334,6 @@ class CoverImageView @JvmOverloads constructor(
                 invalidate()
                 return false
             }
-
         }
     }
 
@@ -332,13 +343,13 @@ class CoverImageView @JvmOverloads constructor(
         fragment: Fragment? = null,
         lifecycle: Lifecycle? = null,
         overrideWidth: Int = 0,
-        overrideHeight: Int = 0
+        overrideHeight: Int = 0,
     ) {
         val galleryIdentity = listOf(
             searchBook.bookUrl,
             searchBook.origin,
             searchBook.name,
-            searchBook.author
+            searchBook.author,
         ).joinToString("|")
         load(searchBook.coverUrl, searchBook.name, searchBook.author, loadOnlyWifi, searchBook.origin, fragment, lifecycle, galleryIdentity = galleryIdentity, overrideWidth = overrideWidth, overrideHeight = overrideHeight)
     }
@@ -350,16 +361,16 @@ class CoverImageView @JvmOverloads constructor(
         lifecycle: Lifecycle? = null,
         overrideWidth: Int = 0,
         overrideHeight: Int = 0,
-        onLoadFinish: (() -> Unit)? = null
+        onLoadFinish: (() -> Unit)? = null,
     ) {
-       load(
-           book.getDisplayCover(), book.name, book.author,
-           loadOnlyWifi, book.origin, fragment, lifecycle,
-           galleryIdentity = book.bookUrl,
-           overrideWidth = overrideWidth,
-           overrideHeight = overrideHeight,
-           onLoadFinish = onLoadFinish
-       )
+        load(
+            book.getDisplayCover(), book.name, book.author,
+            loadOnlyWifi, book.origin, fragment, lifecycle,
+            galleryIdentity = book.bookUrl,
+            overrideWidth = overrideWidth,
+            overrideHeight = overrideHeight,
+            onLoadFinish = onLoadFinish,
+        )
     }
 
     /**
@@ -375,7 +386,7 @@ class CoverImageView @JvmOverloads constructor(
         lifecycle: Lifecycle? = null,
         overrideWidth: Int = 0,
         overrideHeight: Int = 0,
-        onLoadFinish: (() -> Unit)? = null
+        onLoadFinish: (() -> Unit)? = null,
     ) {
         load(
             display.getDisplayCover(), display.name, display.author,
@@ -383,7 +394,7 @@ class CoverImageView @JvmOverloads constructor(
             galleryIdentity = display.bookUrl,
             overrideWidth = overrideWidth,
             overrideHeight = overrideHeight,
-            onLoadFinish = onLoadFinish
+            onLoadFinish = onLoadFinish,
         )
     }
 
@@ -396,7 +407,7 @@ class CoverImageView @JvmOverloads constructor(
     fun load(group: BookGroup) {
         load(
             path = group.cover,
-            galleryIdentity = "bookGroup:${group.groupId}"
+            galleryIdentity = "bookGroup:${group.groupId}",
         )
     }
 
@@ -411,7 +422,7 @@ class CoverImageView @JvmOverloads constructor(
         galleryIdentity: String? = null,
         overrideWidth: Int = 0,
         overrideHeight: Int = 0,
-        onLoadFinish: (() -> Unit)? = null
+        onLoadFinish: (() -> Unit)? = null,
     ) {
         updateCoverBackground()
         val currentAuthor = author?.replace(AppPattern.bdRegex, "")?.trim()?.also {
@@ -422,7 +433,7 @@ class CoverImageView @JvmOverloads constructor(
         }
         val galleryDefaultCover = BookCover.getGalleryDefaultCover(
             galleryIdentity ?: listOfNotNull(sourceOrigin, path, name, author).joinToString("|"),
-            path
+            path,
         )
         val actualPath = galleryDefaultCover ?: path
         this.bitmapPath = actualPath
@@ -442,7 +453,7 @@ class CoverImageView @JvmOverloads constructor(
                 .into(this)
         } else {
             if (galleryDefaultCover == null && drawBookName && currentName != null) {
-                val pathName = if (drawBookAuthor){
+                val pathName = if (drawBookAuthor) {
                     currentName + currentAuthor
                 } else {
                     currentName
@@ -468,7 +479,7 @@ class CoverImageView @JvmOverloads constructor(
                         e: GlideException?,
                         model: Any?,
                         target: Target<Drawable?>,
-                        isFirstResource: Boolean
+                        isFirstResource: Boolean,
                     ): Boolean {
                         onLoadFinish.invoke()
                         return false
@@ -479,7 +490,7 @@ class CoverImageView @JvmOverloads constructor(
                         model: Any,
                         target: Target<Drawable?>?,
                         dataSource: DataSource,
-                        isFirstResource: Boolean
+                        isFirstResource: Boolean,
                     ): Boolean {
                         onLoadFinish.invoke()
                         return false
@@ -538,5 +549,4 @@ class CoverImageView @JvmOverloads constructor(
         currentJob?.cancel()
         currentJob = null
     }
-
 }

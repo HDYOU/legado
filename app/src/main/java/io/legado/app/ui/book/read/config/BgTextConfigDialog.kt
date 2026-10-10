@@ -168,7 +168,7 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
                 override fun getDropDownView(
                     position: Int,
                     convertView: View?,
-                    parent: ViewGroup
+                    parent: ViewGroup,
                 ): View {
                     val view = super.getDropDownView(position, convertView, parent)
                     if (view is android.widget.TextView) {
@@ -183,7 +183,7 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
             spUnderline.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 var isInitializing = true
                 override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                    if (isInitializing) { //忽略初始化选择
+                    if (isInitializing) { // 忽略初始化选择
                         isInitializing = false
                         return
                     }
@@ -358,7 +358,7 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
             }
             configFile.writeText(GSON.toJson(config))
             exportFiles.add(configFile)
-            repeat(3) {
+            repeat(2) {
                 val path = ReadBookConfig.durConfig.getBgPath(it) ?: return@repeat
                 val bgExportFile = copyBgImage(path, configDir) ?: return@repeat
                 exportFiles.add(bgExportFile)

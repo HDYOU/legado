@@ -40,6 +40,13 @@
             android:title="@string/imm_navigation_bar"
             app:iconSpaceReserved="false" />
 
+        <io.legado.app.lib.prefs.SwitchPreference
+            android:defaultValue="false"
+            android:key="enableEInk"
+            android:summary="@string/enable_eink_render_summary"
+            android:title="@string/enable_eink_render"
+            app:iconSpaceReserved="false" />
+
         <io.legado.app.lib.prefs.Preference
             android:key="barElevation"
             android:summary="@string/bar_elevation_s"

@@ -538,6 +538,8 @@
     <string name="night_theme">夜间模式</string>
     <string name="eink_theme">E-Ink 模式</string>
     <string name="eink_theme_desc">电子墨水屏模式</string>
+    <string name="enable_eink_render">启用墨水屏渲染</string>
+    <string name="enable_eink_render_summary">日间与夜间模式均应用墨水屏显示风格（界面与图片转为灰阶，滚动会更耗性能）</string>
     <string name="get_storage_per">需要存储权限</string>
     <string name="double_click_exit">再按一次退出程序</string>
     <string name="import_book_per">导入本地书籍需要存储权限</string>

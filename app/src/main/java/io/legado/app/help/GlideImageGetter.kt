@@ -32,6 +32,7 @@ import android.graphics.Color
 import com.bumptech.glide.request.RequestOptions
 import io.legado.app.data.appDb
 import io.legado.app.help.glide.OkHttpModelLoader
+import io.legado.app.lib.theme.EInkRender
 import io.legado.app.model.analyzeRule.AnalyzeUrl
 
 class GlideImageGetter(
@@ -39,8 +40,9 @@ class GlideImageGetter(
     textView: TextView,
     private val lifecycle: Lifecycle,
     private val availableWidth: Int,
-    private val sourceOrigin: String? = null
-) : Html.ImageGetter, Drawable.Callback {
+    private val sourceOrigin: String? = null,
+) : Html.ImageGetter,
+    Drawable.Callback {
     private val textViewRef = WeakReference(textView)
     private val contextRef = WeakReference(context)
     private val cacheDrawable = ConcurrentHashMap<String, GlideUrlDrawable>()
@@ -69,7 +71,7 @@ class GlideImageGetter(
                 } else {
                     AnalyzeUrl(
                         source,
-                        source = bookSource
+                        source = bookSource,
                     ).url
                 }
             }
@@ -79,12 +81,16 @@ class GlideImageGetter(
                 ?: return emptyDrawable
             val rect = getDrawableRect(size, urlOption)
             pictureDrawable.bounds = rect
+            // 墨水屏渲染：简介内嵌图一并灰阶
+            pictureDrawable.colorFilter = EInkRender.androidFilterOrNull()
             return pictureDrawable
         }
         cacheDrawable[source]?.let {
             return it
         }
         val urlDrawable = GlideUrlDrawable()
+        // 先落滤镜：真正的位图是异步回调进来后才有的（见 GlideUrlDrawable.setDrawable）
+        urlDrawable.colorFilter = EInkRender.androidFilterOrNull()
         cacheDrawable[source] = urlDrawable
         pendingImages.add(source)
         val urlMatcher = paramPattern.matcher(source)
@@ -151,21 +157,28 @@ class GlideImageGetter(
     override fun scheduleDrawable(
         who: Drawable,
         what: Runnable,
-        `when`: Long
+        `when`: Long,
     ) {
     }
 
     override fun unscheduleDrawable(
         who: Drawable,
-        what: Runnable
+        what: Runnable,
     ) {
     }
 
-    private inner class GlideUrlDrawable() : Drawable(), Animatable {
+    private inner class GlideUrlDrawable :
+        Drawable(),
+        Animatable {
         private var mDrawable: Drawable? = null
         private var gDrawable: GifDrawable? = null
 
+        /** 记下外部设置的滤镜，异步到位的内层 Drawable 也要带上（墨水屏灰阶） */
+        private var pendingColorFilter: ColorFilter? = null
+
         fun setDrawable(drawable: Drawable?) {
+            // 内层 Drawable 是后到的，滤镜必须在这里补应用
+            drawable?.colorFilter = pendingColorFilter
             if (drawable is GifDrawable) {
                 gDrawable?.apply {
                     callback = null
@@ -225,20 +238,16 @@ class GlideImageGetter(
         }
 
         override fun setColorFilter(colorFilter: ColorFilter?) {
+            pendingColorFilter = colorFilter
             mDrawable?.colorFilter = colorFilter
+            gDrawable?.colorFilter = colorFilter
         }
 
-        override fun getIntrinsicWidth(): Int {
-            return (mDrawable ?: gDrawable)?.intrinsicWidth ?: 0
-        }
+        override fun getIntrinsicWidth(): Int = (mDrawable ?: gDrawable)?.intrinsicWidth ?: 0
 
-        override fun getIntrinsicHeight(): Int {
-            return (mDrawable ?: gDrawable)?.intrinsicHeight ?: 0
-        }
+        override fun getIntrinsicHeight(): Int = (mDrawable ?: gDrawable)?.intrinsicHeight ?: 0
 
-        override fun isRunning(): Boolean {
-            return gDrawable?.isRunning == true
-        }
+        override fun isRunning(): Boolean = gDrawable?.isRunning == true
 
         override fun start() {
             gDrawable?.start()
@@ -252,12 +261,12 @@ class GlideImageGetter(
     private inner class ImageTarget(
         private val urlDrawable: GlideUrlDrawable,
         private val source: String,
-        private val urlOption: Map<String, String>?
+        private val urlOption: Map<String, String>?,
     ) : CustomTarget<Drawable>() {
 
         override fun onResourceReady(
             drawable: Drawable,
-            transition: Transition<in Drawable>?
+            transition: Transition<in Drawable>?,
         ) {
             urlDrawable.setDrawable(drawable)
             val rect =

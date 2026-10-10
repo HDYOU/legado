@@ -500,7 +500,7 @@ class MainActivity :
                     scheduleOffscreenPageLimitSteps()
                     return true
                 }
-            }
+            },
         )
         viewPagerMain.adapter = adapter
         // 常驻范围按实际启用的 Tab 数确定（见 [fullOffscreenPageLimit]）
@@ -750,7 +750,11 @@ class MainActivity :
             return false
         }
         val atRestart = themeStateAtRestart ?: return false
-        return ThemeState(AppConfig.themeMode, ThemeConfig.getDurConfig(this)) == atRestart
+        return ThemeState(
+            AppConfig.themeMode,
+            AppConfig.isEInkMode,
+            ThemeConfig.getDurConfig(this),
+        ) == atRestart
     }
 
     /**
@@ -774,7 +778,11 @@ class MainActivity :
         recreatePending = true
         instanceCreateTime = System.currentTimeMillis()
         // 记下新窗口将依据的主题状态，供 isLateRecreateEcho() 识别这次变更的迟到回声
-        themeStateAtRestart = ThemeState(AppConfig.themeMode, ThemeConfig.getDurConfig(this))
+        themeStateAtRestart = ThemeState(
+            AppConfig.themeMode,
+            AppConfig.isEInkMode,
+            ThemeConfig.getDurConfig(this),
+        )
         startActivity(
             Intent(this, MainActivity::class.java)
                 // 旧实例已做过自动更新目录，重启后不再重复（等价于原来 recreate 保留的
@@ -782,7 +790,7 @@ class MainActivity :
                 .putExtra("isAutoRefreshedBook", true)
                 .putExtra(EXTRA_FRESH_RESTART, true)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION),
         )
         finish()
     }
@@ -1253,10 +1261,9 @@ class MainActivity :
      * 判定被「整包应用」与「构建 Shell 背景」共用，收敛成一处，避免两条路径的条件漂移
      * 导致同一配置下算出的外观不一致。
      */
-    private fun usesRealtimeGlassShell(config: NavigationBarConfig): Boolean =
-        config.layoutMode != NavigationBarConfig.LAYOUT_STANDARD &&
-            config.effectMode != NavigationBarConfig.EFFECT_SOLID &&
-            DevicePerformanceUtils.supportsRealtimeGlass
+    private fun usesRealtimeGlassShell(config: NavigationBarConfig): Boolean = config.layoutMode != NavigationBarConfig.LAYOUT_STANDARD &&
+        config.effectMode != NavigationBarConfig.EFFECT_SOLID &&
+        DevicePerformanceUtils.supportsRealtimeGlass
 
     /**
      * 构建底栏 Shell 背景 Drawable，与 [applyBottomNavigationShell] 的落地分支一一对应。
@@ -1683,13 +1690,17 @@ class MainActivity :
         private var themeStateAtRestart: ThemeState? = null
 
         /**
-         * 一次重建所依据的主题状态：**模式 + 色板**。
+         * 一次重建所依据的主题状态：**模式 + 墨水屏开关 + 色板**。
          *
-         * 两者必须一起比对——墨水屏模式与日间模式拿到的色板完全相同（都读日间偏好），
-         * 只比色板会把「日间 ↔ 墨水屏」当成没变化，那次切换就会在宽限窗内被吞掉。
+         * 墨水屏开关必须单列：它只改由 [ThemeConfig.applyTheme] 推导并写入 ThemeStore 的色板，
+         * 不改 `getDurConfig()` 读到的日夜偏好，只比色板会把「开关墨水屏渲染」当成没变化而吞掉。
          * 色板比对范围：日夜、主题名、主色、强调色、背景、底栏色、背景图（含模糊）、透明底栏。
          */
-        private data class ThemeState(val themeMode: String?, val config: ThemeConfig.Config)
+        private data class ThemeState(
+            val themeMode: String?,
+            val isEInkMode: Boolean,
+            val config: ThemeConfig.Config,
+        )
 
         /**
          * 最近一次由重启建立的主界面实例时刻。

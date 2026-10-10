@@ -1,16 +1,19 @@
 package io.legado.app.ui.theme
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import io.legado.app.help.config.AppConfig
 import io.legado.app.lib.theme.ThemeStateStore
+import io.legado.app.lib.theme.eInkGrayscale
 import io.legado.app.lib.theme.ThemeStore
 import io.legado.app.utils.ColorUtils
 
@@ -40,7 +43,7 @@ import io.legado.app.utils.ColorUtils
  */
 @Composable
 fun LegadoTheme(
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -73,7 +76,16 @@ fun LegadoTheme(
     }
 
     MaterialTheme(colorScheme = colorScheme, typography = rememberAppTypography()) {
-        content()
+        // 墨水屏渲染的 Compose 侧入口：在这一层的范围内把内容按灰阶合成。
+        // 放在 LegadoTheme 里是刻意的——凡是进了 LegadoTheme 的 Compose 内容（页面、
+        // 弹窗、底部面板、下拉菜单各自的窗口）都被覆盖，不必逐个控件贴滤镜。
+        // propagateMinConstraints 打开：这一层只做合成，不改变子内容的测量约束。
+        Box(
+            modifier = Modifier.eInkGrayscale(),
+            propagateMinConstraints = true,
+        ) {
+            content()
+        }
     }
 }
 
@@ -130,7 +142,7 @@ private fun buildLegadoColorScheme(
             surfaceContainerLow = surfaceContainerLow,
             surfaceContainer = surfaceContainer,
             surfaceContainerHigh = surfaceContainerHigh,
-            surfaceContainerHighest = surfaceContainerHighest
+            surfaceContainerHighest = surfaceContainerHighest,
         )
     } else {
         darkColorScheme(
@@ -155,7 +167,7 @@ private fun buildLegadoColorScheme(
             surfaceContainerLow = surfaceContainerLow,
             surfaceContainer = surfaceContainer,
             surfaceContainerHigh = surfaceContainerHigh,
-            surfaceContainerHighest = surfaceContainerHighest
+            surfaceContainerHighest = surfaceContainerHighest,
         )
     }
 }

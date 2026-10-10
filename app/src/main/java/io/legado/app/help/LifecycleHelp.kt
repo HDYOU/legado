@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import io.legado.app.base.BaseService
+import io.legado.app.lib.theme.EInkRender
 import io.legado.app.ui.debuglog.DebugFloatingBallManager
 import io.legado.app.utils.LogUtils
 import java.lang.ref.WeakReference
@@ -36,9 +37,7 @@ object LifecycleHelp : Application.ActivityLifecycleCallbacks {
      */
     private var enteredFromExternal = false
 
-    fun activitySize(): Int {
-        return activities.size
-    }
+    fun activitySize(): Int = activities.size
 
     /**
      * 标记本次进入前台来自 App 外部。
@@ -63,13 +62,9 @@ object LifecycleHelp : Application.ActivityLifecycleCallbacks {
         return value
     }
 
-    fun getCurrentActivity(): Activity? {
-        return currentActivityRef?.get()
-    }
+    fun getCurrentActivity(): Activity? = currentActivityRef?.get()
 
-    fun getCurrentActivityName(): String? {
-        return getCurrentActivity()?.javaClass?.simpleName
-    }
+    fun getCurrentActivityName(): String? = getCurrentActivity()?.javaClass?.simpleName
 
     /**
      * 判断指定Activity是否存在
@@ -121,6 +116,13 @@ object LifecycleHelp : Application.ActivityLifecycleCallbacks {
             enteredFromExternal = true
         }
         startedActivityCount++
+        // 墨水屏渲染：Activity 窗口统一按灰阶合成（见 EInkRender.applyRootLayer）。
+        // 挂在这里而不是某个基类上：Compose 页面走 BaseComposeActivity、View 页面走
+        // BaseActivity，两者没有公共基类。内容根是懒安装的，onCreate 回调时可能还不存在，
+        // onStart 时一定已建好；同类型 + 同一 Paint 的重复调用不会重建图层。
+        if (EInkRender.supportsRootLayer(activity)) {
+            EInkRender.applyRootLayer(activity.findViewById(android.R.id.content))
+        }
     }
 
     override fun onActivityDestroyed(activity: Activity) {

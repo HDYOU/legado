@@ -1,5 +1,6 @@
 package io.legado.app.lib.dialogs
 
+import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.graphics.drawable.Drawable
@@ -9,6 +10,7 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import io.legado.app.R
 import io.legado.app.help.config.AppConfig
+import io.legado.app.lib.theme.EInkRender
 import io.legado.app.utils.applyTint
 
 internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<AlertDialog> {
@@ -16,7 +18,7 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
 
     private class ButtonConfig(
         val text: CharSequence,
-        val handler: ((DialogInterface) -> Unit)?
+        val handler: ((DialogInterface) -> Unit)?,
     )
 
     private var positiveConfig: ButtonConfig? = null
@@ -69,42 +71,42 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
 
     override fun positiveButton(
         buttonText: String,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         positiveConfig = ButtonConfig(buttonText, onClicked)
     }
 
     override fun positiveButton(
         buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         positiveConfig = ButtonConfig(ctx.getString(buttonTextResource), onClicked)
     }
 
     override fun negativeButton(
         buttonText: String,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         negativeConfig = ButtonConfig(buttonText, onClicked)
     }
 
     override fun negativeButton(
         buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         negativeConfig = ButtonConfig(ctx.getString(buttonTextResource), onClicked)
     }
 
     override fun neutralButton(
         buttonText: String,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         neutralConfig = ButtonConfig(buttonText, onClicked)
     }
 
     override fun neutralButton(
         buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         neutralConfig = ButtonConfig(ctx.getString(buttonTextResource), onClicked)
     }
@@ -141,7 +143,7 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
 
     override fun items(
         items: List<CharSequence>,
-        onItemSelected: (dialog: DialogInterface, index: Int) -> Unit
+        onItemSelected: (dialog: DialogInterface, index: Int) -> Unit,
     ) {
         builder.setItems(Array(items.size) { i -> items[i].toString() }) { dialog, which ->
             onItemSelected(dialog, which)
@@ -150,7 +152,7 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
 
     override fun <T> items(
         items: List<T>,
-        onItemSelected: (dialog: DialogInterface, item: T, index: Int) -> Unit
+        onItemSelected: (dialog: DialogInterface, item: T, index: Int) -> Unit,
     ) {
         builder.setItems(Array(items.size) { i -> items[i].toString() }) { dialog, which ->
             onItemSelected(dialog, items[which], which)
@@ -160,7 +162,7 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
     override fun multiChoiceItems(
         items: Array<String>,
         checkedItems: BooleanArray,
-        onClick: (dialog: DialogInterface, which: Int, isChecked: Boolean) -> Unit
+        onClick: (dialog: DialogInterface, which: Int, isChecked: Boolean) -> Unit,
     ) {
         builder.setMultiChoiceItems(items, checkedItems) { dialog, which, isChecked ->
             onClick(dialog, which, isChecked)
@@ -170,7 +172,7 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
     override fun singleChoiceItems(
         items: Array<String>,
         checkedItem: Int,
-        onClick: ((dialog: DialogInterface, which: Int) -> Unit)?
+        onClick: ((dialog: DialogInterface, which: Int) -> Unit)?,
     ) {
         builder.setSingleChoiceItems(items, checkedItem) { dialog, which ->
             onClick?.invoke(dialog, which)
@@ -189,6 +191,8 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
                 attributes = attr
                 setBackgroundDrawableResource(R.drawable.bg_eink_border_dialog)
             }
+            // 内容视图要到 show() 才存在，这里挂一个一次性监听把灰阶层补上
+            dialog.setOnShowListener { shown -> applyEInkRootLayer(shown) }
         }
         return dialog
     }
@@ -205,8 +209,15 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
                 attributes = attr
                 setBackgroundDrawableResource(R.drawable.bg_eink_border_dialog)
             }
+            applyEInkRootLayer(dialog)
         }
         return dialog
+    }
+
+    /** 墨水屏渲染：弹窗是独立窗口，Activity 的根层盖不到，给它自己的内容根挂一层灰阶 */
+    private fun applyEInkRootLayer(dialog: DialogInterface) {
+        val window = (dialog as? Dialog)?.window ?: return
+        EInkRender.applyRootLayer(window.findViewById(android.R.id.content))
     }
 
     /**

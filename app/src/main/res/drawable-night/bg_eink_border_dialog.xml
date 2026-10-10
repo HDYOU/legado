@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  墨水屏渲染的弹窗背景（夜间）：墨黑底 + 浅色描边。
+  日间版本是纸白底 + 深色描边，靠 -night 限定符自动切换。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/black" />
+    <stroke
+        android:width="1dp"
+        android:color="#66FFFFFF" />
+    <corners android:radius="2dp" />
+
+</shape>
