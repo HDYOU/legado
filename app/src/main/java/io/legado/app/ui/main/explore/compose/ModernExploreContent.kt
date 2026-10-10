@@ -431,6 +431,16 @@ private fun ModernExploreHeader(
                 modifier = Modifier.size(28.dp)
             )
         }
+        // 搜索书籍：图标入口，放在「发现页管理」左侧（此前收在三点菜单里）
+        if (currentSource != null) {
+            IconButton(onClick = onSearchSource) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = stringResource(R.string.search),
+                    tint = topBarColors.contentColor
+                )
+            }
+        }
         if (hasSettings) {
             IconButton(onClick = onOpenSettings) {
                 Icon(
@@ -515,19 +525,12 @@ private fun ModernExploreHeader(
                         actions.onShowBlockRuleClick()
                     }
                 )
-                // 与旧版长按书源菜单里的「编辑 / 搜索」同一动作，作用于当前选中的书源
+                // 与旧版长按书源菜单里的「编辑」同一动作，作用于当前选中的书源
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.edit)) },
                     onClick = {
                         showMoreMenu = false
                         onEditSource()
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(text = stringResource(R.string.search)) },
-                    onClick = {
-                        showMoreMenu = false
-                        onSearchSource()
                     }
                 )
                 DropdownMenuItem(
